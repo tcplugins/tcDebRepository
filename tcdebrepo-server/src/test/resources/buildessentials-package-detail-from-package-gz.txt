@@ -1,0 +1,20 @@
+Package: build-essential
+Priority: optional
+Section: devel
+Installed-Size: 37
+Maintainer: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>
+Original-Maintainer: Matthias Klose <doko@debian.org>
+Architecture: amd64
+Version: 11.6ubuntu6
+Depends: libc6-dev | libc-dev, gcc (>= 4:4.4.3), g++ (>= 4:4.4.3), make, dpkg-dev (>= 1.13.5)
+Filename: pool/main/b/build-essential/build-essential_11.6ubuntu6_amd64.deb
+Size: 4838
+MD5sum: 6fa3d082885a7440d512236685cd24fd
+SHA1: 488c10084cd20cafec7f8b917e752bad45a4f983
+SHA256: 50c00d2da704e131855abda2f823f3ac2589ab1579f511ccd005be421f0a3954
+Description: Informational list of build-essential packages
+Description-md5: 90ef0ef86cafda0bd16f746eb621d9da
+Bugs: https://bugs.launchpad.net/ubuntu/+filebug
+Build-Essential: yes
+Origin: Ubuntu
+Supported: 5y
