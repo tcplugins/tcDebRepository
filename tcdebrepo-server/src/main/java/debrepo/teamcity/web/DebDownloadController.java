@@ -20,6 +20,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.web.servlet.ModelAndView;
 
+import debrepo.teamcity.ebean.Customer;
 import jetbrains.buildServer.controllers.AuthorizationInterceptor;
 import jetbrains.buildServer.controllers.BaseController;
 import jetbrains.buildServer.serverSide.SBuildServer;
@@ -38,7 +39,10 @@ public class DebDownloadController extends BaseController {
 		
 	@Override
 	protected ModelAndView doHandle(HttpServletRequest arg0, HttpServletResponse arg1) throws Exception {
-		return simpleView("Weeeeee");
+		Customer c = new Customer();
+		c.setName("netwolfuk");
+		c.save();
+		return simpleView("Weeeeee. We found " + Customer.find.findCount() + " rows.");
 	}
 
 }
