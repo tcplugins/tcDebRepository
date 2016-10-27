@@ -15,6 +15,11 @@
  *******************************************************************************/
 package debrepo.teamcity.settings;
 
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -29,6 +34,22 @@ public class DebRepoProjectSettings {
 	@Getter
 	@Setter
 	private boolean repositoryEnabled = true;
+	
+	private Map<String,String> buildDebFilters = new TreeMap<>();
+	
+	public void addBuild(String buildTypeId, String regex) {
+		buildDebFilters.put(buildTypeId, regex);
+	}
+	
+	public void removeBuild(String buildTypeId){
+		buildDebFilters.remove(buildTypeId);
+	}
+	
+	public Set<String> getBuildList(){
+		Set<String> builds = new TreeSet<>();
+		builds.addAll(buildDebFilters.keySet());
+		return builds;
+	}
 
 	public String isEnabledAsChecked() {
 		if (this.repositoryEnabled){
@@ -36,5 +57,6 @@ public class DebRepoProjectSettings {
 		}
 		return "";
 	}
+
 
 }

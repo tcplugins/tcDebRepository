@@ -15,6 +15,8 @@
  *******************************************************************************/
 package debrepo.teamcity.entity;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.TreeMap;
 
 public class DebPackageStore extends TreeMap<DebPackageEntityKey, DebPackageEntity> {
@@ -27,6 +29,79 @@ public class DebPackageStore extends TreeMap<DebPackageEntityKey, DebPackageEnti
 	
 	public DebPackageEntity find(String packageName, String version, String arch){
 		return this.get(new DebPackageEntityKey(packageName, version, arch));
+	}
+	
+	public List<DebPackageEntity> findAllForBuildType(String buildTypeId) {
+		List<DebPackageEntity> debs = new ArrayList<>();
+		for (DebPackageEntity deb: this.values()){
+			if (deb.getSBuildTypeId().equalsIgnoreCase(buildTypeId)){
+				debs.add(deb);
+			}
+		}
+		return debs;
+	}
+	
+
+	public List<DebPackageEntity> findAllForBuild(long buildId) {
+		List<DebPackageEntity> debs = new ArrayList<>();
+		for (DebPackageEntity deb: this.values()){
+			if (deb.getSBuildId()== buildId){
+				debs.add(deb);
+			}
+		}
+		return debs;
+	}	
+	
+	public List<DebPackageEntity> findAllForPackageName(String packageName) {
+		List<DebPackageEntity> debs = new ArrayList<>();
+		for (DebPackageEntity deb: this.values()){
+			if (deb.getPackageName().equalsIgnoreCase(packageName)){
+				debs.add(deb);
+			}
+		}
+		return debs;
+	}
+
+	public List<DebPackageEntity> findAllForPackageNameAndVersion(String packageName, String version) {
+		List<DebPackageEntity> debs = new ArrayList<>();
+		for (DebPackageEntity deb: this.values()){
+			if (deb.getPackageName().equalsIgnoreCase(packageName)
+				&& deb.getVersion().equalsIgnoreCase(version)){
+				debs.add(deb);
+			}
+		}
+		return debs;
+	}
+	
+	public List<DebPackageEntity> findAllForPackageNameVersionAndArch(String packageName, String version, String arch) {
+		List<DebPackageEntity> debs = new ArrayList<>();
+		for (DebPackageEntity deb: this.values()){
+			if (deb.getPackageName().equalsIgnoreCase(packageName)
+					&& deb.getVersion().equalsIgnoreCase(version)
+					&& deb.getArch().equalsIgnoreCase(arch)){
+				debs.add(deb);
+			}
+		}
+		return debs;
+	}
+
+	public List<DebPackageEntity> findAllForPackageNameAndArch(String packageName, String arch) {
+		List<DebPackageEntity> debs = new ArrayList<>();
+		for (DebPackageEntity deb: this.values()){
+			if (deb.getPackageName().equalsIgnoreCase(packageName)
+					&& deb.getArch().equalsIgnoreCase(arch)){
+				debs.add(deb);
+			}
+		}
+		return debs;
+	}
+
+	public List<DebPackageEntity> findAll() {
+		List<DebPackageEntity> debs = new ArrayList<>();
+		for (DebPackageEntity deb: this.values()){
+			debs.add(deb);
+		}
+		return debs;
 	}
 
 }

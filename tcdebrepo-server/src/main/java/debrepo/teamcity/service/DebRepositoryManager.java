@@ -21,5 +21,9 @@ public interface DebRepositoryManager {
 
 	public DebPackageStore getPackageStore(String storeName) throws NonExistantRepositoryException;
 	public DebPackageStore initialisePackageStore(String projectId, String storename);
+	public DebPackageStore getPackageStoreForBuildType(String buildTypeid) throws NonExistantRepositoryException;
+	public DebPackageStore getPackageStoreForProject(String projectId) throws NonExistantRepositoryException;
+	public boolean registerBuildWithPackageStore(String storeName, String sBuildTypeId) throws NonExistantRepositoryException;
+	public boolean registerBuildWithProjectPackageStore(String projectId, String sBuildTypeId) throws NonExistantRepositoryException;
 
 }

@@ -48,7 +48,7 @@ public class DebPackageEntity {
 	@NotNull @XmlAttribute(name="Architecture")
 	private String arch;
 	@NotNull @XmlAttribute(name="sBuildId")
-	private String sBuildId;
+	private Long sBuildId;
 	@NotNull @XmlAttribute(name="sBuildTypeId")
 	private String sBuildTypeId;
 	
@@ -66,6 +66,10 @@ public class DebPackageEntity {
 		PackageParameter() {
 			// empty constructor for JAXB
 		}
+	}
+	
+	public DebPackageEntityKey buildKey(){
+		return new DebPackageEntityKey(this.getPackageName(), this.getVersion(), this.getArch());
 	}
 	
 }
