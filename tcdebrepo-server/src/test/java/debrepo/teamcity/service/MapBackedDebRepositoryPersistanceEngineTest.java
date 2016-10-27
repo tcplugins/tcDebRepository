@@ -1,8 +1,25 @@
+/*******************************************************************************
+ * Copyright 2016 Net Wolf UK
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
 package debrepo.teamcity.service;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,6 +29,8 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import debrepo.teamcity.entity.DebPackageEntity;
+import debrepo.teamcity.entity.DebPackageStore;
+import debrepo.teamcity.entity.helper.DebRepositoryDatabaseXmlPersister;
 import jetbrains.buildServer.serverSide.ProjectManager;
 import jetbrains.buildServer.serverSide.SBuild;
 import jetbrains.buildServer.serverSide.SBuildType;
@@ -24,6 +43,7 @@ public class MapBackedDebRepositoryPersistanceEngineTest {
 	private static final String BUILD_TYPE_ID_BT03 = "bt03";
 	DebRepositoryManager debRepositoryManager;
 	@Mock ProjectManager projectManager;
+	@Mock DebRepositoryDatabaseXmlPersister debRepositoryDatabaseXmlPersister;
 	@Mock SProject project01;
 	@Mock SProject project02;
 	@Mock SProject root;
@@ -38,10 +58,10 @@ public class MapBackedDebRepositoryPersistanceEngineTest {
 	List<SProject> projectPath2 = new ArrayList<>();
 	
 	DebPackageEntity entity, entity2, entity3, entity4;
-	DebRepositoryPersistanceEngine engine;
+	DebRepositoryDatabase engine;
 	
 	@Before
-	public void setup() throws NonExistantRepositoryException {
+	public void setup() throws NonExistantRepositoryException, IOException {
 		
 		MockitoAnnotations.initMocks(this);
 		
@@ -83,6 +103,8 @@ public class MapBackedDebRepositoryPersistanceEngineTest {
 		when(project02.getProjectPath()).thenReturn(projectPath2);
 		when(root.getProjectId()).thenReturn("_Root");
 		
+		when(debRepositoryDatabaseXmlPersister.persistDatabaseToXml(any(DebPackageStore.class))).thenReturn(true);
+		
 		entity = new DebPackageEntity();
 		entity.setPackageName("testpackage");
 		entity.setVersion("1.2.3.4");
@@ -111,13 +133,13 @@ public class MapBackedDebRepositoryPersistanceEngineTest {
 		entity4.setSBuildTypeId(BUILD_TYPE_ID_BT03);
 		entity4.setSBuildId(build03.getBuildId());
 		
-		debRepositoryManager = new DebRepositoryManagerImpl(projectManager);
+		debRepositoryManager = new DebRepositoryManagerImpl(projectManager, debRepositoryDatabaseXmlPersister);
 		debRepositoryManager.initialisePackageStore("project01", "MyStoreName");
 		debRepositoryManager.initialisePackageStore("project02", "MyStoreName2");
 		debRepositoryManager.registerBuildWithPackageStore("MyStoreName", BUILD_TYPE_ID_BT01);
 		debRepositoryManager.registerBuildWithPackageStore("MyStoreName", BUILD_TYPE_ID_BT02);
 		
-		engine = new MapBackedDebRepositoryPersistanceEngine(debRepositoryManager, projectManager);
+		engine = new MapBackedDebRepositoryDatabase(debRepositoryManager, projectManager);
 	}
 	
 	@Test

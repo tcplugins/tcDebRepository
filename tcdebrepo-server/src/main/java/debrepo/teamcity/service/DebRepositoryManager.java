@@ -15,6 +15,8 @@
  *******************************************************************************/
 package debrepo.teamcity.service;
 
+import java.util.UUID;
+
 import debrepo.teamcity.entity.DebPackageStore;
 
 public interface DebRepositoryManager {
@@ -25,5 +27,6 @@ public interface DebRepositoryManager {
 	public DebPackageStore getPackageStoreForProject(String projectId) throws NonExistantRepositoryException;
 	public boolean registerBuildWithPackageStore(String storeName, String sBuildTypeId) throws NonExistantRepositoryException;
 	public boolean registerBuildWithProjectPackageStore(String projectId, String sBuildTypeId) throws NonExistantRepositoryException;
+	public boolean persist(UUID uuid);
 
 }

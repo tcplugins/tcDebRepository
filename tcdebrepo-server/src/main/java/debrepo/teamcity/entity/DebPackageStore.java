@@ -18,10 +18,17 @@ package debrepo.teamcity.entity;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeMap;
+import java.util.UUID;
+
+import lombok.Getter;
+import lombok.Setter;
 
 public class DebPackageStore extends TreeMap<DebPackageEntityKey, DebPackageEntity> {
 
 	private static final long serialVersionUID = 5836877424915088844L;
+	
+	@Getter @Setter
+	private UUID uuid;
 
 	public DebPackageEntity find(DebPackageEntityKey key) {
 		return this.get(key);

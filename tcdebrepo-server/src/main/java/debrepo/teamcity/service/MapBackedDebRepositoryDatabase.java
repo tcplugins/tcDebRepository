@@ -27,12 +27,12 @@ import jetbrains.buildServer.serverSide.SBuild;
 import jetbrains.buildServer.serverSide.SBuildType;
 import jetbrains.buildServer.serverSide.SProject;
 
-public class MapBackedDebRepositoryPersistanceEngine implements DebRepositoryPersistanceEngine {
+public class MapBackedDebRepositoryDatabase implements DebRepositoryDatabase {
 	
 	final private DebRepositoryManager myDebRepositoryManager;
 	final private ProjectManager myProjectManager;
 	
-	public MapBackedDebRepositoryPersistanceEngine(DebRepositoryManager debRepositoryManager, ProjectManager projectManager){
+	public MapBackedDebRepositoryDatabase(DebRepositoryManager debRepositoryManager, ProjectManager projectManager){
 		this.myDebRepositoryManager = debRepositoryManager;
 		this.myProjectManager = projectManager;
 	}
@@ -50,6 +50,7 @@ public class MapBackedDebRepositoryPersistanceEngine implements DebRepositoryPer
 			return false;
 		}
 		store.put(entity.buildKey(), entity);
+		this.myDebRepositoryManager.persist(store.getUuid());
 		return true;
 	}
 
@@ -65,7 +66,9 @@ public class MapBackedDebRepositoryPersistanceEngine implements DebRepositoryPer
 			Loggers.SERVER.debug(e);
 			return false;
 		}
-		return store.remove(entity.buildKey()) != null;
+		boolean result = store.remove(entity.buildKey()) != null;
+		this.myDebRepositoryManager.persist(store.getUuid());
+		return result;  
 	}
 
 	@Override

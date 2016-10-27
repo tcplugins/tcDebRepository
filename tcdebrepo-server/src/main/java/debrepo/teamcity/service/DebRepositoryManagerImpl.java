@@ -15,6 +15,7 @@
  *******************************************************************************/
 package debrepo.teamcity.service;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -27,6 +28,7 @@ import org.springframework.stereotype.Service;
 
 import debrepo.teamcity.Loggers;
 import debrepo.teamcity.entity.DebPackageStore;
+import debrepo.teamcity.entity.helper.DebRepositoryDatabaseXmlPersister;
 import jetbrains.buildServer.serverSide.ProjectManager;
 import jetbrains.buildServer.serverSide.SBuildType;
 import jetbrains.buildServer.serverSide.SProject;
@@ -41,9 +43,11 @@ public class DebRepositoryManagerImpl implements DebRepositoryManager  {
 	Map<UUID, DebPackageStore> repositories = new TreeMap<UUID, DebPackageStore>();
 	
 	private final ProjectManager myProjectManager;
+	private final DebRepositoryDatabaseXmlPersister myDebRepositoryDatabaseXmlPersister;
 	
-	public DebRepositoryManagerImpl(ProjectManager projectManager) {
+	public DebRepositoryManagerImpl(ProjectManager projectManager, DebRepositoryDatabaseXmlPersister debRepositoryDatabaseXmlPersister) {
 		this.myProjectManager = projectManager;
+		this.myDebRepositoryDatabaseXmlPersister = debRepositoryDatabaseXmlPersister;
 	}
 	
 	@Override
@@ -55,12 +59,24 @@ public class DebRepositoryManagerImpl implements DebRepositoryManager  {
 		return repositories.get(repositoryMetaData.get(storeName).uuid);
 	}
 	
+
+	@Override
+	public boolean persist(UUID uuid) {
+		try {
+			return this.myDebRepositoryDatabaseXmlPersister.persistDatabaseToXml(repositories.get(uuid));
+		} catch (IOException e) {
+			Loggers.SERVER.warn("DebRepositoryManagerImpl :: Failed to persist store to disk. UUID: " + uuid.toString());
+			if (Loggers.SERVER.isDebugEnabled()) { Loggers.SERVER.debug(e); }
+			return false;
+		}
+	}
 	
 	
 	@Override
 	public DebPackageStore initialisePackageStore(String projectId, String storename) {
 		DebRepoMeta newData = new DebRepoMeta(UUID.randomUUID(), projectId, storename, new TreeSet<String>());
 		DebPackageStore newStore = new DebPackageStore();
+		newStore.setUuid(newData.uuid);
 		repositoryMetaData.put(storename, newData);
 		repositories.put(newData.uuid, newStore);
 		Loggers.SERVER.info("DebRepositoryManagerImpl :: Initialised debrepo named '" + storename + "' for project '" + projectId + "'");
@@ -127,8 +143,14 @@ public class DebRepositoryManagerImpl implements DebRepositoryManager  {
 	
 	@AllArgsConstructor
 	public static class DebRepoMeta {
+		
+		@Getter
 		UUID uuid;
+		
+		@Getter
 		String projectId;
+		
+		@Getter
 		String repoName;
 		
 		@Getter @Setter

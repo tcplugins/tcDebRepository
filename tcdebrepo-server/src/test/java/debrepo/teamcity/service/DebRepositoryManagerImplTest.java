@@ -15,21 +15,24 @@
  *******************************************************************************/
 package debrepo.teamcity.service;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import static org.mockito.Mockito.*;
-
-import java.util.ArrayList;
-import java.util.List;
-
 import debrepo.teamcity.entity.DebPackageEntity;
 import debrepo.teamcity.entity.DebPackageStore;
+import debrepo.teamcity.entity.helper.DebRepositoryDatabaseXmlPersister;
 import jetbrains.buildServer.serverSide.ProjectManager;
 import jetbrains.buildServer.serverSide.SBuildType;
 import jetbrains.buildServer.serverSide.SProject;
@@ -42,11 +45,12 @@ public class DebRepositoryManagerImplTest {
 	@Mock SProject root;
 	@Mock SBuildType bt01;
 	@Mock SBuildType bt02;
+	@Mock DebRepositoryDatabaseXmlPersister debRepositoryDatabaseXmlPersister;
 	
 	List<SProject> projectPath = new ArrayList<>();
 
 	@Before
-	public void setup() {
+	public void setup() throws IOException {
 		MockitoAnnotations.initMocks(this);
 		
 		projectPath.add(project01);
@@ -62,13 +66,13 @@ public class DebRepositoryManagerImplTest {
 		when(project02.getProjectId()).thenReturn("project02");
 		when(root.getProjectId()).thenReturn("_Root");
 		
-		
+		when(debRepositoryDatabaseXmlPersister.persistDatabaseToXml(any(DebPackageStore.class))).thenReturn(true);
 	}
 	
 	@Test
 	public void testGetPackageStore() throws NonExistantRepositoryException {
 		
-		DebRepositoryManager manager = new DebRepositoryManagerImpl(projectManager);
+		DebRepositoryManager manager = new DebRepositoryManagerImpl(projectManager, debRepositoryDatabaseXmlPersister);
 		manager.initialisePackageStore("project01", "MyStoreName");
 		manager.initialisePackageStore("project02", "MyStoreName2");
 		manager.registerBuildWithPackageStore("MyStoreName", "bt01");
@@ -80,7 +84,7 @@ public class DebRepositoryManagerImplTest {
 	@Test
 	public void testGetParentPackageStore() throws NonExistantRepositoryException {
 		
-		DebRepositoryManager manager = new DebRepositoryManagerImpl(projectManager);
+		DebRepositoryManager manager = new DebRepositoryManagerImpl(projectManager, debRepositoryDatabaseXmlPersister);
 		manager.initialisePackageStore("project01", "MyStoreName");
 		manager.initialisePackageStore("project02", "MyStoreName2");
 		manager.registerBuildWithPackageStore("MyStoreName", "bt01");
@@ -96,7 +100,7 @@ public class DebRepositoryManagerImplTest {
 	@Test(expected=NonExistantRepositoryException.class)
 	public void testGetNonExistantPackageStore() throws NonExistantRepositoryException {
 		
-		DebRepositoryManager manager = new DebRepositoryManagerImpl(projectManager);
+		DebRepositoryManager manager = new DebRepositoryManagerImpl(projectManager, debRepositoryDatabaseXmlPersister);
 		manager.initialisePackageStore("project01", "MyStoreName");
 		manager.getPackageStore("MystoreMame2");
 		
@@ -105,7 +109,7 @@ public class DebRepositoryManagerImplTest {
 	@Test
 	public void testGetNullPackageStoreForBuild() throws NonExistantRepositoryException {
 		
-		DebRepositoryManager manager = new DebRepositoryManagerImpl(projectManager);
+		DebRepositoryManager manager = new DebRepositoryManagerImpl(projectManager, debRepositoryDatabaseXmlPersister);
 		manager.initialisePackageStore("project01", "MyStoreName");
 		manager.initialisePackageStore("project02", "MyStoreName2");
 		manager.registerBuildWithPackageStore("MyStoreName", "bt01");
@@ -116,7 +120,7 @@ public class DebRepositoryManagerImplTest {
 	@Test
 	public void testGetAddPackageToPackageStore() throws NonExistantRepositoryException {
 		
-		DebRepositoryManager manager = new DebRepositoryManagerImpl(projectManager);
+		DebRepositoryManager manager = new DebRepositoryManagerImpl(projectManager, debRepositoryDatabaseXmlPersister);
 		manager.initialisePackageStore("project01", "MyStoreName");
 		manager.initialisePackageStore("project02", "MyStoreName2");
 		manager.registerBuildWithPackageStore("MyStoreName", "bt01");

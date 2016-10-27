@@ -23,7 +23,7 @@ import jetbrains.buildServer.serverSide.SBuild;
 import jetbrains.buildServer.serverSide.SBuildType;
 import jetbrains.buildServer.serverSide.SProject;
 
-public interface DebRepositoryPersistanceEngine {
+public interface DebRepositoryDatabase {
 	
 	public boolean addPackage(DebPackageEntity entity);
 	public boolean removePackage(DebPackageEntity entity);
