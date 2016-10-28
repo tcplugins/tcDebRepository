@@ -19,6 +19,9 @@ import debrepo.teamcity.web.DebDownloadController;
 
 public class StringUtils {
 	
+	// Utility class. Prevent instantiation.
+	private StringUtils() {}
+	
     public static String stripTrailingSlash(String stringWithPossibleTrailingSlash){
     	if (stringWithPossibleTrailingSlash.endsWith("/")){
     		return stringWithPossibleTrailingSlash.substring(0, stringWithPossibleTrailingSlash.length()-1);

@@ -28,7 +28,6 @@ import javax.xml.bind.annotation.XmlType;
 
 import org.jetbrains.annotations.NotNull;
 
-import lombok.Builder;
 import lombok.Data;
 
 /* Use the XmlAttributes on the fields rather than the getters
@@ -53,7 +52,7 @@ public class DebPackageEntity {
 	private String sBuildTypeId;
 	
 	@XmlElement(name="parameter") @XmlElementWrapper(name="package-parameters")
-	private List<PackageParameter> parameters = new ArrayList<PackageParameter>();
+	private List<PackageParameter> parameters = new ArrayList<>();
 	
 	@XmlType(name = "format") @Data  @XmlAccessorType(XmlAccessType.FIELD)
 	public static class PackageParameter {

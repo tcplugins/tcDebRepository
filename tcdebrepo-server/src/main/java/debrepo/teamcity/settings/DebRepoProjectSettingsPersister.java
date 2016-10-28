@@ -24,7 +24,9 @@ import lombok.Getter;
 import lombok.Setter;
 
 public class DebRepoProjectSettingsPersister implements ProjectSettings {
-	private static final String NAME = DebRepoProjectSettingsPersister.class.getName();
+	private static final String NAME = "name";
+	private static final String ENABLED = "enabled";
+	private static final String LOG_NAME = DebRepoProjectSettingsPersister.class.getName();
 	ProjectSettingsManager psm;
 	ProjectSettings ps;
 	
@@ -39,12 +41,12 @@ public class DebRepoProjectSettingsPersister implements ProjectSettings {
     	Loggers.SERVER.debug("readFrom :: " + rootElement.toString());
     	settings = new DebRepoProjectSettings();
     	
-    	if (rootElement.getAttribute("enabled") != null){
-    		settings.setRepositoryEnabled(Boolean.parseBoolean(rootElement.getAttributeValue("enabled")));
+    	if (rootElement.getAttribute(ENABLED) != null){
+    		settings.setRepositoryEnabled(Boolean.parseBoolean(rootElement.getAttributeValue(ENABLED)));
     	}
     	
-    	if (rootElement.getAttribute("name") != null){
-    		settings.setRepositoryName(rootElement.getAttributeValue("name"));
+    	if (rootElement.getAttribute(NAME) != null){
+    		settings.setRepositoryName(rootElement.getAttributeValue(NAME));
     	}
     	
    }
@@ -54,14 +56,14 @@ public class DebRepoProjectSettingsPersister implements ProjectSettings {
      * in memory. 
      */
     {
-    	Loggers.SERVER.debug(NAME + ":writeTo :: " + parentElement.toString());
-    	parentElement.setAttribute("name", String.valueOf(settings.getRepositoryName()));
-    	parentElement.setAttribute("enabled", String.valueOf(settings.isRepositoryEnabled()));
+    	Loggers.SERVER.debug(LOG_NAME + ":writeTo :: " + parentElement.toString());
+    	parentElement.setAttribute(NAME, String.valueOf(settings.getRepositoryName()));
+    	parentElement.setAttribute(ENABLED, String.valueOf(settings.isRepositoryEnabled()));
     }
 
     
 	public void dispose() {
-		Loggers.SERVER.debug(NAME + ":dispose() called");
+		Loggers.SERVER.debug(LOG_NAME + ":dispose() called");
 	}
 	
 	public String getRepositoryName() {

@@ -29,8 +29,8 @@ import jetbrains.buildServer.serverSide.SProject;
 
 public class MapBackedDebRepositoryDatabase implements DebRepositoryDatabase {
 	
-	final private DebRepositoryManager myDebRepositoryManager;
-	final private ProjectManager myProjectManager;
+	private final DebRepositoryManager myDebRepositoryManager;
+	private final ProjectManager myProjectManager;
 	
 	public MapBackedDebRepositoryDatabase(DebRepositoryManager debRepositoryManager, ProjectManager projectManager){
 		this.myDebRepositoryManager = debRepositoryManager;

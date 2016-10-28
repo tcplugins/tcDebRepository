@@ -25,7 +25,7 @@ import lombok.Setter;
 
 public class DebRepoProjectSettings {
 	
-	public final static String PROJECT_SETTINGS_KEY = "deb-repository";
+	public static final String PROJECT_SETTINGS_KEY = "deb-repository";
 
 	@Getter 
 	@Setter

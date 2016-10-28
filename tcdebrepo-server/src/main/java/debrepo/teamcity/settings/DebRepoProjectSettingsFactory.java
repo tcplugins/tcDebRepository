@@ -29,8 +29,7 @@ public class DebRepoProjectSettingsFactory implements ProjectSettingsFactory {
 
 	public DebRepoProjectSettingsPersister createProjectSettings(String projectId) {
 		Loggers.SERVER.info("DebRepoProjectSettingsFactory: re-reading settings for " + projectId);
-		DebRepoProjectSettingsPersister settings = new DebRepoProjectSettingsPersister();
-		return settings;
+		return new DebRepoProjectSettingsPersister();
 	}
 
 

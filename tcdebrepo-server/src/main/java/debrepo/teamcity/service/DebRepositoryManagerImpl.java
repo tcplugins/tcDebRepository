@@ -118,10 +118,9 @@ public class DebRepositoryManagerImpl implements DebRepositoryManager  {
 	
 	@Override
 	public boolean registerBuildWithProjectPackageStore(String projectId, String sBuildTypeId) throws NonExistantRepositoryException {
-		for (String metaName : repositoryMetaData.keySet()){
-			DebRepoMeta meta = repositoryMetaData.get(metaName);
-			if (meta.projectId.equals(projectId)){
-				return registerBuildWithPackageStore(metaName, sBuildTypeId);
+		for (Map.Entry<String,DebRepoMeta> entry : repositoryMetaData.entrySet()){
+			if (entry.getValue().projectId.equals(projectId)){
+				return registerBuildWithPackageStore(entry.getKey(), sBuildTypeId);
 			}
 		}
 		return false;

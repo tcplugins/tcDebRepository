@@ -18,7 +18,6 @@ package debrepo.teamcity.archive;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -36,6 +35,8 @@ import org.rauschig.jarchivelib.Archiver;
 import org.rauschig.jarchivelib.ArchiverFactory;
 import org.rauschig.jarchivelib.CompressionType;
 import org.rauschig.jarchivelib.IOUtils;
+
+import debrepo.teamcity.Loggers;
 
 public class DebFileReader {
 	File debFile;
@@ -58,8 +59,7 @@ public class DebFileReader {
 		    // access each archive entry individually using the stream
 		    // or extract it using entry.extract(destination)
 		    // or fetch meta-data using entry.getName(), entry.isDirectory(), ...
-			System.out.println(entry.getName());
-			if (entry.getName().equals("control.tar.gz")){
+			if ("control.tar.gz".equals(entry.getName())){
 				controlTarGzFile = entry.extract(tmpLocation);
 			}
 		}
@@ -75,7 +75,7 @@ public class DebFileReader {
 		ByteArrayOutputStream baos= new ByteArrayOutputStream();
 		
 		while((entry = stream.getNextEntry()) != null) {
-			if (entry.getName().equals("./control")){
+			if ("./control".equals(entry.getName())){
 				IOUtils.copy(stream, baos);
 			}
 		}
@@ -99,12 +99,12 @@ public class DebFileReader {
 		}
 		scanner.close();
 		
-		map.putAll(getExtraPackageItemsFromDeb(debFile));
+		map.putAll(getExtraPackageItemsFromDeb());
 		
 		return map;
 	}
 	
-	protected Map<String,String> getExtraPackageItemsFromDeb(File debFile) {
+	protected Map<String,String> getExtraPackageItemsFromDeb() {
 		/*
 		 * Filename: pool/main/b/build-essential/build-essential_11.6ubuntu6_amd64.deb
 		 * Size: 4838
@@ -113,15 +113,14 @@ public class DebFileReader {
 		 * SHA256: 50c00d2da704e131855abda2f823f3ac2589ab1579f511ccd005be421f0a3954 
 		 * 
 		 */
-		Map<String, String> map = new LinkedHashMap<String, String>();
+		Map<String, String> map = new LinkedHashMap<>();
 		try {
 			map.put("MD5sum", getFileHashSum("MD5"));
 			map.put("SHA1", getFileHashSum("SHA-1"));
 			map.put("SHA256", getFileHashSum("SHA-256"));
-		} catch (IOException e){
-			e.printStackTrace();
-		} catch (NoSuchAlgorithmException e) {
-			e.printStackTrace();
+		} catch (IOException | NoSuchAlgorithmException e){
+			Loggers.SERVER.warn("DebFileReader:: Failed to generate file hash. " + e.getMessage());
+			if (Loggers.SERVER.isDebugEnabled()) { Loggers.SERVER.debug(e);}
 		}
 		
 		return map;
@@ -141,7 +140,7 @@ public class DebFileReader {
         byte[] mdbytes = md.digest();
 
        //convert the byte to hex format method 2
-        StringBuffer hexString = new StringBuffer();
+        StringBuilder hexString = new StringBuilder();
     	for (int i=0;i<mdbytes.length;i++) {
     	  hexString.append(Integer.toHexString(0xFF & mdbytes[i]));
     	}

@@ -15,13 +15,12 @@
  *******************************************************************************/
 package debrepo.teamcity.web;
 
-import static org.junit.Assert.*;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import static org.mockito.Mockito.*;
 import org.mockito.MockitoAnnotations;
 
 import jetbrains.buildServer.serverSide.SBuildServer;
