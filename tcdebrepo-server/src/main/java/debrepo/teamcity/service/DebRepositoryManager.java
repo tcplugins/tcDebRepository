@@ -18,11 +18,12 @@ package debrepo.teamcity.service;
 import java.util.UUID;
 
 import debrepo.teamcity.entity.DebPackageStore;
+import debrepo.teamcity.entity.DebRepositoryConfiguration;
 
 public interface DebRepositoryManager {
 
 	public DebPackageStore getPackageStore(String storeName) throws NonExistantRepositoryException;
-	public DebPackageStore initialisePackageStore(String projectId, String storename);
+	public DebPackageStore initialisePackageStore(DebRepositoryConfiguration conf);
 	public DebPackageStore getPackageStoreForBuildType(String buildTypeid) throws NonExistantRepositoryException;
 	public DebPackageStore getPackageStoreForProject(String projectId) throws NonExistantRepositoryException;
 	public boolean registerBuildWithPackageStore(String storeName, String sBuildTypeId) throws NonExistantRepositoryException;

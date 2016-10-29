@@ -9,18 +9,19 @@ import debrepo.teamcity.Loggers;
 import debrepo.teamcity.entity.DebPackageStore;
 import debrepo.teamcity.entity.DebPackageStoreEntity;
 
-public class DebRepositoryDatabaseXmlPersisterImpl implements DebRepositoryDatabaseXmlPersister {
+public class DebRepositoryDatabaseXmlPersisterImpl implements XmlPersister<DebPackageStore> {
 	
-	private final PluginDataDirectoryResolver myPluginDataDirectoryResolver;
-	private final DebRepositoryDatabaseJaxHelper myDebRepositoryDatabaseJaxHelper;
+	private final PluginDataResolver myPluginDataDirectoryResolver;
+	private final JaxHelper<DebPackageStoreEntity> myDebRepositoryDatabaseJaxHelper;
 	
-	public DebRepositoryDatabaseXmlPersisterImpl(PluginDataDirectoryResolver pluginDataDirectoryResolver, DebRepositoryDatabaseJaxHelper debRepositoryDatabaseJaxHelper){
+	public DebRepositoryDatabaseXmlPersisterImpl(PluginDataResolver pluginDataDirectoryResolver, JaxHelper<DebPackageStoreEntity> debRepositoryDatabaseJaxHelper){
 		this.myPluginDataDirectoryResolver = pluginDataDirectoryResolver;
 		this.myDebRepositoryDatabaseJaxHelper = debRepositoryDatabaseJaxHelper;
 		
 	}
 	
-	public boolean persistDatabaseToXml(DebPackageStore debPackageStore) throws IOException{
+	@Override
+	public boolean persistToXml(DebPackageStore debPackageStore) throws IOException {
 		synchronized (debPackageStore) {
 			
 			DebPackageStoreEntity wrapperEntity = new DebPackageStoreEntity();
@@ -28,7 +29,7 @@ public class DebRepositoryDatabaseXmlPersisterImpl implements DebRepositoryDatab
 			
 			wrapperEntity.setPackages(debPackageStore.findAll());
 			
-			String configFilePath = this.myPluginDataDirectoryResolver.getPluginDataDirectory() 
+			String configFilePath = this.myPluginDataDirectoryResolver.getPluginDatabaseDirectory() 
 									+ File.separator + debPackageStore.getUuid().toString() + ".xml";
 					
 			try {
@@ -42,5 +43,4 @@ public class DebRepositoryDatabaseXmlPersisterImpl implements DebRepositoryDatab
 			}
 		}
 	}
-
 }

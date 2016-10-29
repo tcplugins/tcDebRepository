@@ -26,33 +26,33 @@ import javax.xml.bind.JAXBException;
 
 import debrepo.teamcity.entity.DebPackageStoreEntity;
 
-public interface DebRepositoryDatabaseJaxHelper {
+public interface JaxHelper<T> {
 
 	/**
 	 * Read saved configuration from file
 	 * 
-	 * @return {@link DebPackageStoreEntity} bean
+	 * @return T bean
 	 * @throws JAXBException
 	 * @throws FileNotFoundException
 	 */
-	public abstract DebPackageStoreEntity read(String configFilePath)
+	public abstract T read(String configFilePath)
 			throws JAXBException, FileNotFoundException;
 
 	/**
 	 * Read saved configuration from stream
 	 * 
-	 * @return Suppliers bean
+	 * @return T bean
 	 * @throws JAXBException
 	 */
-	public abstract DebPackageStoreEntity read(InputStream stream)
+	public abstract T read(InputStream stream)
 			throws JAXBException;
 
 	/**
-	 * Write suppliers bean to configuration file
+	 * Write T bean to configuration file
 	 * 
 	 * @throws JAXBException
 	 */
-	public abstract void write(DebPackageStoreEntity debPackages, String configFilePath)
+	public abstract void write(T jaxObject, String configFilePath)
 			throws JAXBException;
 
 }

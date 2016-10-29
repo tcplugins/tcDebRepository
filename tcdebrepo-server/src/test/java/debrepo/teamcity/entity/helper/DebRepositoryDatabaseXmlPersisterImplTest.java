@@ -17,6 +17,7 @@ import org.mockito.MockitoAnnotations;
 
 import debrepo.teamcity.entity.DebPackageEntity;
 import debrepo.teamcity.entity.DebPackageStore;
+import debrepo.teamcity.entity.DebRepositoryConfiguration;
 import debrepo.teamcity.service.DebRepositoryDatabase;
 import debrepo.teamcity.service.DebRepositoryManager;
 import debrepo.teamcity.service.DebRepositoryManagerImpl;
@@ -35,7 +36,7 @@ public class DebRepositoryDatabaseXmlPersisterImplTest {
 	private static final String BUILD_TYPE_ID_BT03 = "bt03";
 	
 	@Mock ProjectManager projectManager;
-	DebRepositoryDatabaseXmlPersister debRepositoryDatabaseXmlPersister;
+	XmlPersister debRepositoryDatabaseXmlPersister;
 	DebRepositoryManager debRepositoryManager;
 	
 	@Mock SProject project01;
@@ -127,15 +128,17 @@ public class DebRepositoryDatabaseXmlPersisterImplTest {
 		entity4.setSBuildId(build03.getBuildId());
 		
 		debRepositoryManager = new DebRepositoryManagerImpl(projectManager, debRepositoryDatabaseXmlPersister);
-		debRepositoryManager.initialisePackageStore("project01", "MyStoreName");
-		debRepositoryManager.initialisePackageStore("project02", "MyStoreName2");
+		DebRepositoryConfiguration config1 = new DebRepositoryConfiguration("project01", "MyStoreName");
+		DebRepositoryConfiguration config2 = new DebRepositoryConfiguration("project02", "MyStoreName2");
+		debRepositoryManager.initialisePackageStore(config1);
+		debRepositoryManager.initialisePackageStore(config2);
 		debRepositoryManager.registerBuildWithPackageStore("MyStoreName", BUILD_TYPE_ID_BT01);
 		debRepositoryManager.registerBuildWithPackageStore("MyStoreName", BUILD_TYPE_ID_BT02);
 		
 		when(serverPaths.getPluginDataDirectory()).thenReturn(new File("target"));
 
-		PluginDataDirectoryResolver pluginDataDirectoryResolver = new PluginDataDirectoryResolverImpl(serverPaths);
-		DebRepositoryDatabaseJaxHelper debRepositoryDatabaseJaxHelper = new DebRepositoryDatabaseJaxHelperImpl();
+		PluginDataResolver pluginDataDirectoryResolver = new PluginDataResolverImpl(serverPaths);
+		JaxHelper debRepositoryDatabaseJaxHelper = new DebRepositoryDatabaseJaxHelperImpl();
 		debRepositoryDatabaseXmlPersister = new DebRepositoryDatabaseXmlPersisterImpl(
 																	pluginDataDirectoryResolver, 
 																	debRepositoryDatabaseJaxHelper);
@@ -145,8 +148,10 @@ public class DebRepositoryDatabaseXmlPersisterImplTest {
 	public void testPersistDatabaseToXml() throws NonExistantRepositoryException {
 		
 		DebRepositoryManager manager = new DebRepositoryManagerImpl(projectManager, debRepositoryDatabaseXmlPersister);
-		manager.initialisePackageStore("project01", "MyStoreName");
-		manager.initialisePackageStore("project02", "MyStoreName2");
+		DebRepositoryConfiguration config1 = new DebRepositoryConfiguration("project01", "MyStoreName");
+		DebRepositoryConfiguration config2 = new DebRepositoryConfiguration("project02", "MyStoreName2");
+		debRepositoryManager.initialisePackageStore(config1);
+		debRepositoryManager.initialisePackageStore(config2);
 		manager.registerBuildWithPackageStore("MyStoreName", "bt01");
 		manager.registerBuildWithPackageStore("MyStoreName2", "bt02");
 		DebPackageStore store = manager.getPackageStoreForBuildType("bt01");

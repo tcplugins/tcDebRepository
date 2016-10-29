@@ -31,41 +31,41 @@ import javax.xml.bind.Unmarshaller;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import debrepo.teamcity.entity.DebPackageStoreEntity;
+import debrepo.teamcity.entity.DebRepositoryConfigurations;
 
-public class DebRepositoryDatabaseJaxHelperImpl implements JaxHelper<DebPackageStoreEntity> {
+public class DebRepositoryConfigurationJaxHelperImpl implements JaxHelper<DebRepositoryConfigurations> {
 
 	@Override
 	@Nullable
-	public DebPackageStoreEntity read(@NotNull String configFilePath)
+	public DebRepositoryConfigurations read(@NotNull String configFilePath)
 			throws JAXBException, FileNotFoundException {
-		JAXBContext context = JAXBContext.newInstance(DebPackageStoreEntity.class);
+		JAXBContext context = JAXBContext.newInstance(DebRepositoryConfigurations.class);
 		Unmarshaller um = context.createUnmarshaller();
 		File file = new File(configFilePath);
 		if (!file.isFile()) {
-			return new DebPackageStoreEntity();
+			return new DebRepositoryConfigurations();
 		}
-		return (DebPackageStoreEntity) um.unmarshal(file);
+		return (DebRepositoryConfigurations) um.unmarshal(file);
 	}
 
 	@Override
 	@NotNull
-	public DebPackageStoreEntity read(@NotNull InputStream stream)
+	public DebRepositoryConfigurations read(@NotNull InputStream stream)
 			throws JAXBException {
-		JAXBContext context = JAXBContext.newInstance(DebPackageStoreEntity.class);
+		JAXBContext context = JAXBContext.newInstance(DebRepositoryConfigurations.class);
 		Unmarshaller um = context.createUnmarshaller();
-		return (DebPackageStoreEntity) um.unmarshal(stream);
+		return (DebRepositoryConfigurations) um.unmarshal(stream);
 	}
 
 	@Override
-	public void write(@NotNull DebPackageStoreEntity packages,
+	public void write(@NotNull DebRepositoryConfigurations repoConfigs,
 			@NotNull String configFilePath) throws JAXBException {
 		
-		JAXBContext context = JAXBContext.newInstance(DebPackageStoreEntity.class);
+		JAXBContext context = JAXBContext.newInstance(DebRepositoryConfigurations.class);
 		Marshaller m = context.createMarshaller();
 		m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
 		//m.setProperty("com.sun.xml.bind.xmlHeaders", "\n<!-- This file is not intended to be edited. You have been warned :-) -->");
-		m.marshal(packages, new File(configFilePath));
+		m.marshal(repoConfigs, new File(configFilePath));
 	}
 
 }

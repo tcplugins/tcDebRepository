@@ -30,7 +30,8 @@ import org.mockito.MockitoAnnotations;
 
 import debrepo.teamcity.entity.DebPackageEntity;
 import debrepo.teamcity.entity.DebPackageStore;
-import debrepo.teamcity.entity.helper.DebRepositoryDatabaseXmlPersister;
+import debrepo.teamcity.entity.DebRepositoryConfiguration;
+import debrepo.teamcity.entity.helper.XmlPersister;
 import jetbrains.buildServer.serverSide.ProjectManager;
 import jetbrains.buildServer.serverSide.SBuild;
 import jetbrains.buildServer.serverSide.SBuildType;
@@ -43,7 +44,7 @@ public class MapBackedDebRepositoryPersistanceEngineTest {
 	private static final String BUILD_TYPE_ID_BT03 = "bt03";
 	DebRepositoryManager debRepositoryManager;
 	@Mock ProjectManager projectManager;
-	@Mock DebRepositoryDatabaseXmlPersister debRepositoryDatabaseXmlPersister;
+	@Mock XmlPersister debRepositoryDatabaseXmlPersister;
 	@Mock SProject project01;
 	@Mock SProject project02;
 	@Mock SProject root;
@@ -103,7 +104,7 @@ public class MapBackedDebRepositoryPersistanceEngineTest {
 		when(project02.getProjectPath()).thenReturn(projectPath2);
 		when(root.getProjectId()).thenReturn("_Root");
 		
-		when(debRepositoryDatabaseXmlPersister.persistDatabaseToXml(any(DebPackageStore.class))).thenReturn(true);
+		when(debRepositoryDatabaseXmlPersister.persistToXml(any(DebPackageStore.class))).thenReturn(true);
 		
 		entity = new DebPackageEntity();
 		entity.setPackageName("testpackage");
@@ -134,8 +135,10 @@ public class MapBackedDebRepositoryPersistanceEngineTest {
 		entity4.setSBuildId(build03.getBuildId());
 		
 		debRepositoryManager = new DebRepositoryManagerImpl(projectManager, debRepositoryDatabaseXmlPersister);
-		debRepositoryManager.initialisePackageStore("project01", "MyStoreName");
-		debRepositoryManager.initialisePackageStore("project02", "MyStoreName2");
+		DebRepositoryConfiguration config1 = new DebRepositoryConfiguration("project01", "MyStoreName");
+		DebRepositoryConfiguration config2 = new DebRepositoryConfiguration("project02", "MyStoreName2");
+		debRepositoryManager.initialisePackageStore(config1);
+		debRepositoryManager.initialisePackageStore(config2);
 		debRepositoryManager.registerBuildWithPackageStore("MyStoreName", BUILD_TYPE_ID_BT01);
 		debRepositoryManager.registerBuildWithPackageStore("MyStoreName", BUILD_TYPE_ID_BT02);
 		
