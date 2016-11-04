@@ -17,9 +17,12 @@ package debrepo.teamcity.entity;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.TreeMap;
 import java.util.UUID;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -29,6 +32,22 @@ public class DebPackageStore extends TreeMap<DebPackageEntityKey, DebPackageEnti
 	
 	@Getter @Setter
 	private UUID uuid;
+	
+	private Map<DebPackageEntityArchFilenameKey, DebPackageEntityKey> fileNameMap = new TreeMap<>();
+	
+	public DebPackageEntity findByFilename(String arch, String filename) throws DebPackageNotFoundInStoreException {
+		if (fileNameMap.containsKey(new DebPackageEntityArchFilenameKey(arch, filename))){
+			return get(fileNameMap.get(fileNameMap));
+		}
+		throw new DebPackageNotFoundInStoreException("File Not Found:: File:" + filename + "  Arch:" + arch);
+	}
+	
+	@Override
+	public DebPackageEntity put(DebPackageEntityKey key, DebPackageEntity value) {
+		super.put(key, value);
+		fileNameMap.put(new DebPackageEntityArchFilenameKey(value.getArch(), value.getFilename()), key);
+		return value;
+	}
 
 	public DebPackageEntity find(DebPackageEntityKey key) {
 		return this.get(key);
@@ -111,4 +130,18 @@ public class DebPackageStore extends TreeMap<DebPackageEntityKey, DebPackageEnti
 		return debs;
 	}
 
+	@AllArgsConstructor @Data
+	private static class DebPackageEntityArchFilenameKey implements Comparable<DebPackageEntityArchFilenameKey>{
+		String arch;
+		String filename;
+		
+		@Override
+		public int compareTo(DebPackageEntityArchFilenameKey o) {
+			if (this.getArch().equalsIgnoreCase(o.getArch())){
+				return this.getFilename().compareTo(o.getFilename());
+			} else {
+				return this.getArch().compareToIgnoreCase(o.getArch());
+			}
+		}
+	}
 }

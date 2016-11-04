@@ -18,6 +18,8 @@ package debrepo.teamcity.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 import debrepo.teamcity.Loggers;
 import debrepo.teamcity.entity.DebPackageEntity;
@@ -40,35 +42,45 @@ public class MapBackedDebRepositoryDatabase implements DebRepositoryDatabase {
 	@Override
 	public boolean addPackage(DebPackageEntity entity) {
 		SBuildType sBuildType = myProjectManager.findBuildTypeById(entity.getSBuildTypeId());
-		
-		DebPackageStore store;
-		try {
-			store = this.myDebRepositoryManager.getPackageStoreForBuildType(sBuildType.getBuildTypeId());
-		} catch (NonExistantRepositoryException e) {
-			Loggers.SERVER.warn("MapBackedDebRepositoryPersistanceEngine: No repo found for project: " + sBuildType.getProjectId());
-			Loggers.SERVER.debug(e);
+		if (sBuildType != null){
+			List<DebPackageStore> stores = new ArrayList<>();
+			try {
+				stores = this.myDebRepositoryManager.getPackageStoresForDebPackage(entity);
+			} catch (NonExistantRepositoryException e) {
+				Loggers.SERVER.warn("MapBackedDebRepositoryDatabase: No repo found for project: " + sBuildType.getProjectId());
+				Loggers.SERVER.debug(e);
+				return false;
+			}
+			for (DebPackageStore store : stores) {
+				store.put(entity.buildKey(), entity);
+				this.myDebRepositoryManager.persist(store.getUuid());
+			}
+			//FIXME: Should return something more appropriate.
+			return true;  
+
+		} else {
 			return false;
 		}
-		store.put(entity.buildKey(), entity);
-		this.myDebRepositoryManager.persist(store.getUuid());
-		return true;
 	}
 
 	@Override
 	public boolean removePackage(DebPackageEntity entity) {
 		SBuildType sBuildType = myProjectManager.findBuildTypeById(entity.getSBuildTypeId());
 		
-		DebPackageStore store;
+		List<DebPackageStore> stores;
 		try {
-			store = this.myDebRepositoryManager.getPackageStoreForBuildType(sBuildType.getBuildTypeId());
+			stores = this.myDebRepositoryManager.getPackageStoresForBuildType(sBuildType.getBuildTypeId());
 		} catch (NonExistantRepositoryException e) {
-			Loggers.SERVER.warn("MapBackedDebRepositoryPersistanceEngine: No repo found for project: " + sBuildType.getProjectId());
+			Loggers.SERVER.warn("MapBackedDebRepositoryDatabase: No repo found for project: " + sBuildType.getProjectId());
 			Loggers.SERVER.debug(e);
 			return false;
 		}
-		boolean result = store.remove(entity.buildKey()) != null;
-		this.myDebRepositoryManager.persist(store.getUuid());
-		return result;  
+		for (DebPackageStore store : stores) {
+			store.remove(entity.buildKey());
+			this.myDebRepositoryManager.persist(store.getUuid());
+		}
+		//FIXME: Should return something more appropriate.
+		return true;  
 	}
 
 	@Override
@@ -76,7 +88,7 @@ public class MapBackedDebRepositoryDatabase implements DebRepositoryDatabase {
 		try {
 			return this.myDebRepositoryManager.getPackageStore(repoName).findAllForPackageName(packageName);
 		} catch (NonExistantRepositoryException e) {
-			Loggers.SERVER.warn("MapBackedDebRepositoryPersistanceEngine: No repo found by name: " + repoName);
+			Loggers.SERVER.warn("MapBackedDebRepositoryDatabase: No repo found by name: " + repoName);
 			return new ArrayList<>();
 		}
 	}
@@ -86,7 +98,7 @@ public class MapBackedDebRepositoryDatabase implements DebRepositoryDatabase {
 		try {
 			return this.myDebRepositoryManager.getPackageStore(repoName).findAllForPackageNameAndVersion(packageName, version);
 		} catch (NonExistantRepositoryException e) {
-			Loggers.SERVER.warn("MapBackedDebRepositoryPersistanceEngine: No repo found by name: " + repoName);
+			Loggers.SERVER.warn("MapBackedDebRepositoryDatabase: No repo found by name: " + repoName);
 			return new ArrayList<>();
 		}
 	}
@@ -96,7 +108,7 @@ public class MapBackedDebRepositoryDatabase implements DebRepositoryDatabase {
 		try {
 			return this.myDebRepositoryManager.getPackageStore(repoName).findAllForPackageNameAndArch(packageName, arch);
 		} catch (NonExistantRepositoryException e) {
-			Loggers.SERVER.warn("MapBackedDebRepositoryPersistanceEngine: No repo found by name: " + repoName);
+			Loggers.SERVER.warn("MapBackedDebRepositoryDatabase: No repo found by name: " + repoName);
 			return new ArrayList<>();
 		}
 	}
@@ -106,29 +118,32 @@ public class MapBackedDebRepositoryDatabase implements DebRepositoryDatabase {
 		try {
 			return this.myDebRepositoryManager.getPackageStore(repoName).findAllForPackageNameVersionAndArch(packageName, version, arch);
 		} catch (NonExistantRepositoryException e) {
-			Loggers.SERVER.warn("MapBackedDebRepositoryPersistanceEngine: No repo found by name: " + repoName);
+			Loggers.SERVER.warn("MapBackedDebRepositoryDatabase: No repo found by name: " + repoName);
 			return new ArrayList<>();
 		}
 	}
+	
+	
 
 	@Override
 	public List<DebPackageEntity> findAllByBuild(SBuild sBuild) {
-		try {
-			return this.myDebRepositoryManager.getPackageStoreForBuildType(sBuild.getBuildTypeId()).findAllForBuild(sBuild.getBuildId());
-		} catch (NonExistantRepositoryException | NullPointerException e) {
-			Loggers.SERVER.warn("MapBackedDebRepositoryPersistanceEngine: No repo found for sBuildType: " + sBuild.getBuildTypeId());
-			return new ArrayList<>();
-		}
+		return findAllByBuildType(sBuild.getBuildType());
 	}
 
 	@Override
 	public List<DebPackageEntity> findAllByBuildType(SBuildType sBuildType) {
+		List<DebPackageStore> stores = null;
+		List<DebPackageEntity> entities = new ArrayList<>();
 		try {
-			return this.myDebRepositoryManager.getPackageStoreForBuildType(sBuildType.getBuildTypeId()).findAllForBuildType(sBuildType.getBuildTypeId());
-		} catch (NonExistantRepositoryException | NullPointerException e) {
-			Loggers.SERVER.warn("MapBackedDebRepositoryPersistanceEngine: No repo found for sBuildType: " + sBuildType.getBuildTypeId());
-			return new ArrayList<>();
+			stores = this.myDebRepositoryManager.getPackageStoresForBuildType(sBuildType.getBuildTypeId());
+		} catch (NonExistantRepositoryException e) {
+			Loggers.SERVER.warn("MapBackedDebRepositoryDatabase: No repo found for sBuildType: " + sBuildType.getBuildTypeId());
+			Loggers.SERVER.debug(e);
 		}
+		for (DebPackageStore store : stores) {
+			entities.addAll(store.findAllForBuildType(sBuildType.getBuildTypeId()));
+		}
+		return entities;
 	}
 
 	@Override
@@ -141,7 +156,7 @@ public class MapBackedDebRepositoryDatabase implements DebRepositoryDatabase {
 		try {
 			return this.myDebRepositoryManager.getPackageStoreForProject(projectId).findAll();
 		} catch (NonExistantRepositoryException | NullPointerException e) {
-			Loggers.SERVER.warn("MapBackedDebRepositoryPersistanceEngine: No repo found for project: " + projectId);
+			Loggers.SERVER.warn("MapBackedDebRepositoryDatabase: No repo found for project: " + projectId);
 			return new ArrayList<>();
 		}
 	}

@@ -17,6 +17,8 @@ package debrepo.teamcity.entity;
 
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -69,6 +71,15 @@ public class DebRepositoryBuildTypeConfig {
 	public DebRepositoryBuildTypeConfig af(String filter) {
 		this.addFilter(filter);
 		return this;
+	}
+
+	public boolean matchAgainstFilter(String filename) {
+		for (String filter : debFilters) {
+			if (Pattern.matches(filter, filename)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 }

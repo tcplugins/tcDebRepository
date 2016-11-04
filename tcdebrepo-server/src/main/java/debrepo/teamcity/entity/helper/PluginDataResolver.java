@@ -5,6 +5,6 @@ import java.io.IOException;
 public interface PluginDataResolver {
 	
 	public String getPluginDatabaseDirectory() throws IOException;
-	public String getPluginConfigurationFile() throws IOException;
+	public String getPluginConfigurationFile();
 
 }

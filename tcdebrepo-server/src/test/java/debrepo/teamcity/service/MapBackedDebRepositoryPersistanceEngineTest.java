@@ -18,6 +18,7 @@ package debrepo.teamcity.service;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.*;
+import static debrepo.teamcity.service.DebRepositoryBaseTest.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -37,14 +38,14 @@ import jetbrains.buildServer.serverSide.SBuild;
 import jetbrains.buildServer.serverSide.SBuildType;
 import jetbrains.buildServer.serverSide.SProject;
 
-public class MapBackedDebRepositoryPersistanceEngineTest {
+public class MapBackedDebRepositoryPersistanceEngineTest extends DebRepositoryBaseTest {
 
 	private static final String BUILD_TYPE_ID_BT01 = "bt01";
 	private static final String BUILD_TYPE_ID_BT02 = "bt02";
 	private static final String BUILD_TYPE_ID_BT03 = "bt03";
 	DebRepositoryManager debRepositoryManager;
 	@Mock ProjectManager projectManager;
-	@Mock XmlPersister debRepositoryDatabaseXmlPersister;
+	@Mock XmlPersister<DebPackageStore> debRepositoryDatabaseXmlPersister;
 	@Mock SProject project01;
 	@Mock SProject project02;
 	@Mock SProject root;
@@ -62,7 +63,7 @@ public class MapBackedDebRepositoryPersistanceEngineTest {
 	DebRepositoryDatabase engine;
 	
 	@Before
-	public void setup() throws NonExistantRepositoryException, IOException {
+	public void setuplocal() throws NonExistantRepositoryException, IOException {
 		
 		MockitoAnnotations.initMocks(this);
 		
@@ -94,7 +95,7 @@ public class MapBackedDebRepositoryPersistanceEngineTest {
 		when(build02.getBuildTypeId()).thenReturn(BUILD_TYPE_ID_BT02);
 		
 		when(build03.getBuildType()).thenReturn(bt01);
-		when(build02.getBuildId()).thenReturn(12347L);
+		when(build03.getBuildId()).thenReturn(12347L);
 		when(build03.getBuildTypeId()).thenReturn(BUILD_TYPE_ID_BT01);
 		
 		when(project01.getProjectId()).thenReturn("project01");
@@ -110,6 +111,7 @@ public class MapBackedDebRepositoryPersistanceEngineTest {
 		entity.setPackageName("testpackage");
 		entity.setVersion("1.2.3.4");
 		entity.setArch("i386");
+		entity.setFilename("testpackage-i386-1.2.3.4.deb");
 		entity.setSBuildTypeId(BUILD_TYPE_ID_BT01);
 		entity.setSBuildId(build01.getBuildId());
 		
@@ -117,6 +119,7 @@ public class MapBackedDebRepositoryPersistanceEngineTest {
 		entity2.setPackageName("testpackage");
 		entity2.setVersion("1.2.3.5");
 		entity2.setArch("i386");
+		entity2.setFilename("testpackage-i386-1.2.3.5.deb");
 		entity2.setSBuildTypeId(BUILD_TYPE_ID_BT02);
 		entity2.setSBuildId(build02.getBuildId());
 		
@@ -124,6 +127,7 @@ public class MapBackedDebRepositoryPersistanceEngineTest {
 		entity3.setPackageName("testpackage");
 		entity3.setVersion("1.2.3.5");
 		entity3.setArch("amd64");
+		entity3.setFilename("testpackage-amd64-1.2.3.5.deb");
 		entity3.setSBuildTypeId(BUILD_TYPE_ID_BT02);
 		entity3.setSBuildId(build02.getBuildId());
 		
@@ -131,14 +135,15 @@ public class MapBackedDebRepositoryPersistanceEngineTest {
 		entity4.setPackageName("anotherpackage");
 		entity4.setVersion("1.5");
 		entity4.setArch("amd64");
+		entity4.setFilename("testpackage-amd64-1.5.deb");
 		entity4.setSBuildTypeId(BUILD_TYPE_ID_BT03);
 		entity4.setSBuildId(build03.getBuildId());
 		
 		debRepositoryManager = new DebRepositoryManagerImpl(projectManager, debRepositoryDatabaseXmlPersister);
-		DebRepositoryConfiguration config1 = new DebRepositoryConfiguration("project01", "MyStoreName");
-		DebRepositoryConfiguration config2 = new DebRepositoryConfiguration("project02", "MyStoreName2");
-		debRepositoryManager.initialisePackageStore(config1);
-		debRepositoryManager.initialisePackageStore(config2);
+//		DebRepositoryConfiguration config1 = new DebRepositoryConfiguration("project01", "MyStoreName");
+//		DebRepositoryConfiguration config2 = new DebRepositoryConfiguration("project02", "MyStoreName2");
+		debRepositoryManager.initialisePackageStore(getDebRepoConfig1());
+		debRepositoryManager.initialisePackageStore(getDebRepoConfig2());
 		debRepositoryManager.registerBuildWithPackageStore("MyStoreName", BUILD_TYPE_ID_BT01);
 		debRepositoryManager.registerBuildWithPackageStore("MyStoreName", BUILD_TYPE_ID_BT02);
 		
@@ -155,7 +160,7 @@ public class MapBackedDebRepositoryPersistanceEngineTest {
 		engine.addPackage(entity);
 		assertEquals(1, engine.findAllByBuildType(bt01).size());
 		
-		engine.addPackage(entity2);
+		engine.addPackage(entity2); // entity2 belongs to 
 		assertEquals(1, engine.findAllByBuildType(bt02).size());
 		
 		engine.addPackage(entity3);
@@ -259,8 +264,7 @@ public class MapBackedDebRepositoryPersistanceEngineTest {
 		engine.addPackage(entity3);
 		assertEquals(1, engine.findAllByBuild(build01).size());
 		assertEquals(2, engine.findAllByBuild(build02).size());
-		
-		assertEquals(0, engine.findAllByBuild(build03).size());		
+		assertEquals(1, engine.findAllByBuild(build03).size());
 	}
 
 	@Test

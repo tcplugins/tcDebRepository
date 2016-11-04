@@ -41,15 +41,21 @@ public class DebPackageEntity {
 	
 	@NotNull @XmlAttribute(name="Package")
 	private String packageName;
-	
+
 	@NotNull @XmlAttribute(name="Version")
 	private String version;
+	
 	@NotNull @XmlAttribute(name="Architecture")
 	private String arch;
+	
 	@NotNull @XmlAttribute(name="sBuildId")
 	private Long sBuildId;
+	
 	@NotNull @XmlAttribute(name="sBuildTypeId")
 	private String sBuildTypeId;
+	
+	@NotNull @XmlAttribute(name="filename")
+	private String filename;
 	
 	@XmlElement(name="parameter") @XmlElementWrapper(name="package-parameters")
 	private List<PackageParameter> parameters = new ArrayList<>();

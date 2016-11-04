@@ -16,17 +16,21 @@
 package debrepo.teamcity.service;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.TreeMap;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
 import debrepo.teamcity.Loggers;
+import debrepo.teamcity.entity.DebPackageEntity;
 import debrepo.teamcity.entity.DebPackageStore;
 import debrepo.teamcity.entity.DebRepositoryConfiguration;
+import debrepo.teamcity.entity.DebRepositoryConfigurations;
 import debrepo.teamcity.entity.helper.XmlPersister;
 import jetbrains.buildServer.serverSide.ProjectManager;
 import jetbrains.buildServer.serverSide.SBuildType;
@@ -79,22 +83,44 @@ public class DebRepositoryManagerImpl implements DebRepositoryManager  {
 	}
 	
 	@Override
-	public DebPackageStore getPackageStoreForBuildType(String buildTypeid) throws NonExistantRepositoryException {
+	public List<DebPackageStore> getPackageStoresForBuildType(String buildTypeid) throws NonExistantRepositoryException {
 		SBuildType sBuildType = myProjectManager.findBuildTypeById(buildTypeid);
 		List<SProject> projectPathList = this.myProjectManager.findProjectById(sBuildType.getProjectId()).getProjectPath();
-		Collections.reverse(projectPathList);
+		List<DebPackageStore> stores = new ArrayList<>();
+		//Collections.reverse(projectPathList);
 		for (SProject sProject : projectPathList) {
 			for (DebRepositoryConfiguration meta : repositoryMetaData.values()){
-				if (meta.getProjectId().equals(sProject.getProjectId()) && meta.getBuildTypes().contains(buildTypeid)){
+				if (meta.getProjectId().equals(sProject.getProjectId()) && meta.containsBuildType(buildTypeid)){
 					if (repositories.containsKey(meta.getUuid())){
-						return repositories.get(meta.getUuid());
+						stores.add(repositories.get(meta.getUuid()));
 					} else {
 						throw new NonExistantRepositoryException();
 					}
 				}
 			}
 		}
-		return null;
+		return stores;
+	}
+	
+	@Override
+	public List<DebPackageStore> getPackageStoresForDebPackage(DebPackageEntity entity) throws NonExistantRepositoryException {
+		SBuildType sBuildType = myProjectManager.findBuildTypeById(entity.getSBuildTypeId());
+		List<SProject> projectPathList = this.myProjectManager.findProjectById(sBuildType.getProjectId()).getProjectPath();
+		List<DebPackageStore> stores = new ArrayList<>();
+		//Collections.reverse(projectPathList);
+		for (SProject sProject : projectPathList) {
+			for (DebRepositoryConfiguration meta : repositoryMetaData.values()){
+				if (meta.getProjectId().equals(sProject.getProjectId()) 
+						&& meta.containsBuildTypeAndFilter(entity) ){
+					if (repositories.containsKey(meta.getUuid())){
+						stores.add(repositories.get(meta.getUuid()));
+					} else {
+						throw new NonExistantRepositoryException();
+					}
+				}
+			}
+		}
+		return stores;
 	}
 	
 	@Override
@@ -133,6 +159,43 @@ public class DebRepositoryManagerImpl implements DebRepositoryManager  {
 			}			
 		}
 		return null;
+	}
+
+	@Override
+	public void updateRepositoryConfigurations(DebRepositoryConfigurations repoConfigurations) {
+		
+		synchronized (repositoryMetaData) {
+			
+			/* Build a list of the existing entries.
+			 * Any that don't exist in the new config will be deleted later.
+			 */
+			Map<String, Boolean> existingRepos = new TreeMap<>();
+			for (String keyName : repositoryMetaData.keySet()) {
+				existingRepos.put(keyName, false);
+			}
+			
+			/* Apply the update to the config, flag repo as existing (add to existingRepos map)
+			 * and initialise if a repo with that UUID didn't exist already.
+			 */
+			for (DebRepositoryConfiguration newConfig : repoConfigurations.getDebRepositoryConfigurations()) {
+				repositoryMetaData.put(newConfig.getRepoName(), newConfig);
+				existingRepos.put(newConfig.getRepoName(), true);
+				if(!repositories.containsKey(newConfig.getUuid())){
+					initialisePackageStore(newConfig);
+				}
+			}
+			
+			/* Now remove old repos in the config map and their corresponding repos. */
+			for (Entry<String,Boolean> existing  : existingRepos.entrySet()) {
+				if (existing.getValue() == false) {
+					Loggers.SERVER.info("DebRepositoryManagerImpl:updateRepositoryConfigurations :: Removing old repository '" + existing.getKey());
+					repositories.remove(repositoryMetaData.get(existing.getKey()).getUuid());
+					repositoryMetaData.remove(existing.getKey());
+				}
+			}
+			
+		} /* End Syncronized block */
+		
 	}
 	
 }

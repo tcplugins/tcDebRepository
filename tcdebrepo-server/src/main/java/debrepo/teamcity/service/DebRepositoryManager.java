@@ -15,19 +15,24 @@
  *******************************************************************************/
 package debrepo.teamcity.service;
 
+import java.util.List;
 import java.util.UUID;
 
+import debrepo.teamcity.entity.DebPackageEntity;
 import debrepo.teamcity.entity.DebPackageStore;
 import debrepo.teamcity.entity.DebRepositoryConfiguration;
+import debrepo.teamcity.entity.DebRepositoryConfigurations;
 
 public interface DebRepositoryManager {
 
 	public DebPackageStore getPackageStore(String storeName) throws NonExistantRepositoryException;
 	public DebPackageStore initialisePackageStore(DebRepositoryConfiguration conf);
-	public DebPackageStore getPackageStoreForBuildType(String buildTypeid) throws NonExistantRepositoryException;
+	public List<DebPackageStore> getPackageStoresForBuildType(String buildTypeid) throws NonExistantRepositoryException;
+	public List<DebPackageStore> getPackageStoresForDebPackage(DebPackageEntity entity) throws NonExistantRepositoryException;
 	public DebPackageStore getPackageStoreForProject(String projectId) throws NonExistantRepositoryException;
 	public boolean registerBuildWithPackageStore(String storeName, String sBuildTypeId) throws NonExistantRepositoryException;
 	public boolean registerBuildWithProjectPackageStore(String projectId, String sBuildTypeId) throws NonExistantRepositoryException;
 	public boolean persist(UUID uuid);
+	public void updateRepositoryConfigurations(DebRepositoryConfigurations repoConfigurations);
 
 }

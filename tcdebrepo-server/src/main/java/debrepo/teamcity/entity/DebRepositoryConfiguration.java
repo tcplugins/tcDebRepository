@@ -73,7 +73,27 @@ public class DebRepositoryConfiguration {
 	}
 	
 	public boolean addBuildType(String buildTypeId) {
-		return buildTypes.add(new DebRepositoryBuildTypeConfig(buildTypeId, "*.deb"));
+		return buildTypes.add(new DebRepositoryBuildTypeConfig(buildTypeId, ".+\\.deb"));
 	}
+	
+	public boolean containsBuildType(String buildTypeId) {
+		for (DebRepositoryBuildTypeConfig config : this.buildTypes) {
+			if (buildTypeId.equals(config.getBuildTypeId())) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public boolean containsBuildTypeAndFilter(DebPackageEntity entity) {
+		for (DebRepositoryBuildTypeConfig config : this.buildTypes) {
+			if (entity.getSBuildTypeId().equals(config.getBuildTypeId()) &&
+				config.matchAgainstFilter(entity.getFilename())) {
+					return true;
+			}
+		}
+		return false;
+	}
+
 
 }

@@ -35,10 +35,8 @@ public class PluginDataResolverImpl implements PluginDataResolver {
 	}
 
 	@Override
-	public String getPluginConfigurationFile() throws IOException {
-		File configFilePath = new File(this.myServerPaths.getConfigDir() 
-				 + File.separator + TC_DEB_REPOSITORY_CONFIGURATION_FILENAME);
-		return configFilePath.getAbsolutePath();
+	public String getPluginConfigurationFile() {
+		return this.myServerPaths.getConfigDir() + File.separator + TC_DEB_REPOSITORY_CONFIGURATION_FILENAME;
 	}
 
 }

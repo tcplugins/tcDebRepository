@@ -15,5 +15,29 @@
        <bean id="debRepoProjectSettingsPage"
      	class="debrepo.teamcity.web.DebRepoProjectSettingsPage" 
      	/>
+     	
+       <bean id="debRepositoryManager"
+     	class="debrepo.teamcity.service.DebRepositoryManagerImpl"
+     	/>
+     	
+       <bean id="pluginDataResolver"
+     	class="debrepo.teamcity.entity.helper.PluginDataResolverImpl"
+     	/>
+     	
+       <bean id="jaxDatabaseHelper"
+     		class="debrepo.teamcity.entity.helper.DebRepositoryDatabaseJaxHelperImpl">
+       </bean>
+     	
+       <bean id="xmlDatabasePersister"
+     		class="debrepo.teamcity.entity.helper.DebRepositoryDatabaseXmlPersisterImpl">
+     	     <constructor-arg>
+		        <!-- this can be any full path to a class -->
+		        <value>debrepo.teamcity.entity.helper.PluginDataResolver</value> 
+    		</constructor-arg>
+     	     <constructor-arg>
+		        <!-- this can be any full path to a class -->
+		        <value>debrepo.teamcity.entity.DebPackageStore</value> 
+    		</constructor-arg>
+     	</bean>
        
 </beans>

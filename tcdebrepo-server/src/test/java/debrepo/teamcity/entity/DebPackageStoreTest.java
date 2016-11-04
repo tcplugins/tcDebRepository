@@ -31,6 +31,7 @@ public class DebPackageStoreTest {
 		entity.setPackageName("abc-package");
 		entity.setVersion("1.1-ubuntu-6");
 		entity.setArch("amd64");
+		entity.setFilename("package-123.deb");
 		store.put(key, entity);
 		assertTrue(store.size() == 1);
 	}
@@ -45,6 +46,7 @@ public class DebPackageStoreTest {
 		entity.setPackageName("abc-package");
 		entity.setVersion("1.1-ubuntu-6");
 		entity.setArch("amd64");
+		entity.setFilename("package-123.deb");
 		store.put(key, entity);
 		assertTrue(store.size() == 1);
 		
@@ -62,6 +64,7 @@ public class DebPackageStoreTest {
 		entity.setPackageName("abc-package");
 		entity.setVersion("1.1-ubuntu-6");
 		entity.setArch("amd64");
+		entity.setFilename("package-123.deb");
 		store.put(key, entity);
 		assertTrue(store.size() == 1);
 		
@@ -79,6 +82,7 @@ public class DebPackageStoreTest {
 		entity.setPackageName("abc-package");
 		entity.setVersion("1.1-ubuntu-6");
 		entity.setArch("amd64");
+		entity.setFilename("package-123.deb");
 		store.put(key, entity);
 		assertTrue(store.size() == 1);
 		
