@@ -76,6 +76,7 @@ public class MapBackedDebRepositoryPersistanceEngineTest extends DebRepositoryBa
 		
 		when(projectManager.findBuildTypeById(BUILD_TYPE_ID_BT01)).thenReturn(bt01);
 		when(projectManager.findBuildTypeById(BUILD_TYPE_ID_BT02)).thenReturn(bt02);
+		when(projectManager.findBuildTypeById(BUILD_TYPE_ID_BT03)).thenReturn(bt03);
 		when(projectManager.findProjectById("project01")).thenReturn(project01);
 		when(bt01.getProjectId()).thenReturn("project01");
 		when(bt01.getBuildTypeId()).thenReturn(BUILD_TYPE_ID_BT01);
@@ -83,6 +84,7 @@ public class MapBackedDebRepositoryPersistanceEngineTest extends DebRepositoryBa
 		when(bt02.getProjectId()).thenReturn("project01");
 		when(bt02.getBuildTypeId()).thenReturn(BUILD_TYPE_ID_BT02);
 		
+		when(projectManager.findProjectById("project02")).thenReturn(project02);
 		when(bt03.getProjectId()).thenReturn("project02");
 		when(bt03.getBuildTypeId()).thenReturn(BUILD_TYPE_ID_BT03);
 		
