@@ -31,6 +31,7 @@ import debrepo.teamcity.entity.DebPackageEntity;
 import debrepo.teamcity.entity.DebPackageStore;
 import debrepo.teamcity.entity.DebRepositoryConfiguration;
 import debrepo.teamcity.entity.DebRepositoryConfigurations;
+import debrepo.teamcity.entity.DebRepositoryStatistics;
 import debrepo.teamcity.entity.helper.XmlPersister;
 import jetbrains.buildServer.serverSide.ProjectManager;
 import jetbrains.buildServer.serverSide.SBuildType;
@@ -196,6 +197,21 @@ public class DebRepositoryManagerImpl implements DebRepositoryManager  {
 			
 		} /* End Syncronized block */
 		
+	}
+
+	@Override
+	public List<DebRepositoryConfiguration> getConfigurationsForProject(String projectId) {
+		List<DebRepositoryConfiguration> configs = new ArrayList<>();
+		for (DebRepositoryConfiguration config : this.repositoryMetaData.values())
+			if (projectId.equals(config.getProjectId())) {
+				configs.add(config);
+			}
+		return configs;
+	}
+
+	@Override
+	public DebRepositoryStatistics getRepositoryStatatstics(DebRepositoryConfiguration projectConfig, String repoURL) {
+		return new DebRepositoryStatistics(repositories.get(projectConfig.getUuid()).size(), repoURL);
 	}
 	
 }

@@ -22,6 +22,7 @@ import debrepo.teamcity.entity.DebPackageEntity;
 import debrepo.teamcity.entity.DebPackageStore;
 import debrepo.teamcity.entity.DebRepositoryConfiguration;
 import debrepo.teamcity.entity.DebRepositoryConfigurations;
+import debrepo.teamcity.entity.DebRepositoryStatistics;
 
 public interface DebRepositoryManager {
 
@@ -34,5 +35,7 @@ public interface DebRepositoryManager {
 	public boolean registerBuildWithProjectPackageStore(String projectId, String sBuildTypeId) throws NonExistantRepositoryException;
 	public boolean persist(UUID uuid);
 	public void updateRepositoryConfigurations(DebRepositoryConfigurations repoConfigurations);
+	public List<DebRepositoryConfiguration> getConfigurationsForProject(String projectId);
+	public DebRepositoryStatistics getRepositoryStatatstics(DebRepositoryConfiguration projectConfig, String repoUrl);
 
 }

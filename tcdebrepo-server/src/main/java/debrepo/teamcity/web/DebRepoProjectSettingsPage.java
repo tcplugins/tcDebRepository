@@ -15,32 +15,34 @@
  *******************************************************************************/
 package debrepo.teamcity.web;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
 import org.jetbrains.annotations.NotNull;
 
-import debrepo.teamcity.settings.DebRepoProjectSettings;
-import debrepo.teamcity.settings.DebRepoProjectSettingsPersister;
+import debrepo.teamcity.entity.DebRepositoryConfiguration;
+import debrepo.teamcity.entity.DebRepositoryStatistics;
+import debrepo.teamcity.service.DebRepositoryManager;
 import debrepo.teamcity.util.StringUtils;
 import jetbrains.buildServer.serverSide.SBuildServer;
 import jetbrains.buildServer.serverSide.SProject;
-import jetbrains.buildServer.serverSide.settings.ProjectSettingsManager;
 import jetbrains.buildServer.web.openapi.PagePlaces;
 import jetbrains.buildServer.web.openapi.PlaceId;
 import jetbrains.buildServer.web.openapi.PluginDescriptor;
 import jetbrains.buildServer.web.openapi.SimpleCustomTab;
 
 public class DebRepoProjectSettingsPage extends SimpleCustomTab {
-	final ProjectSettingsManager mySettings;
+	final DebRepositoryManager myDebRepositoryManager;
 	final SBuildServer myServer;
 	
 	public DebRepoProjectSettingsPage(@NotNull PagePlaces pagePlaces, @NotNull PluginDescriptor descriptor,
-									  @NotNull ProjectSettingsManager settings, @NotNull SBuildServer sBuildServer) {
+									  @NotNull DebRepositoryManager debRepositoryManager, @NotNull SBuildServer sBuildServer) {
 		super(pagePlaces, PlaceId.EDIT_PROJECT_PAGE_TAB, "debRepository",
 				descriptor.getPluginResourcesPath("debRepository/projectConfigTab.jsp"), "Deb Repository");
-		this.mySettings = settings;
+		this.myDebRepositoryManager = debRepositoryManager;
 		this.myServer = sBuildServer;
 		register();
 	}
@@ -54,9 +56,13 @@ public class DebRepoProjectSettingsPage extends SimpleCustomTab {
 	public void fillModel(@NotNull Map<String, Object> model, @NotNull HttpServletRequest request) {
 		if (request.getParameter("projectId") != null && ! request.getParameter("projectId").equals("")){
 			SProject project = myServer.getProjectManager().findProjectByExternalId(request.getParameter("projectId"));
-			DebRepoProjectSettingsPersister projectSettings = (DebRepoProjectSettingsPersister) mySettings.getSettings(project.getProjectId(), DebRepoProjectSettings.PROJECT_SETTINGS_KEY);
-			model.put("debRepoUrl", StringUtils.getDebRepoUrl(myServer.getRootUrl(), projectSettings.getRepositoryName()));
-			model.put("debRepoSettings", projectSettings.getSettings());
+			
+			List<DebRepositoryStatistics> respositories = new ArrayList<>();
+			for (DebRepositoryConfiguration config : myDebRepositoryManager.getConfigurationsForProject(project.getProjectId())) {
+				respositories.add(myDebRepositoryManager.getRepositoryStatatstics(config, StringUtils.getDebRepoUrl(myServer.getRootUrl(), config.getRepoName())));
+				
+			}
+			model.put("repositories", respositories);
 		}
 	}
 }

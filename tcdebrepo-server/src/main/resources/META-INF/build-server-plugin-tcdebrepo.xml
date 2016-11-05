@@ -26,18 +26,34 @@
      	
        <bean id="jaxDatabaseHelper"
      		class="debrepo.teamcity.entity.helper.DebRepositoryDatabaseJaxHelperImpl">
+
        </bean>
      	
        <bean id="xmlDatabasePersister"
      		class="debrepo.teamcity.entity.helper.DebRepositoryDatabaseXmlPersisterImpl">
-     	     <constructor-arg>
-		        <!-- this can be any full path to a class -->
-		        <value>debrepo.teamcity.entity.helper.PluginDataResolver</value> 
+     	     <constructor-arg ref="pluginDataResolver">
     		</constructor-arg>
-     	     <constructor-arg>
-		        <!-- this can be any full path to a class -->
-		        <value>debrepo.teamcity.entity.DebPackageStore</value> 
+     	     <constructor-arg ref="jaxDatabaseHelper">
     		</constructor-arg>
      	</bean>
+
+       <bean id="jaxConfigHelper"
+     		class="debrepo.teamcity.entity.helper.DebRepositoryConfigurationJaxHelperImpl">
+       </bean>
+
+       <bean id="debRepositoryConfigFileChangeHandler"
+     		class="debrepo.teamcity.settings.DebRepositoryConfigFileChangeHandler" 
+     		init-method="register" >
+     	     <constructor-arg ref="debRepositoryManager">
+    		</constructor-arg>     		
+     	     <constructor-arg ref="jaxConfigHelper">
+    		</constructor-arg>     		
+       </bean>
        
+       <bean id="debRepositoryDatabase"
+     		class="debrepo.teamcity.service.MapBackedDebRepositoryDatabase">
+     	     <constructor-arg ref="debRepositoryManager">
+    		</constructor-arg>     		
+       </bean>
+    
 </beans>
