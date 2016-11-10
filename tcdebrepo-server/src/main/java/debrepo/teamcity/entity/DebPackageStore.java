@@ -33,19 +33,19 @@ public class DebPackageStore extends TreeMap<DebPackageEntityKey, DebPackageEnti
 	@Getter @Setter
 	private UUID uuid;
 	
-	private Map<DebPackageEntityArchFilenameKey, DebPackageEntityKey> fileNameMap = new TreeMap<>();
+	private Map<String, DebPackageEntityKey> fileNameMap = new TreeMap<>();
 	
-	public DebPackageEntity findByFilename(String arch, String filename) throws DebPackageNotFoundInStoreException {
-		if (fileNameMap.containsKey(new DebPackageEntityArchFilenameKey(arch, filename))){
-			return get(fileNameMap.get(fileNameMap));
+	public DebPackageEntity findByUri(String uri) throws DebPackageNotFoundInStoreException {
+		if (fileNameMap.containsKey(uri)){
+			return get(fileNameMap.get(uri));
 		}
-		throw new DebPackageNotFoundInStoreException("File Not Found:: File:" + filename + "  Arch:" + arch);
+		throw new DebPackageNotFoundInStoreException("File Not Found:: Uri:" + uri);
 	}
 	
 	@Override
 	public DebPackageEntity put(DebPackageEntityKey key, DebPackageEntity value) {
 		super.put(key, value);
-		fileNameMap.put(new DebPackageEntityArchFilenameKey(value.getArch(), value.getFilename()), key);
+		fileNameMap.put(value.getUri(), key);
 		return value;
 	}
 
@@ -53,8 +53,8 @@ public class DebPackageStore extends TreeMap<DebPackageEntityKey, DebPackageEnti
 		return this.get(key);
 	}
 	
-	public DebPackageEntity find(String packageName, String version, String arch){
-		return this.get(new DebPackageEntityKey(packageName, version, arch));
+	public DebPackageEntity find(String packageName, String version, String arch, String component, String dist){
+		return this.get(new DebPackageEntityKey(packageName, version, arch, component, dist));
 	}
 	
 	public List<DebPackageEntity> findAllForBuildType(String buildTypeId) {
@@ -131,14 +131,14 @@ public class DebPackageStore extends TreeMap<DebPackageEntityKey, DebPackageEnti
 	}
 
 	@AllArgsConstructor @Data
-	private static class DebPackageEntityArchFilenameKey implements Comparable<DebPackageEntityArchFilenameKey>{
+	private static class DebPackageEntityArchUriKey implements Comparable<DebPackageEntityArchUriKey>{
 		String arch;
-		String filename;
+		String uri;
 		
 		@Override
-		public int compareTo(DebPackageEntityArchFilenameKey o) {
+		public int compareTo(DebPackageEntityArchUriKey o) {
 			if (this.getArch().equalsIgnoreCase(o.getArch())){
-				return this.getFilename().compareTo(o.getFilename());
+				return this.getUri().compareTo(o.getUri());
 			} else {
 				return this.getArch().compareToIgnoreCase(o.getArch());
 			}

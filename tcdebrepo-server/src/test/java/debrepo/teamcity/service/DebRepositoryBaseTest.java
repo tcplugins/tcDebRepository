@@ -45,7 +45,7 @@ public class DebRepositoryBaseTest {
 	final protected String BUILD_TYPE_ID_BT03 = "bt03";
 	protected DebRepositoryManager debRepositoryManager;
 	@Mock protected ProjectManager projectManager;
-	@Mock protected XmlPersister<DebPackageStore> debRepositoryDatabaseXmlPersister;
+	@Mock protected XmlPersister<DebPackageStore, DebRepositoryConfiguration> debRepositoryDatabaseXmlPersister;
 	@Mock protected SProject project01;
 	@Mock protected SProject project02;
 	@Mock protected SProject root;
@@ -107,6 +107,7 @@ public class DebRepositoryBaseTest {
 		when(project02.getProjectPath()).thenReturn(projectPath2);
 		when(root.getProjectId()).thenReturn("_Root");
 		
+		when(debRepositoryDatabaseXmlPersister.loadfromXml(any(DebRepositoryConfiguration.class))).thenThrow(new IOException());
 		when(debRepositoryDatabaseXmlPersister.persistToXml(any(DebPackageStore.class))).thenReturn(true);
 		
 		entity = new DebPackageEntity();
@@ -116,6 +117,7 @@ public class DebRepositoryBaseTest {
 		entity.setFilename("testpackage-i386-1.2.3.4.deb");
 		entity.setSBuildTypeId(BUILD_TYPE_ID_BT01);
 		entity.setSBuildId(build01.getBuildId());
+		entity.setUri("ProjectName/BuildName/" + entity.getSBuildId() + "/" + entity.getFilename());
 		
 		entity2 = new DebPackageEntity();
 		entity2.setPackageName("testpackage");
@@ -124,6 +126,7 @@ public class DebRepositoryBaseTest {
 		entity2.setFilename("testpackage-i386-1.2.3.5.deb");
 		entity2.setSBuildTypeId(BUILD_TYPE_ID_BT02);
 		entity2.setSBuildId(build02.getBuildId());
+		entity2.setUri("ProjectName/BuildName/" + entity2.getSBuildId() + "/" + entity2.getFilename());
 		
 		entity3 = new DebPackageEntity();
 		entity3.setPackageName("testpackage");
@@ -132,6 +135,7 @@ public class DebRepositoryBaseTest {
 		entity3.setFilename("testpackage-amd64-1.2.3.5.deb");
 		entity3.setSBuildTypeId(BUILD_TYPE_ID_BT02);
 		entity3.setSBuildId(build02.getBuildId());
+		entity3.setUri("ProjectName/BuildName/" + entity3.getSBuildId() + "/" + entity3.getFilename());
 		
 		entity4 = new DebPackageEntity();
 		entity4.setPackageName("anotherpackage");
@@ -140,6 +144,7 @@ public class DebRepositoryBaseTest {
 		entity4.setFilename("testpackage-amd64-1.5.deb");
 		entity4.setSBuildTypeId(BUILD_TYPE_ID_BT03);
 		entity4.setSBuildId(build03.getBuildId());
+		entity4.setUri("ProjectName/BuildName/" + entity4.getSBuildId() + "/" + entity4.getFilename());
 		
 		debRepositoryManager = new DebRepositoryManagerImpl(projectManager, debRepositoryDatabaseXmlPersister);
 		DebRepositoryConfiguration config1 = getDebRepoConfig1();
@@ -155,14 +160,17 @@ public class DebRepositoryBaseTest {
 
 	public DebRepositoryConfiguration getDebRepoConfig1() {
 		DebRepositoryConfiguration config1 = new DebRepositoryConfiguration("project01", "MyStoreName");
-		config1.addBuildType(new DebRepositoryBuildTypeConfig(bt01.getBuildTypeId()).af(".+\\.deb"));
-		config1.addBuildType(new DebRepositoryBuildTypeConfig(bt02.getBuildTypeId()).af(".+\\.deb"));
+		config1.addBuildType(new DebRepositoryBuildTypeConfig(bt01.getBuildTypeId())
+									.af(new DebRepositoryBuildTypeConfig.Filter(".+\\.deb", "wheezy", "main")));
+		config1.addBuildType(new DebRepositoryBuildTypeConfig(bt02.getBuildTypeId())
+									.af(new DebRepositoryBuildTypeConfig.Filter(".+\\.deb", "wheezy", "main")));
 		return config1;
 	}
 	
 	public DebRepositoryConfiguration getDebRepoConfig2() {
 		DebRepositoryConfiguration config2 = new DebRepositoryConfiguration("project02", "MyStoreName2");
-		config2.addBuildType(new DebRepositoryBuildTypeConfig(bt03.getBuildTypeId()).af(".+\\.deb"));
+		config2.addBuildType(new DebRepositoryBuildTypeConfig(bt03.getBuildTypeId())
+									.af(new DebRepositoryBuildTypeConfig.Filter(".+\\.deb", "squeeze", "main")));
 		return config2;
 	}
 	

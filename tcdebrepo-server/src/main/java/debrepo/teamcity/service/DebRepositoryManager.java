@@ -18,6 +18,7 @@ package debrepo.teamcity.service;
 import java.util.List;
 import java.util.UUID;
 
+import debrepo.teamcity.archive.DebFileReader;
 import debrepo.teamcity.entity.DebPackageEntity;
 import debrepo.teamcity.entity.DebPackageStore;
 import debrepo.teamcity.entity.DebRepositoryConfiguration;
@@ -31,11 +32,14 @@ public interface DebRepositoryManager {
 	public List<DebPackageStore> getPackageStoresForBuildType(String buildTypeid) throws NonExistantRepositoryException;
 	public List<DebPackageStore> getPackageStoresForDebPackage(DebPackageEntity entity) throws NonExistantRepositoryException;
 	public DebPackageStore getPackageStoreForProject(String projectId) throws NonExistantRepositoryException;
+	/*
 	public boolean registerBuildWithPackageStore(String storeName, String sBuildTypeId) throws NonExistantRepositoryException;
 	public boolean registerBuildWithProjectPackageStore(String projectId, String sBuildTypeId) throws NonExistantRepositoryException;
+	*/
 	public boolean persist(UUID uuid);
-	public void updateRepositoryConfigurations(DebRepositoryConfigurations repoConfigurations);
-	public List<DebRepositoryConfiguration> getConfigurationsForProject(String projectId);
-	public DebRepositoryStatistics getRepositoryStatatstics(DebRepositoryConfiguration projectConfig, String repoUrl);
+	public DebRepositoryStatistics getRepositoryStatistics(String uuid, String repoUrl);
+	public DebRepositoryStatistics getRepositoryStatistics(DebRepositoryConfiguration projectConfig, String repoUrl);
+	public void addBuildPackages(String buildTypeId, List<DebPackageEntity> debPackageEntities, DebFileReader debFileReader);
+	public void addBuildPackage(DebRepositoryConfiguration config, DebPackageEntity newEntity);
 
 }

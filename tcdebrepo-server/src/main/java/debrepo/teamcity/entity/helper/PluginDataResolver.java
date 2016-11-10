@@ -21,5 +21,6 @@ public interface PluginDataResolver {
 	
 	public String getPluginDatabaseDirectory() throws IOException;
 	public String getPluginConfigurationFile();
+	public String getPluginTempFileDirectory();
 
 }

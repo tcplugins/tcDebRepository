@@ -24,6 +24,21 @@ public class DebPackageEntityKey  implements Comparable<DebPackageEntityKey>{
 	private String packageName;
 	private String version;
 	private String arch;
+	private String component;
+	private String dist;
+	
+	public boolean isSamePackageVersionComponentAndArch(DebPackageEntityKey debPackageEntityKey){
+		return this.packageName.equalsIgnoreCase(debPackageEntityKey.getPackageName())
+				&& this.version.equalsIgnoreCase(debPackageEntityKey.getVersion())
+				&& this.component.equalsIgnoreCase(debPackageEntityKey.getComponent())
+				&& this.arch.equalsIgnoreCase(debPackageEntityKey.getArch());
+	}
+	
+	public boolean isSamePackageVersionAndComponent(DebPackageEntityKey debPackageEntityKey){
+		return this.packageName.equalsIgnoreCase(debPackageEntityKey.getPackageName())
+				&& this.version.equalsIgnoreCase(debPackageEntityKey.getVersion())
+				&& this.component.equalsIgnoreCase(debPackageEntityKey.getComponent());
+	}
 	
 	public boolean isSamePackageAndVersion(DebPackageEntityKey debPackageEntityKey){
 		return this.packageName.equalsIgnoreCase(debPackageEntityKey.getPackageName())
@@ -36,8 +51,12 @@ public class DebPackageEntityKey  implements Comparable<DebPackageEntityKey>{
 
 	@Override
 	public int compareTo(DebPackageEntityKey o) {
-		if (this.isSamePackageAndVersion(o)){
-			return this.getArch().compareToIgnoreCase(o.getArch());
+		if (this.isSamePackageVersionComponentAndArch(o)){
+			return this.getDist().compareToIgnoreCase(o.getDist());
+		} else if (this.isSamePackageVersionAndComponent(o)){
+				return this.getArch().compareToIgnoreCase(o.getArch());
+		} else if (this.isSamePackageAndVersion(o)) {
+			return this.getComponent().compareToIgnoreCase(o.getComponent());
 		} else if (this.isSamePackage(o)) {
 			return this.getVersion().compareToIgnoreCase(o.getVersion());
 		} else {

@@ -19,16 +19,10 @@
 
 package debrepo.teamcity;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.MockitoAnnotations;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-
-import debrepo.teamcity.entity.DebRepositoryConfigurations;
-import debrepo.teamcity.entity.helper.JaxHelper;
 
 
 /**
@@ -47,13 +41,12 @@ import debrepo.teamcity.entity.helper.JaxHelper;
 								  })
 public class SpringContextValidationTest {
 	
-	@Autowired
-	private JaxHelper<DebRepositoryConfigurations> configs;
-
-	@Test @Ignore
-	public void test() {
-		MockitoAnnotations.initMocks(this);
-		
+	@Test
+	public void CreatingSpringContextShouldThrowReturnIllegalStateException() {
+		/*
+		 * If we get an illegal state exception, it means Spring was not able to 
+		 * wire up the dependencies correctly.
+		 */
 	}
 
 }

@@ -52,8 +52,10 @@ public class DebRepositoryConfigurationJaxHelperImplTest {
 	@Test
 	public void testReadString() throws JAXBException, IOException {
 		DebRepositoryConfiguration config01 = new DebRepositoryConfiguration("project01", "TestRepoName01");
-		config01.addBuildType(new DebRepositoryBuildTypeConfig("bt01").af(".+\\.deb").af("/prod/somthing.*\\.deb"));
-		config01.addBuildType(new DebRepositoryBuildTypeConfig("bt02", ".*\\.deb"));
+		config01.addBuildType(new DebRepositoryBuildTypeConfig("bt01")
+									.af(new DebRepositoryBuildTypeConfig.Filter(".+\\.deb", "wheezy", "main"))
+									.af(new DebRepositoryBuildTypeConfig.Filter("/prod/somthing.*\\.deb", "wheezy", "main")));
+		config01.addBuildType(new DebRepositoryBuildTypeConfig("bt02", "wheezy", "main", ".*\\.deb"));
 		repositoryConfigurations.getDebRepositoryConfigurations().add(config01);
 		configJaxHelper.write(repositoryConfigurations, pathResolver.getPluginConfigurationFile());	
 		
@@ -64,11 +66,13 @@ public class DebRepositoryConfigurationJaxHelperImplTest {
 	@Test
 	public void testWrite() throws JAXBException, IOException {
 		DebRepositoryConfiguration config01 = new DebRepositoryConfiguration("project01", "TestRepoName01");
-		config01.addBuildType(new DebRepositoryBuildTypeConfig("bt01").af(".+\\.deb").af("/prod/somthing.*\\.deb"));
-		config01.addBuildType(new DebRepositoryBuildTypeConfig("bt02", ".+\\.deb"));
-		config01.addBuildType(new DebRepositoryBuildTypeConfig("bt03", ".+\\.deb"));
-		config01.addBuildType(new DebRepositoryBuildTypeConfig("bt04", ".+\\.deb"));
-		config01.addBuildType(new DebRepositoryBuildTypeConfig("bt05", ".+\\.deb"));
+		config01.addBuildType(new DebRepositoryBuildTypeConfig("bt01")
+									.af(new DebRepositoryBuildTypeConfig.Filter(".+\\.deb", "wheezy", "main"))
+									.af(new DebRepositoryBuildTypeConfig.Filter("/prod/somthing.*\\.deb", "wheezy", "main")));
+		config01.addBuildType(new DebRepositoryBuildTypeConfig("bt02", "wheezy", "main", ".+\\.deb"));
+		config01.addBuildType(new DebRepositoryBuildTypeConfig("bt03", "wheezy", "main", ".+\\.deb"));
+		config01.addBuildType(new DebRepositoryBuildTypeConfig("bt04", "wheezy", "main", ".+\\.deb"));
+		config01.addBuildType(new DebRepositoryBuildTypeConfig("bt05", "wheezy", "main", ".+\\.deb"));
 		repositoryConfigurations.getDebRepositoryConfigurations().add(config01);
 		configJaxHelper.write(repositoryConfigurations, pathResolver.getPluginConfigurationFile());
 	}

@@ -17,18 +17,21 @@ package debrepo.teamcity.service;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
 import debrepo.teamcity.Loggers;
+import debrepo.teamcity.archive.DebFileReader;
 import debrepo.teamcity.entity.DebPackageEntity;
 import debrepo.teamcity.entity.DebPackageStore;
+import debrepo.teamcity.entity.DebRepositoryBuildTypeConfig;
 import debrepo.teamcity.entity.DebRepositoryConfiguration;
 import debrepo.teamcity.entity.DebRepositoryConfigurations;
 import debrepo.teamcity.entity.DebRepositoryStatistics;
@@ -38,15 +41,15 @@ import jetbrains.buildServer.serverSide.SBuildType;
 import jetbrains.buildServer.serverSide.SProject;
 
 @Service
-public class DebRepositoryManagerImpl implements DebRepositoryManager  {
+public class DebRepositoryManagerImpl implements DebRepositoryManager, DebRepositoryConfigurationManager  {
 	
 	Map<String, DebRepositoryConfiguration> repositoryMetaData = new TreeMap<String, DebRepositoryConfiguration>();
 	Map<UUID, DebPackageStore> repositories = new TreeMap<UUID, DebPackageStore>();
 	
 	private final ProjectManager myProjectManager;
-	private final XmlPersister<DebPackageStore> myDebRepositoryDatabaseXmlPersister;
+	private final XmlPersister<DebPackageStore, DebRepositoryConfiguration> myDebRepositoryDatabaseXmlPersister;
 	
-	public DebRepositoryManagerImpl(ProjectManager projectManager, XmlPersister<DebPackageStore> debRepositoryDatabaseXmlPersister) {
+	public DebRepositoryManagerImpl(ProjectManager projectManager, XmlPersister<DebPackageStore, DebRepositoryConfiguration> debRepositoryDatabaseXmlPersister) {
 		this.myProjectManager = projectManager;
 		this.myDebRepositoryDatabaseXmlPersister = debRepositoryDatabaseXmlPersister;
 	}
@@ -75,8 +78,16 @@ public class DebRepositoryManagerImpl implements DebRepositoryManager  {
 	
 	@Override
 	public DebPackageStore initialisePackageStore(DebRepositoryConfiguration conf) {
-		DebPackageStore newStore = new DebPackageStore();
-		newStore.setUuid(conf.getUuid());
+		
+		DebPackageStore newStore; 
+		try {
+			newStore = this.myDebRepositoryDatabaseXmlPersister.loadfromXml(conf);
+		} catch (IOException ex) {
+			Loggers.SERVER.info("DebRepositoryManagerImpl :: Failed to load existing repository from XML '" + conf.getRepoName() + "' for project '" + conf.getProjectId() + "'");
+			if (Loggers.SERVER.isDebugEnabled()) {Loggers.SERVER.debug(ex);}
+			newStore = new DebPackageStore();
+			newStore.setUuid(conf.getUuid());
+		}
 		repositoryMetaData.put(conf.getRepoName(), conf);
 		repositories.put(conf.getUuid(), newStore);
 		Loggers.SERVER.info("DebRepositoryManagerImpl :: Initialised debrepo named '" + conf.getRepoName() + "' for project '" + conf.getProjectId() + "'");
@@ -124,6 +135,7 @@ public class DebRepositoryManagerImpl implements DebRepositoryManager  {
 		return stores;
 	}
 	
+	/*
 	@Override
 	public boolean registerBuildWithPackageStore(String storeName, String sBuildTypeId) throws NonExistantRepositoryException {
 		if (!repositoryMetaData.containsKey(storeName)){
@@ -146,7 +158,7 @@ public class DebRepositoryManagerImpl implements DebRepositoryManager  {
 			}
 		}
 		return false;
-	}
+	} */
 
 	@Override
 	public DebPackageStore getPackageStoreForProject(String projectId) throws NonExistantRepositoryException {
@@ -210,8 +222,76 @@ public class DebRepositoryManagerImpl implements DebRepositoryManager  {
 	}
 
 	@Override
-	public DebRepositoryStatistics getRepositoryStatatstics(DebRepositoryConfiguration projectConfig, String repoURL) {
-		return new DebRepositoryStatistics(repositories.get(projectConfig.getUuid()).size(), repoURL);
+	public DebRepositoryStatistics getRepositoryStatistics(DebRepositoryConfiguration projectConfig, String repoURL) {
+		return getRepositoryStatistics(projectConfig.getUuid().toString(), repoURL);
+	}
+	
+	@Override
+	public DebRepositoryStatistics getRepositoryStatistics(String uuid, String repoURL) {
+		return new DebRepositoryStatistics(repositories.get(UUID.fromString(uuid)).size(), repoURL);
+	}
+
+	@Override
+	public void addBuildPackages(String buildTypeId, List<DebPackageEntity> debPackageEntities, DebFileReader debFileReader) {
+		
+			for (DebPackageEntity entity : debPackageEntities){
+				boolean entityAdded = false;
+				for (DebRepositoryConfiguration config : repositoryMetaData.values()) {
+					if (config.containsBuildTypeAndFilter(entity)) {
+						if (!entity.isPopulated()) {
+							try {
+								entity.populateMetadata(debFileReader.getMetaDataFromPackage(entity.getFilename()));
+							} catch (IOException e) {
+								Loggers.SERVER.warn("DebRepositoryManagerImpl :: Failed to read data from package: " 
+													+ entity.getFilename() + "  Package will not be added to respository " 
+													+ config.getRepoName());
+								if (Loggers.SERVER.isDebugEnabled()) { Loggers.SERVER.debug(e); }
+							}
+						}
+						if (entity.isPopulated()) {
+							try {
+								getPackageStore(config.getRepoName()).put(entity.buildKey(), entity);
+								entityAdded = true;
+								persist(config.getUuid());
+							} catch (NonExistantRepositoryException e) {
+								Loggers.SERVER.warn("DebRepositoryManagerImpl :: Failed to add package: " 
+										+ entity.getFilename() + "  Non-existant respository " 
+										+ config.getRepoName());
+								if (Loggers.SERVER.isDebugEnabled()) { Loggers.SERVER.debug(e); }
+							}
+						}
+					} else {
+						if (Loggers.SERVER.isDebugEnabled()) { Loggers.SERVER.debug("DebRepositoryManagerImpl :: Not adding package: " 
+								+ entity.getFilename() + " to repo: " + config.getRepoName() + " (" + config.getProjectId() + ")"); }
+					}
+					if (Loggers.SERVER.isDebugEnabled()) {
+						Loggers.SERVER.debug("DebRepositoryManagerImpl :: Statistics" + getRepositoryStatistics(config, ""));
+					}
+				}
+				if (Loggers.SERVER.isDebugEnabled()) {
+					if (! entityAdded) {
+						Loggers.SERVER.debug("DebRepositoryManagerImpl :: No repo found for package: " + entity.getFilename());
+					}
+				}
+			}
+	}
+
+	@Override
+	public Set<DebRepositoryConfiguration> findConfigurationsForBuildType(String buildTypeId) {
+		Set<DebRepositoryConfiguration> configs = new TreeSet<>();
+		for (DebRepositoryConfiguration config : this.repositoryMetaData.values()) {
+			for (DebRepositoryBuildTypeConfig buildType : config.getBuildTypes()) {
+				if (buildTypeId.equals(buildType.getBuildTypeId())){
+					configs.add(config);
+				}
+			}
+		}
+		return configs;
+	}
+
+	@Override
+	public void addBuildPackage(DebRepositoryConfiguration config, DebPackageEntity debPackageEntity) {
+		this.repositories.get(config.getUuid()).put(debPackageEntity.buildKey(), debPackageEntity);
 	}
 	
 }

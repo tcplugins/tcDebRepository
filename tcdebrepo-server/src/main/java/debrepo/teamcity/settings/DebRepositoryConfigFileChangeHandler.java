@@ -23,6 +23,7 @@ import javax.xml.bind.JAXBException;
 import debrepo.teamcity.entity.DebRepositoryConfigurations;
 import debrepo.teamcity.entity.helper.JaxHelper;
 import debrepo.teamcity.entity.helper.PluginDataResolver;
+import debrepo.teamcity.service.DebRepositoryConfigurationManager;
 import debrepo.teamcity.service.DebRepositoryManager;
 import jetbrains.buildServer.configuration.ChangeListener;
 import jetbrains.buildServer.configuration.FileWatcher;
@@ -32,6 +33,7 @@ import jetbrains.buildServer.serverSide.ServerPaths;
 public class DebRepositoryConfigFileChangeHandler implements ChangeListener, DebRepoConfigChangeHandler {
 
 	final DebRepositoryManager myDebRepoManager;
+	final DebRepositoryConfigurationManager myDebRepoConfigManager;
 	final JaxHelper<DebRepositoryConfigurations> jaxHelper;
 	final PluginDataResolver myPluginDataResolver;
 	File configFile;
@@ -39,9 +41,10 @@ public class DebRepositoryConfigFileChangeHandler implements ChangeListener, Deb
 	final ServerPaths serverPaths;
 	
 	public DebRepositoryConfigFileChangeHandler(
-			ServerPaths serverPaths, DebRepositoryManager debRepositoryManager, 
+			ServerPaths serverPaths, DebRepositoryManager debRepositoryManager, DebRepositoryConfigurationManager debRepositoryConfigManager, 
 			JaxHelper<DebRepositoryConfigurations> jaxHelper, PluginDataResolver pluginDataResolver) {
 		this.myDebRepoManager = debRepositoryManager;
+		this.myDebRepoConfigManager = debRepositoryConfigManager;
 		this.jaxHelper = jaxHelper;
 		this.serverPaths = serverPaths;
 		this.myPluginDataResolver = pluginDataResolver;
@@ -74,7 +77,7 @@ public class DebRepositoryConfigFileChangeHandler implements ChangeListener, Deb
 	public void handleConfigFileChange() {
 		try {
 			DebRepositoryConfigurations repoConfigurations =  jaxHelper.read(configFile.getPath());
-			this.myDebRepoManager.updateRepositoryConfigurations(repoConfigurations);
+			this.myDebRepoConfigManager.updateRepositoryConfigurations(repoConfigurations);
 		} catch (FileNotFoundException e) {
 			Loggers.SERVER.warn("DebRepositoryConfigFileChangeHandler :: Exception occurred attempting to reload DebRepositoryConfigurations. File not found: " + this.configFile.getPath());
 			Loggers.SERVER.debug(e);

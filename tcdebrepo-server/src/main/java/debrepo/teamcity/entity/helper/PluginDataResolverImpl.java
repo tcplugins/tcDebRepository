@@ -18,11 +18,13 @@ package debrepo.teamcity.entity.helper;
 import java.io.File;
 import java.io.IOException;
 
+import debrepo.teamcity.Loggers;
 import jetbrains.buildServer.serverSide.ServerPaths;
 
 public class PluginDataResolverImpl implements PluginDataResolver {
 	
 	private static final String TC_DEB_REPOSITORY_DATABASE_DIRECTORY_NAME = "database";
+	private static final String TC_DEB_REPOSITORY_TEMP_DIRECTORY_NAME = "temp";
 	private static final String TC_DEB_REPOSITORY_DIRECTORY_NAME = "tcDebRepository";
 	private static final String TC_DEB_REPOSITORY_CONFIGURATION_FILENAME = "deb-repositories.xml";
 	private final ServerPaths myServerPaths;
@@ -52,6 +54,25 @@ public class PluginDataResolverImpl implements PluginDataResolver {
 	@Override
 	public String getPluginConfigurationFile() {
 		return this.myServerPaths.getConfigDir() + File.separator + TC_DEB_REPOSITORY_CONFIGURATION_FILENAME;
+	}
+
+	@Override
+	public String getPluginTempFileDirectory() {
+		// TODO Auto-generated method stub
+		File tempDirPath = new File(this.myServerPaths.getPluginDataDirectory() 
+				 + File.separator + TC_DEB_REPOSITORY_DIRECTORY_NAME
+				 + File.separator + TC_DEB_REPOSITORY_TEMP_DIRECTORY_NAME);
+
+		if (!tempDirPath.exists()){
+			tempDirPath.mkdirs();
+		}
+		
+		if (tempDirPath.exists() && tempDirPath.isDirectory() && tempDirPath.canWrite()) {
+			return tempDirPath.getAbsolutePath();
+		} else {
+			Loggers.SERVER.error("PluginDataResolverImpl :: temp dir not writable: " + tempDirPath.getAbsolutePath());
+			return tempDirPath.getAbsolutePath();
+		}
 	}
 
 }

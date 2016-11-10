@@ -15,6 +15,8 @@
  *******************************************************************************/
 package debrepo.teamcity.entity;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
@@ -26,9 +28,11 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlValue;
 
 import org.jetbrains.annotations.NotNull;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -44,18 +48,34 @@ public class DebRepositoryBuildTypeConfig {
 	private String buildTypeId;
 	
 	@XmlElement(name="filter") @XmlElementWrapper(name="build-artifact-filters")
-	private Set<String> debFilters = new TreeSet<>();
+	private Set<Filter> debFilters = new TreeSet<>();
+	
+	/**
+	 * dist is the debian distribution name, eg versions like "wheezy", "squeeze", or symbolic names like "stable", "testing", "unstable" 
+	 */
+//	@NotNull @XmlAttribute(name="dist-name")
+//	private String dist;
+	
+	/** 
+	 * Component is the debian component, eg "main", "contrib", "non-free"
+	 */
+//	@NotNull @XmlAttribute(name="component-name")
+//	private String component;
 	
 	public DebRepositoryBuildTypeConfig(String strBuildTypeId){
 		this.buildTypeId = strBuildTypeId;
+//		this.dist = dist;
+//		this.component = component;		
 	}
 	
-	public DebRepositoryBuildTypeConfig(String strBuildTypeId, String filter){
+	public DebRepositoryBuildTypeConfig(String strBuildTypeId, String dist, String component, String filter){
 		this.buildTypeId = strBuildTypeId;
-		this.debFilters.add(filter);
+//		this.dist = dist;
+//		this.component = component;
+		this.debFilters.add(new Filter(filter, dist, component));
 	}
 	
-	public boolean addFilter(String filter) {
+	public boolean addFilter(Filter filter) {
 		return this.debFilters.add(filter);
 	}
 	
@@ -68,18 +88,36 @@ public class DebRepositoryBuildTypeConfig {
 	 * @param filter
 	 * @return this instance of DebRepositoryBuildTypeConfig
 	 */
-	public DebRepositoryBuildTypeConfig af(String filter) {
+	public DebRepositoryBuildTypeConfig af(Filter filter) {
 		this.addFilter(filter);
 		return this;
 	}
 
-	public boolean matchAgainstFilter(String filename) {
-		for (String filter : debFilters) {
-			if (Pattern.matches(filter, filename)) {
-				return true;
+	public List<Filter> matchAgainstFilter(String filename) {
+		List<Filter> matchingFilters = new ArrayList<>();
+		for (Filter filter : debFilters) {
+			if (Pattern.matches(filter.regex, filename)) {
+				matchingFilters.add(filter);
 			}
 		}
-		return false;
+		return matchingFilters;
+	}
+	
+	@XmlRootElement @AllArgsConstructor @NoArgsConstructor @Data
+	public static class Filter {
+		@XmlValue
+		private String regex;
+		
+		@XmlAttribute
+		private String dist;
+		
+		@XmlAttribute
+		private String component;
+		
+		public boolean matches(String filename) {
+			return (Pattern.matches(this.regex, filename));
+		}
+		
 	}
 
 }

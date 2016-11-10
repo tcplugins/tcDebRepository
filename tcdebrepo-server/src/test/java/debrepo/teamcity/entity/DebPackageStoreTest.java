@@ -26,12 +26,13 @@ public class DebPackageStoreTest {
 		
 		DebPackageStore store = new DebPackageStore();
 		
-		DebPackageEntityKey key = new DebPackageEntityKey("abc-package", "1.1-ubuntu-6", "amd64");
+		DebPackageEntityKey key = new DebPackageEntityKey("abc-package", "1.1-ubuntu-6", "amd64", "main", "wheezy");
 		DebPackageEntity entity = new DebPackageEntity();
 		entity.setPackageName("abc-package");
 		entity.setVersion("1.1-ubuntu-6");
 		entity.setArch("amd64");
 		entity.setFilename("package-123.deb");
+		entity.setUri("ProjectName/BuildName/" + entity.getSBuildId() + "/" + entity.getFilename());
 		store.put(key, entity);
 		assertTrue(store.size() == 1);
 	}
@@ -41,12 +42,13 @@ public class DebPackageStoreTest {
 		
 		DebPackageStore store = new DebPackageStore();
 		
-		DebPackageEntityKey key = new DebPackageEntityKey("abc-package", "1.1-ubuntu-6", "amd64");
+		DebPackageEntityKey key = new DebPackageEntityKey("abc-package", "1.1-ubuntu-6", "amd64", "main", "wheezy");
 		DebPackageEntity entity = new DebPackageEntity();
 		entity.setPackageName("abc-package");
 		entity.setVersion("1.1-ubuntu-6");
 		entity.setArch("amd64");
 		entity.setFilename("package-123.deb");
+		entity.setUri("ProjectName/BuildName/" + entity.getSBuildId() + "/" + entity.getFilename());
 		store.put(key, entity);
 		assertTrue(store.size() == 1);
 		
@@ -59,16 +61,17 @@ public class DebPackageStoreTest {
 		
 		DebPackageStore store = new DebPackageStore();
 		
-		DebPackageEntityKey key = new DebPackageEntityKey("abc-package", "1.1-ubuntu-6", "amd64");
+		DebPackageEntityKey key = new DebPackageEntityKey("abc-package", "1.1-ubuntu-6", "amd64", "main", "wheezy");
 		DebPackageEntity entity = new DebPackageEntity();
 		entity.setPackageName("abc-package");
 		entity.setVersion("1.1-ubuntu-6");
 		entity.setArch("amd64");
 		entity.setFilename("package-123.deb");
+		entity.setUri("ProjectName/BuildName/" + entity.getSBuildId() + "/" + entity.getFilename());
 		store.put(key, entity);
 		assertTrue(store.size() == 1);
 		
-		DebPackageEntity newEntity = store.find(new DebPackageEntityKey("abc-package", "1.1-ubuntu-6", "amd64"));
+		DebPackageEntity newEntity = store.find(new DebPackageEntityKey("abc-package", "1.1-ubuntu-6", "amd64", "main", "wheezy"));
 		assertEquals(key.getPackageName(), newEntity.getPackageName());
 	}
 
@@ -77,16 +80,17 @@ public class DebPackageStoreTest {
 		
 		DebPackageStore store = new DebPackageStore();
 		
-		DebPackageEntityKey key = new DebPackageEntityKey("abc-package", "1.1-ubuntu-6", "amd64");
+		DebPackageEntityKey key = new DebPackageEntityKey("abc-package", "1.1-ubuntu-6", "amd64", "main", "wheezy");
 		DebPackageEntity entity = new DebPackageEntity();
 		entity.setPackageName("abc-package");
 		entity.setVersion("1.1-ubuntu-6");
 		entity.setArch("amd64");
 		entity.setFilename("package-123.deb");
+		entity.setUri("ProjectName/BuildName/" + entity.getSBuildId() + "/" + entity.getFilename());
 		store.put(key, entity);
 		assertTrue(store.size() == 1);
 		
-		DebPackageEntity newEntity = store.find("abc-package", "1.1-ubuntu-6", "amd64");
+		DebPackageEntity newEntity = store.find("abc-package", "1.1-ubuntu-6", "amd64", "main", "wheezy");
 		assertEquals(key.getPackageName(), newEntity.getPackageName());
 	}
 

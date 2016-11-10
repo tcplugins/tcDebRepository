@@ -13,12 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package debrepo.teamcity.entity.helper;
+package debrepo.teamcity.archive;
 
+import java.io.File;
 import java.io.IOException;
 
-public interface XmlPersister<T,U> {
-	public T loadfromXml(U dataStoreConfig) throws IOException;
-	public boolean persistToXml(T dataStore) throws IOException;
+import debrepo.teamcity.entity.helper.PluginDataResolver;
+import jetbrains.buildServer.serverSide.SBuild;
+import jetbrains.buildServer.serverSide.ServerPaths;
+
+public class DebFileReaderFactory {
+	
+	private PluginDataResolver myPluginPaths;
+
+	public DebFileReaderFactory(PluginDataResolver pluginPaths, ServerPaths serverPaths) {
+		this.myPluginPaths = pluginPaths;
+	}
+
+	public DebFileReader createFileReader(SBuild build) {
+		return new DebFileReader(build.getArtifactsDirectory(), this.myPluginPaths.getPluginTempFileDirectory());
+	}
+	
+	
 
 }

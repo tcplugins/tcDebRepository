@@ -17,8 +17,6 @@ package debrepo.teamcity.entity;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
 import java.util.UUID;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -31,7 +29,6 @@ import javax.xml.bind.annotation.XmlType;
 
 import org.jetbrains.annotations.NotNull;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -40,10 +37,10 @@ import lombok.NoArgsConstructor;
 @XmlAccessorType(XmlAccessType.FIELD)
 
 @Data  // Let Lombok generate the getters and setters.
+@NoArgsConstructor // Empty constructor for JAXB.
 
 @XmlRootElement()
 @XmlType(propOrder = { "repoName", "projectId", "uuid", "buildTypes" })
-
 public class DebRepositoryConfiguration {
 	
 	@NotNull @XmlAttribute(name="uuid")
@@ -58,10 +55,6 @@ public class DebRepositoryConfiguration {
 	@XmlElement(name="build-type") @XmlElementWrapper(name="build-types")
 	private List<DebRepositoryBuildTypeConfig> buildTypes = new ArrayList<>();
 	
-	public DebRepositoryConfiguration() {
-		// Empty constructor for JAXB.
-	}
-	
 	public DebRepositoryConfiguration(String projectId, String repoName) {
 		this.projectId = projectId;
 		this.repoName = repoName;
@@ -72,8 +65,8 @@ public class DebRepositoryConfiguration {
 		return buildTypes.add(buildType);
 	}
 	
-	public boolean addBuildType(String buildTypeId) {
-		return buildTypes.add(new DebRepositoryBuildTypeConfig(buildTypeId, ".+\\.deb"));
+	public boolean addBuildType(String buildTypeId, String dist, String component) {
+		return buildTypes.add(new DebRepositoryBuildTypeConfig(buildTypeId, dist, component, ".+\\.deb"));
 	}
 	
 	public boolean containsBuildType(String buildTypeId) {
@@ -86,12 +79,12 @@ public class DebRepositoryConfiguration {
 	}
 
 	public boolean containsBuildTypeAndFilter(DebPackageEntity entity) {
-		for (DebRepositoryBuildTypeConfig config : this.buildTypes) {
-			if (entity.getSBuildTypeId().equals(config.getBuildTypeId()) &&
-				config.matchAgainstFilter(entity.getFilename())) {
-					return true;
-			}
-		}
+//		for (DebRepositoryBuildTypeConfig config : this.buildTypes) {
+//			if (entity.getSBuildTypeId().equals(config.getBuildTypeId()) &&
+//				config.matchAgainstFilter(entity.getFilename())) {
+//					return true;
+//			}
+//		}
 		return false;
 	}
 

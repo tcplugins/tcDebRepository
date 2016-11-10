@@ -55,5 +55,22 @@
      	     <constructor-arg ref="debRepositoryManager">
     		</constructor-arg>     		
        </bean>
+       
+       <bean id="debRepositoryBuildArtifactsPublisher"
+     		class="debrepo.teamcity.service.DebRepositoryBuildArtifactsPublisherImpl">
+     	     <constructor-arg ref="debRepositoryManager">
+    		</constructor-arg>     		
+       </bean>
+       
+       <bean id="debRepoServerEventListener"
+     		class="debrepo.teamcity.service.DebRepoServerEventListener"
+     		init-method="register" >
+     	     <constructor-arg ref="debRepositoryBuildArtifactsPublisher">
+    		</constructor-arg>     		
+       </bean>
     
+       <bean id="debFileReaderFactory"
+     		class="debrepo.teamcity.archive.DebFileReaderFactory">
+       </bean>
+       
 </beans>

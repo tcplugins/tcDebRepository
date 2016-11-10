@@ -33,6 +33,7 @@ import org.mockito.MockitoAnnotations;
 import debrepo.teamcity.entity.DebPackageEntity;
 import debrepo.teamcity.entity.DebPackageStore;
 import debrepo.teamcity.entity.DebRepositoryBuildTypeConfig;
+import debrepo.teamcity.entity.DebRepositoryBuildTypeConfig.Filter;
 import debrepo.teamcity.entity.DebRepositoryConfiguration;
 import debrepo.teamcity.entity.helper.XmlPersister;
 import jetbrains.buildServer.serverSide.ProjectManager;
@@ -92,13 +93,15 @@ public class DebRepositoryManagerImplTest extends DebRepositoryBaseTest {
 		
 		DebRepositoryManager manager = new DebRepositoryManagerImpl(projectManager, debRepositoryDatabaseXmlPersister);
 		DebRepositoryConfiguration config1 = new DebRepositoryConfiguration("project01", "MyStoreName");
-		config1.addBuildType(new DebRepositoryBuildTypeConfig(bt01.getBuildTypeId()).af(".*\\.deb"));
+		config1.addBuildType(new DebRepositoryBuildTypeConfig(bt01.getBuildTypeId())
+										.af(new Filter(".*\\.deb", "wheezy", "main")));
 		DebRepositoryConfiguration config2 = new DebRepositoryConfiguration("project02", "MyStoreName2");
-		config2.addBuildType(new DebRepositoryBuildTypeConfig(bt02.getBuildTypeId()).af(".*\\.deb"));
+		config2.addBuildType(new DebRepositoryBuildTypeConfig(bt02.getBuildTypeId())
+										.af(new Filter(".*\\.deb", "wheezy", "main")));
 		manager.initialisePackageStore(config1);
 		manager.initialisePackageStore(config2);
-		manager.registerBuildWithPackageStore("MyStoreName", "bt01");
-		manager.registerBuildWithPackageStore("MyStoreName2", "bt02");
+		//manager.registerBuildWithPackageStore("MyStoreName", "bt01");
+		//manager.registerBuildWithPackageStore("MyStoreName2", "bt02");
 		List<DebPackageStore> store = manager.getPackageStoresForBuildType("bt01");
 		List<DebPackageStore> store2 = manager.getPackageStoresForBuildType("bt02");
 		assertEquals(1, store.size());
@@ -127,7 +130,7 @@ public class DebRepositoryManagerImplTest extends DebRepositoryBaseTest {
 		DebRepositoryConfiguration config2 = new DebRepositoryConfiguration("project02", "MyStoreName2");
 		manager.initialisePackageStore(config1);
 		manager.initialisePackageStore(config2);
-		manager.registerBuildWithPackageStore("MyStoreName", "bt01");
+		//manager.registerBuildWithPackageStore("MyStoreName", "bt01");
 		assertEquals(0, manager.getPackageStoresForBuildType("bt02").size());
 		
 	}
@@ -148,7 +151,7 @@ public class DebRepositoryManagerImplTest extends DebRepositoryBaseTest {
 		e.setVersion("1.2.3.4");
 		e.setArch("i386");
 		e.setFilename("package-123.deb");
-		
+		e.setUri("ProjectName/BuildName/" + e.getSBuildId() + "/" + e.getFilename());
 		store.get(0).put(e.buildKey(), e);
 		assertEquals(1, store.get(0).size());
 		

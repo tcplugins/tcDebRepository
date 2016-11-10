@@ -25,6 +25,7 @@ import org.jetbrains.annotations.NotNull;
 
 import debrepo.teamcity.entity.DebRepositoryConfiguration;
 import debrepo.teamcity.entity.DebRepositoryStatistics;
+import debrepo.teamcity.service.DebRepositoryConfigurationManager;
 import debrepo.teamcity.service.DebRepositoryManager;
 import debrepo.teamcity.util.StringUtils;
 import jetbrains.buildServer.serverSide.SBuildServer;
@@ -36,13 +37,17 @@ import jetbrains.buildServer.web.openapi.SimpleCustomTab;
 
 public class DebRepoProjectSettingsPage extends SimpleCustomTab {
 	final DebRepositoryManager myDebRepositoryManager;
+	final DebRepositoryConfigurationManager myDebRepositoryConfigManager;
 	final SBuildServer myServer;
 	
 	public DebRepoProjectSettingsPage(@NotNull PagePlaces pagePlaces, @NotNull PluginDescriptor descriptor,
-									  @NotNull DebRepositoryManager debRepositoryManager, @NotNull SBuildServer sBuildServer) {
+									  @NotNull DebRepositoryManager debRepositoryManager, 
+									  @NotNull DebRepositoryConfigurationManager debRepositoryConfigManager,
+									  @NotNull SBuildServer sBuildServer) {
 		super(pagePlaces, PlaceId.EDIT_PROJECT_PAGE_TAB, "debRepository",
 				descriptor.getPluginResourcesPath("debRepository/projectConfigTab.jsp"), "Deb Repository");
 		this.myDebRepositoryManager = debRepositoryManager;
+		this.myDebRepositoryConfigManager = debRepositoryConfigManager;
 		this.myServer = sBuildServer;
 		register();
 	}
@@ -58,8 +63,8 @@ public class DebRepoProjectSettingsPage extends SimpleCustomTab {
 			SProject project = myServer.getProjectManager().findProjectByExternalId(request.getParameter("projectId"));
 			
 			List<DebRepositoryStatistics> respositories = new ArrayList<>();
-			for (DebRepositoryConfiguration config : myDebRepositoryManager.getConfigurationsForProject(project.getProjectId())) {
-				respositories.add(myDebRepositoryManager.getRepositoryStatatstics(config, StringUtils.getDebRepoUrl(myServer.getRootUrl(), config.getRepoName())));
+			for (DebRepositoryConfiguration config : myDebRepositoryConfigManager.getConfigurationsForProject(project.getProjectId())) {
+				respositories.add(myDebRepositoryManager.getRepositoryStatistics(config, StringUtils.getDebRepoUrl(myServer.getRootUrl(), config.getRepoName())));
 				
 			}
 			model.put("repositories", respositories);

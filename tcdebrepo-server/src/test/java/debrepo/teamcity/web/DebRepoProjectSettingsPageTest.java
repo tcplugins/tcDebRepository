@@ -23,6 +23,7 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import debrepo.teamcity.service.DebRepositoryConfigurationManager;
 import debrepo.teamcity.service.DebRepositoryManager;
 import jetbrains.buildServer.serverSide.SBuildServer;
 import jetbrains.buildServer.serverSide.settings.ProjectSettingsManager;
@@ -35,6 +36,7 @@ public class DebRepoProjectSettingsPageTest {
 	
 	@Mock SBuildServer sBuildServer;
 	@Mock DebRepositoryManager manager;
+	@Mock DebRepositoryConfigurationManager configManager;
 	@Mock PluginDescriptor descriptor;
 	@Mock PagePlaces pagePlaces;
 	@Mock PagePlace pagePlace;
@@ -48,7 +50,7 @@ public class DebRepoProjectSettingsPageTest {
 	
 	@Test
 	public void testFillModelMapOfStringObjectHttpServletRequest() {
-		DebRepoProjectSettingsPage page  = new DebRepoProjectSettingsPage(pagePlaces, descriptor, manager, sBuildServer);
+		DebRepoProjectSettingsPage page  = new DebRepoProjectSettingsPage(pagePlaces, descriptor, manager, configManager, sBuildServer);
 		
 		//fail("Not yet implemented");
 	}

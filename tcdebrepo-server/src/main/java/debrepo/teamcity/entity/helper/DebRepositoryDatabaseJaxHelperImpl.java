@@ -43,7 +43,7 @@ public class DebRepositoryDatabaseJaxHelperImpl implements JaxHelper<DebPackageS
 		Unmarshaller um = context.createUnmarshaller();
 		File file = new File(configFilePath);
 		if (!file.isFile()) {
-			return new DebPackageStoreEntity();
+			throw new FileNotFoundException(file.getAbsolutePath());
 		}
 		return (DebPackageStoreEntity) um.unmarshal(file);
 	}

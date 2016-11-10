@@ -13,12 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package debrepo.teamcity.entity.helper;
+package debrepo.teamcity.service;
 
-import java.io.IOException;
+import jetbrains.buildServer.serverSide.SBuild;
+import jetbrains.buildServer.serverSide.artifacts.BuildArtifacts;
 
-public interface XmlPersister<T,U> {
-	public T loadfromXml(U dataStoreConfig) throws IOException;
-	public boolean persistToXml(T dataStore) throws IOException;
+public interface DebRepositoryBuildArtifactsPublisher {
+	
+	public abstract void addArtifactsToRepositories(SBuild build, BuildArtifacts buildArtifacts);
 
 }

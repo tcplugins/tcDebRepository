@@ -71,11 +71,12 @@ public class ArStreamerTest {
 	
 	@Test
 	public void getControlFileAsStringTest() throws IOException {
-		DebFileReader reader = new DebFileReader(new File("src/test/resources/build-essential_11.6ubuntu6_amd64.deb"));
-		File controlTarGz = reader.getControlTarGzFromDeb(folder.getRoot());
+		File debFile = new File("src/test/resources/build-essential_11.6ubuntu6_amd64.deb");
+		DebFileReader reader = new DebFileReader(new File("src/test/resources"), "target");
+		File controlTarGz = reader.getControlTarGzFromDeb(debFile);
 		String controlFileContents = reader.getControlFromControlTarGz(controlTarGz);
 		System.out.println(controlFileContents);
-		Map<String,String> params = reader.getDebItemsFromControl(controlFileContents);
+		Map<String,String> params = reader.getDebItemsFromControl(debFile, controlFileContents);
 		
 		assertTrue(params.size() > 0);
 		for (String key: params.keySet()){

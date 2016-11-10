@@ -39,18 +39,26 @@ import org.rauschig.jarchivelib.IOUtils;
 import debrepo.teamcity.Loggers;
 
 public class DebFileReader {
-	File debFile;
+	File myArtifactsBaseDirectory;
+	String myTempDirectory;
 	
-	public DebFileReader(File deb) {
-		this.debFile = deb;
+	public DebFileReader(File artifactsBaseDirectory, String tempDirectory) {
+		this.myArtifactsBaseDirectory = artifactsBaseDirectory;
+		this.myTempDirectory = tempDirectory;
 	}
 	
+	public Map<String,String> getMetaDataFromPackage(String filename) throws IOException {
+		//DebFileReader reader = new DebFileReader(new File("src/test/resources/build-essential_11.6ubuntu6_amd64.deb"));
+		File debFile = new File(this.myArtifactsBaseDirectory + File.separator + filename);
+		File controlTarGz = this.getControlTarGzFromDeb(debFile);
+		String controlFileContents = this.getControlFromControlTarGz(controlTarGz);
+		return this.getDebItemsFromControl(debFile,controlFileContents);
+	}
 	
-	
-	protected File getControlTarGzFromDeb(File tmpLocation) throws IOException {
+	protected File getControlTarGzFromDeb(File debFile) throws IOException {
 		
 		Archiver archiver = ArchiverFactory.createArchiver(ArchiveFormat.AR);
-		ArchiveStream stream = archiver.stream(this.debFile);
+		ArchiveStream stream = archiver.stream(debFile);
 		ArchiveEntry entry;
 		
 		File controlTarGzFile = null;
@@ -60,7 +68,7 @@ public class DebFileReader {
 		    // or extract it using entry.extract(destination)
 		    // or fetch meta-data using entry.getName(), entry.isDirectory(), ...
 			if ("control.tar.gz".equals(entry.getName())){
-				controlTarGzFile = entry.extract(tmpLocation);
+				controlTarGzFile = entry.extract(new File(this.myTempDirectory));
 			}
 		}
 		stream.close();
@@ -85,7 +93,7 @@ public class DebFileReader {
 		return baos.toString( StandardCharsets.UTF_8.toString() );
 	}
 	
-	protected Map<String, String> getDebItemsFromControl(String controlFileContents) {
+	protected Map<String, String> getDebItemsFromControl(File debFile, String controlFileContents) {
 		Pattern p = Pattern.compile("^(\\S+):(.+)$");
 		
 		Map<String, String> map = new LinkedHashMap<String, String>();
@@ -99,12 +107,12 @@ public class DebFileReader {
 		}
 		scanner.close();
 		
-		map.putAll(getExtraPackageItemsFromDeb());
+		map.putAll(getExtraPackageItemsFromDeb(debFile));
 		
 		return map;
 	}
 	
-	protected Map<String,String> getExtraPackageItemsFromDeb() {
+	protected Map<String,String> getExtraPackageItemsFromDeb(File debFile) {
 		/*
 		 * Filename: pool/main/b/build-essential/build-essential_11.6ubuntu6_amd64.deb
 		 * Size: 4838
@@ -115,9 +123,10 @@ public class DebFileReader {
 		 */
 		Map<String, String> map = new LinkedHashMap<>();
 		try {
-			map.put("MD5sum", getFileHashSum("MD5"));
-			map.put("SHA1", getFileHashSum("SHA-1"));
-			map.put("SHA256", getFileHashSum("SHA-256"));
+			map.put("Size",  String.valueOf(debFile.length()));
+			map.put("MD5sum", getFileHashSum(debFile, "MD5"));
+			map.put("SHA1", getFileHashSum(debFile, "SHA-1"));
+			map.put("SHA256", getFileHashSum(debFile, "SHA-256"));
 		} catch (IOException | NoSuchAlgorithmException e){
 			Loggers.SERVER.warn("DebFileReader:: Failed to generate file hash. " + e.getMessage());
 			if (Loggers.SERVER.isDebugEnabled()) { Loggers.SERVER.debug(e);}
@@ -127,7 +136,7 @@ public class DebFileReader {
 
 	}
 	
-	protected String getFileHashSum(String digestAlgorithm) throws NoSuchAlgorithmException, IOException{
+	protected String getFileHashSum(File debFile, String digestAlgorithm) throws NoSuchAlgorithmException, IOException{
         MessageDigest md = MessageDigest.getInstance(digestAlgorithm);
         FileInputStream fis = new FileInputStream(debFile);
 

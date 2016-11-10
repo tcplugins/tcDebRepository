@@ -17,6 +17,8 @@ package debrepo.teamcity.entity;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -28,6 +30,8 @@ import javax.xml.bind.annotation.XmlType;
 
 import org.jetbrains.annotations.NotNull;
 
+import jetbrains.buildServer.serverSide.SBuild;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
 /* Use the XmlAttributes on the fields rather than the getters
@@ -37,7 +41,7 @@ import lombok.Data;
 @Data  // Let Lombok generate the getters and setters.
 
 @XmlRootElement
-public class DebPackageEntity {
+public class DebPackageEntity implements Cloneable {
 	
 	@NotNull @XmlAttribute(name="Package")
 	private String packageName;
@@ -48,6 +52,12 @@ public class DebPackageEntity {
 	@NotNull @XmlAttribute(name="Architecture")
 	private String arch;
 	
+	@NotNull @XmlAttribute(name="Dist")
+	private String dist;
+	
+	@NotNull @XmlAttribute(name="Component")
+	private String component;
+	
 	@NotNull @XmlAttribute(name="sBuildId")
 	private Long sBuildId;
 	
@@ -57,10 +67,13 @@ public class DebPackageEntity {
 	@NotNull @XmlAttribute(name="filename")
 	private String filename;
 	
+	@NotNull @XmlAttribute(name="deb-uri")
+	private String uri;
+	
 	@XmlElement(name="parameter") @XmlElementWrapper(name="package-parameters")
 	private List<PackageParameter> parameters = new ArrayList<>();
 	
-	@XmlType(name = "format") @Data  @XmlAccessorType(XmlAccessType.FIELD)
+	@XmlType(name = "format") @Data  @XmlAccessorType(XmlAccessType.FIELD) @AllArgsConstructor
 	public static class PackageParameter {
 		@XmlAttribute
 		String name;
@@ -73,8 +86,59 @@ public class DebPackageEntity {
 		}
 	}
 	
-	public DebPackageEntityKey buildKey(){
-		return new DebPackageEntityKey(this.getPackageName(), this.getVersion(), this.getArch());
+	public DebPackageEntity clone() {
+		DebPackageEntity e = new DebPackageEntity();
+		e.setArch(this.getArch());
+		e.setComponent(this.getComponent());
+		e.setFilename(this.getFilename());
+		e.setPackageName(this.getPackageName());
+		e.parameters.addAll(this.getParameters());
+		e.setSBuildId(this.getSBuildId());
+		e.setSBuildTypeId(this.getSBuildTypeId());
+		e.setUri(this.getUri());
+		e.setVersion(this.getVersion());
+		return e;
 	}
 	
+	public static DebPackageEntity buildFromArtifact(SBuild build, String filename) {
+		DebPackageEntity e = new DebPackageEntity();
+		e.setSBuildId(build.getBuildId());
+		e.setSBuildTypeId(build.getBuildTypeId());
+		e.setFilename(filename);
+		return e;
+	}
+	
+	public DebPackageEntityKey buildKey(){
+		return new DebPackageEntityKey(this.getPackageName(), this.getVersion(), this.getArch(), this.getComponent(), this.dist);
+	}
+	
+	public boolean isPopulated() {
+		return this.arch != null && this.packageName != null && this.version != null;
+	}
+	
+	public void populateMetadata(Map<String,String> metaData) {
+		for (Entry<String,String> entry : metaData.entrySet()){
+			this.parameters.add(new PackageParameter(entry.getKey(), entry.getValue()));
+		}
+		
+		if (metaData.containsKey("Package")) {
+			this.setPackageName(metaData.get("Package"));
+		}
+		
+		if (metaData.containsKey("Version")) {
+			this.setVersion(metaData.get("Version"));
+		}
+		
+		if (metaData.containsKey("Architecture")) {
+			this.setArch(metaData.get("Architecture"));
+		}
+		
+	}
+	
+	public void buildUri() {
+		this.setUri("pool/" + this.getComponent() + "/" + this.getPackageName() + "/" + filename.replace("\\", "/"));
+		if (this.getUri() != null && !this.getUri().equals("")) {
+			this.parameters.add(new PackageParameter("Filename", this.getUri()));
+		}
+	}
 }
