@@ -15,10 +15,8 @@
  *******************************************************************************/
 package debrepo.teamcity.entity;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
+import java.util.TreeMap;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -71,7 +69,7 @@ public class DebPackageEntity implements Cloneable {
 	private String uri;
 	
 	@XmlElement(name="parameter") @XmlElementWrapper(name="package-parameters")
-	private List<PackageParameter> parameters = new ArrayList<>();
+	private Map<String, String> parameters = new TreeMap<>();
 	
 	@XmlType(name = "format") @Data  @XmlAccessorType(XmlAccessType.FIELD) @AllArgsConstructor
 	public static class PackageParameter {
@@ -85,14 +83,45 @@ public class DebPackageEntity implements Cloneable {
 			// empty constructor for JAXB
 		}
 	}
+
+	/**
+	 * setComponent which also updates the uri. This version overrides the Lombok one.
+	 * 
+	 * @param component The new value for the component
+	 */
+	public void setComponent(String component) {
+		this.component = component;
+		this.buildUri();
+	}
+	
+	/**
+	 * setPackageName which also updates the uri. This version overrides the Lombok one.
+	 * 
+	 * @param packageName The new value for the packageName
+	 */
+	public void setPackageName(String packageName) {
+		this.packageName = packageName;
+		this.buildUri();
+	}
+	
+	/**
+	 * setFilename which also updates the uri. This version overrides the Lombok one.
+	 * 
+	 * @param filename The new value for the filename
+	 */
+	public void setFilename(String filename) {
+		this.filename = filename;
+		this.buildUri();
+	}
 	
 	public DebPackageEntity clone() {
 		DebPackageEntity e = new DebPackageEntity();
 		e.setArch(this.getArch());
 		e.setComponent(this.getComponent());
+		e.setDist(this.getDist());
 		e.setFilename(this.getFilename());
 		e.setPackageName(this.getPackageName());
-		e.parameters.addAll(this.getParameters());
+		e.parameters.putAll(this.getParameters());
 		e.setSBuildId(this.getSBuildId());
 		e.setSBuildTypeId(this.getSBuildTypeId());
 		e.setUri(this.getUri());
@@ -109,7 +138,7 @@ public class DebPackageEntity implements Cloneable {
 	}
 	
 	public DebPackageEntityKey buildKey(){
-		return new DebPackageEntityKey(this.getPackageName(), this.getVersion(), this.getArch(), this.getComponent(), this.dist);
+		return new DebPackageEntityKey(this.getPackageName(), this.getVersion(), this.getArch(), this.getComponent(), this.getDist());
 	}
 	
 	public boolean isPopulated() {
@@ -117,9 +146,8 @@ public class DebPackageEntity implements Cloneable {
 	}
 	
 	public void populateMetadata(Map<String,String> metaData) {
-		for (Entry<String,String> entry : metaData.entrySet()){
-			this.parameters.add(new PackageParameter(entry.getKey(), entry.getValue()));
-		}
+		this.parameters.clear();
+		this.parameters.putAll(metaData);
 		
 		if (metaData.containsKey("Package")) {
 			this.setPackageName(metaData.get("Package"));
@@ -136,9 +164,14 @@ public class DebPackageEntity implements Cloneable {
 	}
 	
 	public void buildUri() {
-		this.setUri("pool/" + this.getComponent() + "/" + this.getPackageName() + "/" + filename.replace("\\", "/"));
-		if (this.getUri() != null && !this.getUri().equals("")) {
-			this.parameters.add(new PackageParameter("Filename", this.getUri()));
+		if ("".equals(this.component) || "".equals(this.packageName) || this.filename == null || "".equals(this.filename)) {
+			this.uri = "";
+			if (this.parameters.containsKey("Filename")) {
+				this.parameters.remove("Filename");
+			}
+		} else {
+			this.setUri("pool/" + this.getComponent() + "/" + this.getPackageName() + "/" + filename.replace("\\", "/"));
+			this.parameters.put("Filename", this.getUri());
 		}
 	}
 }

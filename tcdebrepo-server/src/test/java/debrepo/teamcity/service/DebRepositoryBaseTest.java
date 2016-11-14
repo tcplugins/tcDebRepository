@@ -15,16 +15,14 @@
  *******************************************************************************/
 package debrepo.teamcity.service;
 
-import static org.junit.Assert.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Before;
-import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -32,6 +30,7 @@ import debrepo.teamcity.entity.DebPackageEntity;
 import debrepo.teamcity.entity.DebPackageStore;
 import debrepo.teamcity.entity.DebRepositoryBuildTypeConfig;
 import debrepo.teamcity.entity.DebRepositoryConfiguration;
+import debrepo.teamcity.entity.DebRepositoryConfigurations;
 import debrepo.teamcity.entity.helper.XmlPersister;
 import jetbrains.buildServer.serverSide.ProjectManager;
 import jetbrains.buildServer.serverSide.SBuild;
@@ -44,6 +43,7 @@ public class DebRepositoryBaseTest {
 	final protected String BUILD_TYPE_ID_BT02 = "bt02";
 	final protected String BUILD_TYPE_ID_BT03 = "bt03";
 	protected DebRepositoryManager debRepositoryManager;
+	protected DebRepositoryConfigurationManager debRepositoryConfigManager;
 	@Mock protected ProjectManager projectManager;
 	@Mock protected XmlPersister<DebPackageStore, DebRepositoryConfiguration> debRepositoryDatabaseXmlPersister;
 	@Mock protected SProject project01;
@@ -114,6 +114,8 @@ public class DebRepositoryBaseTest {
 		entity.setPackageName("testpackage");
 		entity.setVersion("1.2.3.4");
 		entity.setArch("i386");
+		entity.setDist("wheezy");
+		entity.setComponent("main");
 		entity.setFilename("testpackage-i386-1.2.3.4.deb");
 		entity.setSBuildTypeId(BUILD_TYPE_ID_BT01);
 		entity.setSBuildId(build01.getBuildId());
@@ -123,6 +125,8 @@ public class DebRepositoryBaseTest {
 		entity2.setPackageName("testpackage");
 		entity2.setVersion("1.2.3.5");
 		entity2.setArch("i386");
+		entity2.setDist("wheezy");
+		entity2.setComponent("main");		
 		entity2.setFilename("testpackage-i386-1.2.3.5.deb");
 		entity2.setSBuildTypeId(BUILD_TYPE_ID_BT02);
 		entity2.setSBuildId(build02.getBuildId());
@@ -132,6 +136,8 @@ public class DebRepositoryBaseTest {
 		entity3.setPackageName("testpackage");
 		entity3.setVersion("1.2.3.5");
 		entity3.setArch("amd64");
+		entity3.setDist("wheezy");
+		entity3.setComponent("main");		
 		entity3.setFilename("testpackage-amd64-1.2.3.5.deb");
 		entity3.setSBuildTypeId(BUILD_TYPE_ID_BT02);
 		entity3.setSBuildId(build02.getBuildId());
@@ -141,16 +147,23 @@ public class DebRepositoryBaseTest {
 		entity4.setPackageName("anotherpackage");
 		entity4.setVersion("1.5");
 		entity4.setArch("amd64");
+		entity4.setDist("wheezy");
+		entity4.setComponent("main");
 		entity4.setFilename("testpackage-amd64-1.5.deb");
 		entity4.setSBuildTypeId(BUILD_TYPE_ID_BT03);
 		entity4.setSBuildId(build03.getBuildId());
 		entity4.setUri("ProjectName/BuildName/" + entity4.getSBuildId() + "/" + entity4.getFilename());
 		
-		debRepositoryManager = new DebRepositoryManagerImpl(projectManager, debRepositoryDatabaseXmlPersister);
+		debRepositoryManager = new DebRepositoryManagerImpl(projectManager, getDebRepositoryXmlPersister());
+		debRepositoryConfigManager = (DebRepositoryConfigurationManager) debRepositoryManager;
 		DebRepositoryConfiguration config1 = getDebRepoConfig1();
+		DebRepositoryConfigurations configs = new DebRepositoryConfigurations();
 		DebRepositoryConfiguration config2 = getDebRepoConfig2();
-		debRepositoryManager.initialisePackageStore(config1);
-		debRepositoryManager.initialisePackageStore(config2);
+		configs.add(config1);
+		configs.add(config2);
+		debRepositoryConfigManager.updateRepositoryConfigurations(configs);
+		//debRepositoryManager.initialisePackageStore(config1);
+		//debRepositoryManager.initialisePackageStore(config2);
 		//debRepositoryManager.registerBuildWithPackageStore("MyStoreName", BUILD_TYPE_ID_BT01);
 		//debRepositoryManager.registerBuildWithPackageStore("MyStoreName", BUILD_TYPE_ID_BT02);
 		
@@ -172,6 +185,10 @@ public class DebRepositoryBaseTest {
 		config2.addBuildType(new DebRepositoryBuildTypeConfig(bt03.getBuildTypeId())
 									.af(new DebRepositoryBuildTypeConfig.Filter(".+\\.deb", "squeeze", "main")));
 		return config2;
+	}
+
+	public XmlPersister<DebPackageStore, DebRepositoryConfiguration> getDebRepositoryXmlPersister() throws IOException, NonExistantRepositoryException {
+		return debRepositoryDatabaseXmlPersister;
 	}
 	
 

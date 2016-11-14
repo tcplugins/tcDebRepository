@@ -17,71 +17,21 @@ package debrepo.teamcity.service;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertNull;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
 
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
 import debrepo.teamcity.entity.DebPackageEntity;
 import debrepo.teamcity.entity.DebPackageStore;
 import debrepo.teamcity.entity.DebRepositoryBuildTypeConfig;
 import debrepo.teamcity.entity.DebRepositoryBuildTypeConfig.Filter;
 import debrepo.teamcity.entity.DebRepositoryConfiguration;
-import debrepo.teamcity.entity.helper.XmlPersister;
-import jetbrains.buildServer.serverSide.ProjectManager;
-import jetbrains.buildServer.serverSide.SBuildType;
-import jetbrains.buildServer.serverSide.SProject;
 
 public class DebRepositoryManagerImplTest extends DebRepositoryBaseTest {
-	
-//	@Mock ProjectManager projectManager;
-//	@Mock SProject project01;
-//	@Mock SProject project02;
-//	@Mock SProject root;
-//	@Mock SBuildType bt01;
-//	@Mock SBuildType bt02;
-//	@Mock XmlPersister<DebPackageStore> debRepositoryDatabaseXmlPersister;
-	
-//	List<SProject> projectPath = new ArrayList<>();
 
-	//@Before
-	//public void setup() throws IOException, NonExistantRepositoryException {
-//		MockitoAnnotations.initMocks(this);
-		
-//		super.setup();
-//		projectPath.add(project01);
-//		projectPath.add(project02);
-//		projectPath.add(root);
-//		when(projectManager.findBuildTypeById("bt01")).thenReturn(bt01);
-//		when(projectManager.findBuildTypeById("bt02")).thenReturn(bt02);
-//		when(projectManager.findProjectById("project01")).thenReturn(project01);
-//		when(bt01.getProjectId()).thenReturn("project01");
-//		when(bt01.getBuildTypeId()).thenReturn("project01");
-//		when(bt02.getProjectId()).thenReturn("project01");
-//		when(project01.getProjectPath()).thenReturn(projectPath);
-//		when(project01.getProjectId()).thenReturn("project01");
-//		when(project02.getProjectId()).thenReturn("project02");
-//		when(root.getProjectId()).thenReturn("_Root");
-		
-//		when(debRepositoryDatabaseXmlPersister.persistToXml(any(DebPackageStore.class))).thenReturn(true);
-	//}
-	
 	@Test
 	public void testGetPackageStore() throws NonExistantRepositoryException {
-//		DebRepositoryConfiguration config1 = new DebRepositoryConfiguration("project01", "MyStoreName");
-//		DebRepositoryConfiguration config2 = new DebRepositoryConfiguration("project02", "MyStoreName2");
-//		DebRepositoryManager manager = new DebRepositoryManagerImpl(projectManager, debRepositoryDatabaseXmlPersister);
-//		manager.initialisePackageStore(config1);
-//		manager.initialisePackageStore(config2);
-//		manager.registerBuildWithPackageStore("MyStoreName", "bt01");
 		List<DebPackageStore> store = debRepositoryManager.getPackageStoresForBuildType(BUILD_TYPE_ID_BT01);
 		assertEquals(1, store.size());
 		assertEquals(0, store.get(0).size());
@@ -100,8 +50,6 @@ public class DebRepositoryManagerImplTest extends DebRepositoryBaseTest {
 										.af(new Filter(".*\\.deb", "wheezy", "main")));
 		manager.initialisePackageStore(config1);
 		manager.initialisePackageStore(config2);
-		//manager.registerBuildWithPackageStore("MyStoreName", "bt01");
-		//manager.registerBuildWithPackageStore("MyStoreName2", "bt02");
 		List<DebPackageStore> store = manager.getPackageStoresForBuildType("bt01");
 		List<DebPackageStore> store2 = manager.getPackageStoresForBuildType("bt02");
 		assertEquals(1, store.size());
@@ -130,7 +78,6 @@ public class DebRepositoryManagerImplTest extends DebRepositoryBaseTest {
 		DebRepositoryConfiguration config2 = new DebRepositoryConfiguration("project02", "MyStoreName2");
 		manager.initialisePackageStore(config1);
 		manager.initialisePackageStore(config2);
-		//manager.registerBuildWithPackageStore("MyStoreName", "bt01");
 		assertEquals(0, manager.getPackageStoresForBuildType("bt02").size());
 		
 	}
@@ -139,17 +86,16 @@ public class DebRepositoryManagerImplTest extends DebRepositoryBaseTest {
 	public void testGetAddPackageToPackageStore() throws NonExistantRepositoryException {
 		
 		debRepositoryManager = new DebRepositoryManagerImpl(projectManager, debRepositoryDatabaseXmlPersister);
-//		DebRepositoryConfiguration config1 = new DebRepositoryConfiguration("project01", "MyStoreName");
-//		DebRepositoryConfiguration config2 = new DebRepositoryConfiguration("project02", "MyStoreName2");
 		debRepositoryManager.initialisePackageStore(getDebRepoConfig1());
 		debRepositoryManager.initialisePackageStore(getDebRepoConfig2());
-//		debRepositoryManager.registerBuildWithPackageStore("MyStoreName", "bt01");
 		List<DebPackageStore> store = debRepositoryManager.getPackageStoresForBuildType("bt01");
 		
 		DebPackageEntity e = new DebPackageEntity();
 		e.setPackageName("testpackage");
 		e.setVersion("1.2.3.4");
 		e.setArch("i386");
+		e.setDist("wheezy");
+		e.setComponent("main");
 		e.setFilename("package-123.deb");
 		e.setUri("ProjectName/BuildName/" + e.getSBuildId() + "/" + e.getFilename());
 		store.get(0).put(e.buildKey(), e);

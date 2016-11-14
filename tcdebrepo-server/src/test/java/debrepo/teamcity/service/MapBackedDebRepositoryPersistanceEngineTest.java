@@ -15,35 +15,19 @@
  *******************************************************************************/
 package debrepo.teamcity.service;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.*;
-import static debrepo.teamcity.service.DebRepositoryBaseTest.*;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import static org.junit.Assert.assertEquals;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
 import debrepo.teamcity.entity.DebPackageEntity;
-import debrepo.teamcity.entity.DebPackageStore;
-import debrepo.teamcity.entity.DebRepositoryConfiguration;
-import debrepo.teamcity.entity.helper.XmlPersister;
-import jetbrains.buildServer.serverSide.ProjectManager;
-import jetbrains.buildServer.serverSide.SBuild;
-import jetbrains.buildServer.serverSide.SBuildType;
-import jetbrains.buildServer.serverSide.SProject;
 
 public class MapBackedDebRepositoryPersistanceEngineTest extends DebRepositoryBaseTest {
 
 	
 	@Before
 	public void setupLocal() {
-		engine = new MapBackedDebRepositoryDatabase(debRepositoryManager, projectManager);
+		engine = new MapBackedDebRepositoryDatabase(debRepositoryManager, debRepositoryConfigManager, projectManager);
 	}
 	
 	@Test

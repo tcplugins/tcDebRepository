@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -28,7 +27,7 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlValue;
+import javax.xml.bind.annotation.XmlTransient;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -103,9 +102,19 @@ public class DebRepositoryBuildTypeConfig {
 		return matchingFilters;
 	}
 	
+	/* Use the XmlAttributes on the fields rather than the getters
+	 * and setters provided by Lombok */
+	@XmlAccessorType(XmlAccessType.FIELD)
 	@XmlRootElement @AllArgsConstructor @NoArgsConstructor @Data
-	public static class Filter {
-		@XmlValue
+	public static class Filter implements Comparable<Filter>{
+		@XmlTransient
+		final int BEFORE = -1;
+		@XmlTransient
+		final int EQUAL = 0;
+		@XmlTransient
+		final int AFTER = 1;
+		
+		@XmlAttribute
 		private String regex;
 		
 		@XmlAttribute
@@ -116,6 +125,22 @@ public class DebRepositoryBuildTypeConfig {
 		
 		public boolean matches(String filename) {
 			return (Pattern.matches(this.regex, filename));
+		}
+
+		@Override
+		public int compareTo(Filter o) {
+			int comparison = this.dist.compareTo(o.getDist());
+			if (comparison != EQUAL) return comparison;
+			
+			comparison = this.component.compareTo(o.getComponent());
+			if (comparison != EQUAL) return comparison;
+			
+			comparison = this.regex.compareTo(o.getRegex());
+			if (comparison != EQUAL) return comparison;
+			
+			assert this.equals(o) : "DebRepositoryBuildTypeConfig.Filter :: compareTo inconsistant with equals";
+			
+			return EQUAL;
 		}
 		
 	}

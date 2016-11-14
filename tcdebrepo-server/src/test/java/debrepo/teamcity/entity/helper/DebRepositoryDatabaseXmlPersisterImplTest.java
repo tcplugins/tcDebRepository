@@ -31,7 +31,6 @@ import debrepo.teamcity.entity.DebPackageStore;
 import debrepo.teamcity.entity.DebPackageStoreEntity;
 import debrepo.teamcity.entity.DebRepositoryConfiguration;
 import debrepo.teamcity.service.DebRepositoryBaseTest;
-import debrepo.teamcity.service.DebRepositoryManagerImpl;
 import debrepo.teamcity.service.MapBackedDebRepositoryDatabase;
 import debrepo.teamcity.service.NonExistantRepositoryException;
 import jetbrains.buildServer.serverSide.ServerPaths;
@@ -53,12 +52,15 @@ public class DebRepositoryDatabaseXmlPersisterImplTest extends DebRepositoryBase
 																	debRepositoryDatabaseJaxHelper);
 	}
 	
+	@Override
+	public XmlPersister<DebPackageStore, DebRepositoryConfiguration> getDebRepositoryXmlPersister() throws IOException, NonExistantRepositoryException {
+		setuplocal();
+		return debRepositoryDatabaseXmlPersister;
+	}
+	
 	@Test
 	public void testPersistDatabaseToXml() throws NonExistantRepositoryException {
 		
-		debRepositoryManager = new DebRepositoryManagerImpl(projectManager, debRepositoryDatabaseXmlPersister);
-		debRepositoryManager.initialisePackageStore(getDebRepoConfig1());
-		debRepositoryManager.initialisePackageStore(getDebRepoConfig2());
 		List<DebPackageStore> store = debRepositoryManager.getPackageStoresForBuildType("bt01");
 		List<DebPackageStore> store2 = debRepositoryManager.getPackageStoresForBuildType("bt03");
 		assertEquals(1, store.size());
@@ -67,7 +69,7 @@ public class DebRepositoryDatabaseXmlPersisterImplTest extends DebRepositoryBase
 		assertEquals(0, store2.get(0).size());
 		assertNotSame(store, store2);
 		
-		engine = new MapBackedDebRepositoryDatabase(debRepositoryManager, projectManager);
+		engine = new MapBackedDebRepositoryDatabase(debRepositoryManager, debRepositoryConfigManager, projectManager);
 		engine.addPackage(entity);
 		
 	}

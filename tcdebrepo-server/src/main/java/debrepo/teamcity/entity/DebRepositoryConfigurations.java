@@ -36,5 +36,9 @@ public class DebRepositoryConfigurations {
 	
 	@XmlElement(name="deb-repository-configuration")// @XmlElementWrapper(name="deb-repositories")
 	List<DebRepositoryConfiguration> debRepositoryConfigurations = new ArrayList<>();
+	
+	public void add(DebRepositoryConfiguration config) {
+		this.debRepositoryConfigurations.add(config);
+	}
 
 }

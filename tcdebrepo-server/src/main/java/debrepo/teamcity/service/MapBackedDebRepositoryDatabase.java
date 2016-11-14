@@ -18,12 +18,11 @@ package debrepo.teamcity.service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
 
 import debrepo.teamcity.Loggers;
 import debrepo.teamcity.entity.DebPackageEntity;
 import debrepo.teamcity.entity.DebPackageStore;
+import debrepo.teamcity.entity.DebRepositoryConfiguration;
 import jetbrains.buildServer.serverSide.ProjectManager;
 import jetbrains.buildServer.serverSide.SBuild;
 import jetbrains.buildServer.serverSide.SBuildType;
@@ -32,35 +31,25 @@ import jetbrains.buildServer.serverSide.SProject;
 public class MapBackedDebRepositoryDatabase implements DebRepositoryDatabase {
 	
 	private final DebRepositoryManager myDebRepositoryManager;
+	private final DebRepositoryConfigurationManager myDebRepositoryConfigurationManager;
 	private final ProjectManager myProjectManager;
 	
-	public MapBackedDebRepositoryDatabase(DebRepositoryManager debRepositoryManager, ProjectManager projectManager){
+	public MapBackedDebRepositoryDatabase(DebRepositoryManager debRepositoryManager, 
+									DebRepositoryConfigurationManager debRepositoryConfigurationManager,
+									ProjectManager projectManager){
 		this.myDebRepositoryManager = debRepositoryManager;
+		this.myDebRepositoryConfigurationManager = debRepositoryConfigurationManager;
 		this.myProjectManager = projectManager;
 	}
 
 	@Override
 	public boolean addPackage(DebPackageEntity entity) {
-		SBuildType sBuildType = myProjectManager.findBuildTypeById(entity.getSBuildTypeId());
-		if (sBuildType != null){
-			List<DebPackageStore> stores = new ArrayList<>();
-			try {
-				stores = this.myDebRepositoryManager.getPackageStoresForDebPackage(entity);
-			} catch (NonExistantRepositoryException e) {
-				Loggers.SERVER.warn("MapBackedDebRepositoryDatabase: No repo found for project: " + sBuildType.getProjectId());
-				Loggers.SERVER.debug(e);
-				return false;
-			}
-			for (DebPackageStore store : stores) {
-				store.put(entity.buildKey(), entity);
-				this.myDebRepositoryManager.persist(store.getUuid());
-			}
-			//FIXME: Should return something more appropriate.
-			return true;  
-
-		} else {
-			return false;
+		boolean added = false;
+		for (DebRepositoryConfiguration config : this.myDebRepositoryConfigurationManager.findConfigurationsForDebRepositoryEntity(entity)) {
+			this.myDebRepositoryManager.addBuildPackage(config, entity);
+			added = true;
 		}
+		return added;
 	}
 
 	@Override

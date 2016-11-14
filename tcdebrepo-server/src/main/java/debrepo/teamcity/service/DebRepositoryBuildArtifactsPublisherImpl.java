@@ -27,10 +27,7 @@ import debrepo.teamcity.entity.DebPackageEntity;
 import debrepo.teamcity.entity.DebRepositoryBuildTypeConfig;
 import debrepo.teamcity.entity.DebRepositoryBuildTypeConfig.Filter;
 import debrepo.teamcity.entity.DebRepositoryConfiguration;
-import jetbrains.buildServer.parameters.MapParametersProvider;
 import jetbrains.buildServer.parameters.ParametersProvider;
-import jetbrains.buildServer.parameters.ReferencesResolverUtil;
-import jetbrains.buildServer.parameters.impl.MapParametersProviderImpl;
 import jetbrains.buildServer.parameters.impl.ReferenceResolver;
 import jetbrains.buildServer.serverSide.SBuild;
 import jetbrains.buildServer.serverSide.artifacts.BuildArtifact;
@@ -71,20 +68,21 @@ public class DebRepositoryBuildArtifactsPublisherImpl implements DebRepositoryBu
 			// iterate of the list of configs and check the filters match.
 			for (DebRepositoryConfiguration config : configs) {
 				for (DebRepositoryBuildTypeConfig bt : config.getBuildTypes()) {
-					if (build.getBuildType().equals(bt.getBuildTypeId())){
+					if (build.getBuildType().getBuildTypeId().equals(bt.getBuildTypeId())){
 						for (Filter filter : bt.getDebFilters()) {
 							for (DebPackageEntity entity : entities) {
 								if (filter.matches(entity.getFilename())) {
 									DebPackageEntity newEntity = populateEntity(entity, myDebFileReaderFactory.createFileReader(build));
-									/* TODO: Support for dist and main being variables.
+									/* TODO: Support for dist and component being variables.
 									if (ReferencesResolverUtil.containsReference(filter.getComponent())) {
 										String component = filter.getComponent();
 										
 										newEntity.setComponent(resolver.resolve(filter.getComponent(), value, parameters).);
-									} else {
+									} else {*/
 										newEntity.setComponent(filter.getComponent());
-										newEntity.set
-									}*/
+										newEntity.setDist(filter.getDist());
+									/*}*/
+									newEntity.buildUri();	
 									this.myDepRepositoryManager.addBuildPackage(config, newEntity);
 								}
 							}
@@ -107,16 +105,16 @@ public class DebRepositoryBuildArtifactsPublisherImpl implements DebRepositoryBu
 	
 	private DebPackageEntity populateEntity(DebPackageEntity entity, DebFileReader debFileReader) {
 		DebPackageEntity e = entity.clone();
-		if (!entity.isPopulated()) {
+		if (!e.isPopulated()) {
 			try {
-				entity.populateMetadata(debFileReader.getMetaDataFromPackage(entity.getFilename()));
+				e.populateMetadata(debFileReader.getMetaDataFromPackage(entity.getFilename()));
 			} catch (IOException ex) {
 				Loggers.SERVER.warn("DebRepositoryBuildArtifactsPublisherImpl :: Failed to read data from package: " 
 									+ entity.getFilename());
 				if (Loggers.SERVER.isDebugEnabled()) { Loggers.SERVER.debug(ex); }
 			}
 		}
-		return entity;
+		return e;
 	}
 	
 	public static class MyBuildArtifactsProcessor implements BuildArtifacts.BuildArtifactsProcessor {

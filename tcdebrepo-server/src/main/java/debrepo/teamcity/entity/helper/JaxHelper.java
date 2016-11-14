@@ -24,8 +24,6 @@ import java.io.InputStream;
 
 import javax.xml.bind.JAXBException;
 
-import debrepo.teamcity.entity.DebPackageStoreEntity;
-
 public interface JaxHelper<T> {
 
 	/**

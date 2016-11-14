@@ -35,6 +35,7 @@ import debrepo.teamcity.entity.DebRepositoryBuildTypeConfig;
 import debrepo.teamcity.entity.DebRepositoryConfiguration;
 import debrepo.teamcity.entity.DebRepositoryConfigurations;
 import debrepo.teamcity.entity.DebRepositoryStatistics;
+import debrepo.teamcity.entity.DebRepositoryBuildTypeConfig.Filter;
 import debrepo.teamcity.entity.helper.XmlPersister;
 import jetbrains.buildServer.serverSide.ProjectManager;
 import jetbrains.buildServer.serverSide.SBuildType;
@@ -292,6 +293,28 @@ public class DebRepositoryManagerImpl implements DebRepositoryManager, DebReposi
 	@Override
 	public void addBuildPackage(DebRepositoryConfiguration config, DebPackageEntity debPackageEntity) {
 		this.repositories.get(config.getUuid()).put(debPackageEntity.buildKey(), debPackageEntity);
+		this.persist(config.getUuid());
+	}
+
+	@Override
+	public Set<DebRepositoryConfiguration> findConfigurationsForDebRepositoryEntity(DebPackageEntity debPackageEntity) {
+		// iterate of the list of configs and check the filters match.
+		Set<DebRepositoryConfiguration> configSet = new TreeSet<>();
+		for (DebRepositoryConfiguration config : repositoryMetaData.values()) {
+			for (DebRepositoryBuildTypeConfig bt : config.getBuildTypes()) {
+				if (debPackageEntity.getSBuildTypeId().equals(bt.getBuildTypeId())){
+					for (Filter filter : bt.getDebFilters()) {
+						if (filter.matches(debPackageEntity.getFilename())
+							&& debPackageEntity.getComponent().equals(filter.getComponent())
+							&& debPackageEntity.getDist().equals(filter.getDist())) 
+						{
+								configSet.add(config);
+						}
+					}
+				}
+			}
+		}
+		return configSet;
 	}
 	
 }

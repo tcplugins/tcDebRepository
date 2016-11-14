@@ -15,9 +15,6 @@
  *******************************************************************************/
 package debrepo.teamcity.archive;
 
-import java.io.File;
-import java.io.IOException;
-
 import debrepo.teamcity.entity.helper.PluginDataResolver;
 import jetbrains.buildServer.serverSide.SBuild;
 import jetbrains.buildServer.serverSide.ServerPaths;

@@ -16,17 +16,20 @@
 package debrepo.teamcity.web;
 
 import java.io.File;
-import java.io.Flushable;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.file.Files;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.xml.ws.Response;
 
 import org.jetbrains.annotations.NotNull;
 import org.springframework.web.servlet.ModelAndView;
 
+import debrepo.teamcity.Loggers;
 import debrepo.teamcity.entity.DebPackageEntity;
 import debrepo.teamcity.entity.DebPackageNotFoundInStoreException;
 import debrepo.teamcity.entity.DebPackageStore;
@@ -88,7 +91,7 @@ public class DebDownloadController extends BaseController {
 	@Override
 	protected ModelAndView doHandle(HttpServletRequest request, HttpServletResponse response) throws Exception {
 		final String uriPath = request.getPathInfo();
-		/* /debrepo/{RepoName}/dists/{Distribution}/{Component}/{Arch}/Packages.bz */
+		/* /debrepo/{RepoName}/dists/{Distribution}/{Component}/{Arch}/Packages.gz */
 		Matcher matcher = packagesGzPattern.matcher(uriPath);
 		if (matcher.matches()) {
 			String repoName = matcher.group(1);
@@ -97,7 +100,7 @@ public class DebDownloadController extends BaseController {
 			String archName = matcher.group(4);
 			try {
 				DebPackageStore store = myDebRepositoryManager.getPackageStore(repoName);
-				return servePackagesGzFile(store);
+				return servePackagesGzFile(response, store.findAllByDistComponentArch(distName, component, archName));
 			} catch (NonExistantRepositoryException ex){
 				response.sendError(HttpServletResponse.SC_NOT_FOUND);
 				return simpleView("Not Found: No Deb Repository exists with the name: " + repoName);
@@ -112,7 +115,7 @@ public class DebDownloadController extends BaseController {
 			String archName = matcher.group(4);
 			try {
 				DebPackageStore store = myDebRepositoryManager.getPackageStore(repoName);
-				return servePackagesFile(response, store);
+				return servePackagesFile(response, store.findAllByDistComponentArch(distName, component, archName));
 			} catch (NonExistantRepositoryException ex){
 				response.sendError(HttpServletResponse.SC_NOT_FOUND);
 				return simpleView("Not Found: No Deb Repository exists with the name: " + repoName);
@@ -158,20 +161,46 @@ public class DebDownloadController extends BaseController {
 		return simpleView("Package Not found");
 	}
 
-	private ModelAndView servePackagesGzFile(DebPackageStore store) {
-		return simpleView ("FIXME: Serving Packages.gz for repo " + store.getUuid());
+	private ModelAndView servePackagesGzFile(HttpServletResponse response, List<DebPackageEntity> packages) {
+		/*
+		OutputStream os = null; 
+		try {
+			os = response.getOutputStream();
+			Files.copy(packagefile.toPath(), os);
+			os.flush();
+		} catch (IOException e) {
+			Loggers.SERVER.debug(e);
+		} finally {
+			if (os != null) { os.close(); }
+		}
+		return null; */
+		return simpleView ("FIXME: Serving Packages.gz for repo");
 	}
 	
-	private ModelAndView servePackagesFile(HttpServletResponse response, DebPackageStore store) {
+	private ModelAndView servePackagesFile(HttpServletResponse response, List<DebPackageEntity> packages) {
 		response.setContentType("text/plain");
 		final ModelAndView mv = new ModelAndView(myPluginDescriptor.getPluginResourcesPath("debRepository/packages.jsp"));
-		mv.getModel().put("packages", store.findAll());
+		mv.getModel().put("packages", packages);
 		return mv;
 	}
 	
-	private ModelAndView servePackage(HttpServletResponse response, File packagefile) {
-		response.setContentType("text/plain");
-		return simpleView ("FIXME: Serving Package file " + packagefile.getAbsolutePath());
+	private ModelAndView servePackage(HttpServletResponse response, File packagefile) throws IOException {
+		response.setContentType("application/octect-stream");
+		if (! packagefile.canRead()) {
+			response.sendError(HttpServletResponse.SC_NOT_FOUND);
+			return null;
+		}
+		OutputStream os = null; 
+		try {
+			os = response.getOutputStream();
+			Files.copy(packagefile.toPath(), os);
+			os.flush();
+		} catch (IOException e) {
+			Loggers.SERVER.debug(e);
+		} finally {
+			if (os != null) { os.close(); }
+		}
+		return null;
 	}
 	
 	private ModelAndView serveRepoInfo(DebPackageStore store, DebRepositoryStatistics stats) {
@@ -179,3 +208,4 @@ public class DebDownloadController extends BaseController {
 	}
 
 }
+
