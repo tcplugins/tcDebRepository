@@ -30,6 +30,7 @@ import org.springframework.stereotype.Service;
 import debrepo.teamcity.Loggers;
 import debrepo.teamcity.archive.DebFileReader;
 import debrepo.teamcity.entity.DebPackageEntity;
+import debrepo.teamcity.entity.DebPackageEntityKey;
 import debrepo.teamcity.entity.DebPackageStore;
 import debrepo.teamcity.entity.DebRepositoryBuildTypeConfig;
 import debrepo.teamcity.entity.DebRepositoryConfiguration;
@@ -315,6 +316,40 @@ public class DebRepositoryManagerImpl implements DebRepositoryManager, DebReposi
 			}
 		}
 		return configSet;
+	}
+
+	@Override
+	public Set<String> findUniqueArchByDistAndComponent(String repoName, String distName, String component)	throws NonExistantRepositoryException {
+		DebPackageStore store = getPackageStore(repoName);
+		Set<String> architectures = new TreeSet<>();
+		for (DebPackageEntityKey e : store.keySet()) {
+			if (distName.equals(e.getDist()) && component.equals(e.getComponent())) {
+				architectures.add(e.getArch());
+			}
+		}
+		return architectures;
+	}
+
+	@Override
+	public Set<String> findUniqueComponentByDist(String repoName, String distName) throws NonExistantRepositoryException {
+		DebPackageStore store = getPackageStore(repoName);
+		Set<String> components = new TreeSet<>();
+		for (DebPackageEntityKey e : store.keySet()) {
+			if (distName.equals(e.getDist())) {
+				components.add(e.getComponent());
+			}
+		}
+		return components;
+	}
+	
+	@Override
+	public Set<String> findUniqueDist(String repoName) throws NonExistantRepositoryException {
+		DebPackageStore store = getPackageStore(repoName);
+		Set<String> dists = new TreeSet<>();
+		for (DebPackageEntityKey e : store.keySet()) {
+			dists.add(e.getDist());
+		}
+		return dists;
 	}
 	
 }

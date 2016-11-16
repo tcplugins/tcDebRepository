@@ -18,6 +18,7 @@ package debrepo.teamcity.archive;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -28,6 +29,7 @@ import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import org.rauschig.jarchivelib.ArchiveEntry;
 import org.rauschig.jarchivelib.ArchiveFormat;
 import org.rauschig.jarchivelib.ArchiveStream;
@@ -124,10 +126,10 @@ public class DebFileReader {
 		Map<String, String> map = new LinkedHashMap<>();
 		try {
 			map.put("Size",  String.valueOf(debFile.length()));
-			map.put("MD5sum", getFileHashSum(debFile, "MD5"));
-			map.put("SHA1", getFileHashSum(debFile, "SHA-1"));
-			map.put("SHA256", getFileHashSum(debFile, "SHA-256"));
-		} catch (IOException | NoSuchAlgorithmException e){
+			map.put("MD5sum", getMd5Hash(debFile));
+			map.put("SHA1", getSha1Hash(debFile));
+			map.put("SHA256", getSha256Hash(debFile));
+		} catch (IOException e){
 			Loggers.SERVER.warn("DebFileReader:: Failed to generate file hash. " + e.getMessage());
 			if (Loggers.SERVER.isDebugEnabled()) { Loggers.SERVER.debug(e);}
 		}
@@ -136,27 +138,19 @@ public class DebFileReader {
 
 	}
 	
-	protected String getFileHashSum(File debFile, String digestAlgorithm) throws NoSuchAlgorithmException, IOException{
-        MessageDigest md = MessageDigest.getInstance(digestAlgorithm);
-        FileInputStream fis = new FileInputStream(debFile);
-
-        byte[] dataBytes = new byte[1024];
-
-        int nread = 0;
-        while ((nread = fis.read(dataBytes)) != -1) {
-          md.update(dataBytes, 0, nread);
-        };
-        byte[] mdbytes = md.digest();
-
-       //convert the byte to hex format method 2
-        StringBuilder hexString = new StringBuilder();
-    	for (int i=0;i<mdbytes.length;i++) {
-    	  hexString.append(Integer.toHexString(0xFF & mdbytes[i]));
-    	}
-    	
-    	fis.close();
-    	
-    	return hexString.toString();
+	protected String getMd5Hash(File debFile) throws IOException {
+		FileInputStream fis = new FileInputStream(debFile);
+		return DigestUtils.md5Hex(fis);
 	}
-
+	
+	protected String getSha1Hash(File debFile) throws IOException {
+		FileInputStream fis = new FileInputStream(debFile);
+		return DigestUtils.sha1Hex(fis);
+	}
+	
+	protected String getSha256Hash(File debFile) throws IOException {
+		FileInputStream fis = new FileInputStream(debFile);
+		return DigestUtils.sha256Hex(fis);
+	}
+	
 }
