@@ -16,6 +16,12 @@
 
 package debrepo.teamcity.settings;
 
+/**
+ * Handles changes to the deb-respositories.xml file.
+ */
 public interface DebRepoConfigChangeHandler {
+	/**
+	 * Called whenever a change is detected.
+	 */
 	public abstract void handleConfigFileChange();
 }

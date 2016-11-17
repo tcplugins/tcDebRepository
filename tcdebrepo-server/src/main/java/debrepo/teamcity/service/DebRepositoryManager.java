@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-import debrepo.teamcity.archive.DebFileReader;
 import debrepo.teamcity.entity.DebPackageEntity;
 import debrepo.teamcity.entity.DebPackageStore;
 import debrepo.teamcity.entity.DebRepositoryConfiguration;
@@ -35,7 +34,6 @@ public interface DebRepositoryManager {
 	public boolean persist(UUID uuid);
 	public DebRepositoryStatistics getRepositoryStatistics(String uuid, String repoUrl);
 	public DebRepositoryStatistics getRepositoryStatistics(DebRepositoryConfiguration projectConfig, String repoUrl);
-	public void addBuildPackages(String buildTypeId, List<DebPackageEntity> debPackageEntities, DebFileReader debFileReader);
 	public void addBuildPackage(DebRepositoryConfiguration config, DebPackageEntity newEntity);
 	public Set<String> findUniqueArchByDistAndComponent(String repoName, String distName, String component) throws NonExistantRepositoryException;
 	public Set<String> findUniqueComponentByDist(String repoName, String distName) throws NonExistantRepositoryException;

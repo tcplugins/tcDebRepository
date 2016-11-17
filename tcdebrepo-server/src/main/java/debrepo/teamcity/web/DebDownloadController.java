@@ -64,31 +64,31 @@ public class DebDownloadController extends BaseController {
 	public static final String DEBREPO_BASE_URL = "/app" + DEBREPO_URL_PART;
 	private static final String DEBREPO_BASE_URL_WITH_WILDCARD = DEBREPO_BASE_URL + "/**";
 	
-	/*                                                             /debrepo/{RepoName}/dists/{Distribution}/{Component}/binary-{Arch}/Packages.gz		*/
+	/**                                                             /debrepo/{RepoName}/dists/{Distribution}/{Component}/binary-{Arch}/Packages.gz		*/
 	final private Pattern packagesGzPattern      = Pattern.compile("^" + DEBREPO_URL_PART + "/(\\S+)/dists/(\\S+?)/(\\S+?)/binary-(\\S+?)/[Pp]ackages.gz");
 	
-	/*                                                             /debrepo/{RepoName}/dists/{Distribution}/{Component}/{Arch}/Packages.bz2		        */
+	/**                                                             /debrepo/{RepoName}/dists/{Distribution}/{Component}/{Arch}/Packages.bz2		        */
 	final private Pattern packagesBz2Pattern     = Pattern.compile("^" + DEBREPO_URL_PART + "/(\\S+?)/dists/(\\S+?)/(\\S+?)/(\\S+?)/[Pp]ackages.bz2");
 	
-	/*                                                             /debrepo/{RepoName}/dists/{Distribution}/{Component}/{Arch}/Packages		            */
+	/**                                                             /debrepo/{RepoName}/dists/{Distribution}/{Component}/{Arch}/Packages		            */
 	final private Pattern packagesPattern        = Pattern.compile("^" + DEBREPO_URL_PART + "/(\\S+?)/dists/(\\S+?)/(\\S+?)/binary-(\\S+?)/[Pp]ackages");
 	
-	/*                                                             /debrepo/{RepoName}/dists/{Distribution}/{Component}/binary-{Arch}/		            */
+	/**                                                             /debrepo/{RepoName}/dists/{Distribution}/{Component}/binary-{Arch}/		            */
 	final private Pattern browseArchPattern      = Pattern.compile("^" + DEBREPO_URL_PART + "/(\\S+?)/dists/(\\S+?)/(\\S+?)/binary-(\\S+?)/$");
 	
-	/*                                                             /debrepo/{RepoName}/dists/{Distribution}/{Component}/		                        */
+	/**                                                             /debrepo/{RepoName}/dists/{Distribution}/{Component}/		                        */
 	final private Pattern browseComponentPattern = Pattern.compile("^" + DEBREPO_URL_PART + "/(\\S+?)/dists/(\\S+?)/(\\S+?)/$");
 	
-	/*                                                             /debrepo/{RepoName}/dists/{Distribution}/		                                    */
+	/**                                                             /debrepo/{RepoName}/dists/{Distribution}/		                                    */
 	final private Pattern browseDistPattern      = Pattern.compile("^" + DEBREPO_URL_PART + "/(\\S+?)/dists/(\\S+?)/$");
 	
-	/*                                                             /debrepo/{RepoName}/dists/		                                                    */
+	/**                                                             /debrepo/{RepoName}/dists/		                                                    */
 	final private Pattern browseRepoDistPattern      = Pattern.compile("^" + DEBREPO_URL_PART + "/(\\S+?)/dists/$");
 	
-	/*                                                             /debrepo/{RepoName}/pool/{Component}/{packageName}		                            */
+	/**                                                             /debrepo/{RepoName}/pool/{Component}/{packageName}		                            */
     final private Pattern packageFilenamePattern = Pattern.compile("^" + DEBREPO_URL_PART + "/(\\S+?)/pool/(\\S+?)/(.+)");
     
-    /*                                                             /debrepo/{RepoName}                    		                                        */
+    /**                                                             /debrepo/{RepoName}                    		                                        */
     final private Pattern infoPattern            = Pattern.compile("^" + DEBREPO_URL_PART + "/(\\S+?)/$");
     
     private final DebRepositoryManager myDebRepositoryManager;
@@ -127,7 +127,6 @@ public class DebDownloadController extends BaseController {
 			} catch (NonExistantRepositoryException ex){
 				response.sendError(HttpServletResponse.SC_NOT_FOUND);
 				Loggers.SERVER.info("DebDownloadController:: Returning 404 : Not Found: No Deb Repository exists with the name: " + request.getPathInfo());
-				//return simpleView("Not Found: No Deb Repository exists with the name: " + repoName);
 				return null;
 			}
 		}
@@ -144,7 +143,6 @@ public class DebDownloadController extends BaseController {
 			} catch (NonExistantRepositoryException ex){
 				response.sendError(HttpServletResponse.SC_NOT_FOUND);
 				Loggers.SERVER.info("DebDownloadController:: Returning 404 : Not Found: No Deb Repository exists with the name: " + request.getPathInfo());
-				//return simpleView("Not Found: No Deb Repository exists with the name: " + repoName);
 				return null;
 			}
 		}
@@ -185,7 +183,6 @@ public class DebDownloadController extends BaseController {
 			} catch (NonExistantRepositoryException ex){
 				response.sendError(HttpServletResponse.SC_NOT_FOUND);
 				Loggers.SERVER.info("DebDownloadController:: Returning 404 : Not Found: No Deb Repository exists with the name: " + request.getPathInfo());
-				//return simpleView("Not Found: No Deb Repository exists with the name: " + repoName);
 				return null;
 			}
 		}
@@ -291,7 +288,6 @@ public class DebDownloadController extends BaseController {
 		matcher = packageFilenamePattern.matcher(uriPath);
 		if (matcher.matches()) {
 			String repoName = matcher.group(1);
-			String component = matcher.group(2);
 			String uri = matcher.group(3);
 			try {
 				DebPackageStore store = myDebRepositoryManager.getPackageStore(repoName);
@@ -344,15 +340,33 @@ public class DebDownloadController extends BaseController {
 		return null;
 	}
 
-    private void gzip(String s, OutputStream os) throws Exception{
-        GZIPOutputStream gzip = new GZIPOutputStream(os);
+	/**
+	 * Creates a new {@link GZIPOutputStream} and streams the stringToGzip through it to the provided {@link OutputStream}
+	 * @param stringToGzip - String of text which needs gzipping.
+	 * @param outputStream - {@link OutputStream} to write gzip'd string to.
+	 * @throws IOException
+	 */
+    private void gzip(String stringToGzip, OutputStream outputStream) throws IOException {
+        GZIPOutputStream gzip = new GZIPOutputStream(outputStream);
         OutputStreamWriter osw = new OutputStreamWriter(gzip, StandardCharsets.UTF_8);
-        osw.write(s);
+        osw.write(stringToGzip);
         osw.flush();
         osw.close();
     }	
 	
-	private ModelAndView servePackagesGzFile(HttpServletRequest request, HttpServletResponse response, List<DebPackageEntity> packages) throws IOException, Exception {
+    /**
+     * <p>Takes a List of {@link DebPackageEntity}s, builds the Debian Package text file and then serves it as a 
+     * GZIP'd compressed stream to the HttpServletResponse OutputStream. </p>
+     * <p>Packages.gz is one of the files which apt retrieves when <code>apt-get update</code> is executed
+     * on a debian system. It contains the list of packages available.</p>
+     * 
+     * @param request - The {@link HttpServletRequest} object the page was requested with.
+     * @param response - The {@link HttpServletResponse} that GZIP the stream to written to.
+     * @param packages - A List of {@link DebPackageEntity} containing the package metadata which is  
+     * @return
+     * @throws IOException
+     */
+	private ModelAndView servePackagesGzFile(HttpServletRequest request, HttpServletResponse response, List<DebPackageEntity> packages) throws IOException {
 		
 		String packagesString = DebPackageToPackageDescriptionBuilder.buildPackageDescriptionList(packages);
 		response.setContentType("application/x-gzip");

@@ -28,7 +28,6 @@ import java.util.UUID;
 import org.springframework.stereotype.Service;
 
 import debrepo.teamcity.Loggers;
-import debrepo.teamcity.archive.DebFileReader;
 import debrepo.teamcity.entity.DebPackageEntity;
 import debrepo.teamcity.entity.DebPackageEntityKey;
 import debrepo.teamcity.entity.DebPackageStore;
@@ -231,51 +230,6 @@ public class DebRepositoryManagerImpl implements DebRepositoryManager, DebReposi
 	@Override
 	public DebRepositoryStatistics getRepositoryStatistics(String uuid, String repoURL) {
 		return new DebRepositoryStatistics(repositories.get(UUID.fromString(uuid)).size(), repoURL);
-	}
-
-	@Override
-	public void addBuildPackages(String buildTypeId, List<DebPackageEntity> debPackageEntities, DebFileReader debFileReader) {
-		
-			for (DebPackageEntity entity : debPackageEntities){
-				boolean entityAdded = false;
-				for (DebRepositoryConfiguration config : repositoryMetaData.values()) {
-					if (config.containsBuildTypeAndFilter(entity)) {
-						if (!entity.isPopulated()) {
-							try {
-								entity.populateMetadata(debFileReader.getMetaDataFromPackage(entity.getFilename()));
-							} catch (IOException e) {
-								Loggers.SERVER.warn("DebRepositoryManagerImpl :: Failed to read data from package: " 
-													+ entity.getFilename() + "  Package will not be added to respository " 
-													+ config.getRepoName());
-								if (Loggers.SERVER.isDebugEnabled()) { Loggers.SERVER.debug(e); }
-							}
-						}
-						if (entity.isPopulated()) {
-							try {
-								getPackageStore(config.getRepoName()).put(entity.buildKey(), entity);
-								entityAdded = true;
-								persist(config.getUuid());
-							} catch (NonExistantRepositoryException e) {
-								Loggers.SERVER.warn("DebRepositoryManagerImpl :: Failed to add package: " 
-										+ entity.getFilename() + "  Non-existant respository " 
-										+ config.getRepoName());
-								if (Loggers.SERVER.isDebugEnabled()) { Loggers.SERVER.debug(e); }
-							}
-						}
-					} else {
-						if (Loggers.SERVER.isDebugEnabled()) { Loggers.SERVER.debug("DebRepositoryManagerImpl :: Not adding package: " 
-								+ entity.getFilename() + " to repo: " + config.getRepoName() + " (" + config.getProjectId() + ")"); }
-					}
-					if (Loggers.SERVER.isDebugEnabled()) {
-						Loggers.SERVER.debug("DebRepositoryManagerImpl :: Statistics" + getRepositoryStatistics(config, ""));
-					}
-				}
-				if (Loggers.SERVER.isDebugEnabled()) {
-					if (! entityAdded) {
-						Loggers.SERVER.debug("DebRepositoryManagerImpl :: No repo found for package: " + entity.getFilename());
-					}
-				}
-			}
 	}
 
 	@Override

@@ -33,6 +33,12 @@ import org.jetbrains.annotations.Nullable;
 
 import debrepo.teamcity.entity.DebRepositoryConfigurations;
 
+/**
+ * Reads and writes to the <code>.BuildServer/config/deb-repositories.xml</code> file
+ * using  JAXB. This file is used to configure the list of repositories, which projects
+ * they belong too, which BuildTypes contribute to the repository and what artifact filters
+ * packages are matched against.
+ */
 public class DebRepositoryConfigurationJaxHelperImpl implements JaxHelper<DebRepositoryConfigurations> {
 
 	@Override

@@ -7,10 +7,6 @@
        <bean id="debDownloadController"
      	class="debrepo.teamcity.web.DebDownloadController" 
      	/>
-     	
-       <bean id="debRepoProjectSettingsFactory"
-     	class="debrepo.teamcity.settings.DebRepoProjectSettingsFactory" 
-     	/>
 
        <bean id="debRepoProjectSettingsPage"
      	class="debrepo.teamcity.web.DebRepoProjectSettingsPage" 

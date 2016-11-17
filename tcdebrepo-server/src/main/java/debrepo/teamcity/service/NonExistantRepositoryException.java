@@ -18,7 +18,7 @@ package debrepo.teamcity.service;
 public class NonExistantRepositoryException extends Exception {
 
 	/**
-	 * 
+	 * Thrown when a repository is requested, but does not exist.
 	 */
 	private static final long serialVersionUID = 1L;
 

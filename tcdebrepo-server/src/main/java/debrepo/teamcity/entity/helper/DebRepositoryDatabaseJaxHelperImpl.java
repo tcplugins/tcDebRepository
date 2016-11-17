@@ -33,6 +33,10 @@ import org.jetbrains.annotations.Nullable;
 
 import debrepo.teamcity.entity.DebPackageStoreEntity;
 
+/**
+ * Reads and writes to the <code>.BuildServer/system/pluginData/tcDebRepository/database/*.xml</code> files
+ * using JAXB. These persist the in memory datastore to/from the disk. 
+ */
 public class DebRepositoryDatabaseJaxHelperImpl implements JaxHelper<DebPackageStoreEntity> {
 
 	@Override
