@@ -29,7 +29,7 @@ import org.mockito.MockitoAnnotations;
 import debrepo.teamcity.entity.DebPackageEntity;
 import debrepo.teamcity.entity.DebPackageStore;
 import debrepo.teamcity.entity.DebRepositoryBuildTypeConfig;
-import debrepo.teamcity.entity.DebRepositoryConfiguration;
+import debrepo.teamcity.entity.DebRepositoryConfigurationJaxImpl;
 import debrepo.teamcity.entity.DebRepositoryConfigurations;
 import debrepo.teamcity.entity.helper.XmlPersister;
 import jetbrains.buildServer.serverSide.ProjectManager;
@@ -45,7 +45,8 @@ public class DebRepositoryBaseTest {
 	protected DebRepositoryManager debRepositoryManager;
 	protected DebRepositoryConfigurationManager debRepositoryConfigManager;
 	@Mock protected ProjectManager projectManager;
-	@Mock protected XmlPersister<DebPackageStore, DebRepositoryConfiguration> debRepositoryDatabaseXmlPersister;
+	@Mock protected XmlPersister<DebPackageStore, DebRepositoryConfigurationJaxImpl> debRepositoryDatabaseXmlPersister;
+	protected DebRepositoryConfigurationFactory debRepositoryConfigurationFactory = new DebRepositoryConfigurationFactoryImpl();
 	@Mock protected SProject project01;
 	@Mock protected SProject project02;
 	@Mock protected SProject root;
@@ -107,7 +108,7 @@ public class DebRepositoryBaseTest {
 		when(project02.getProjectPath()).thenReturn(projectPath2);
 		when(root.getProjectId()).thenReturn("_Root");
 		
-		when(debRepositoryDatabaseXmlPersister.loadfromXml(any(DebRepositoryConfiguration.class))).thenThrow(new IOException());
+		when(debRepositoryDatabaseXmlPersister.loadfromXml(any(DebRepositoryConfigurationJaxImpl.class))).thenThrow(new IOException());
 		when(debRepositoryDatabaseXmlPersister.persistToXml(any(DebPackageStore.class))).thenReturn(true);
 		
 		entity = new DebPackageEntity();
@@ -154,11 +155,11 @@ public class DebRepositoryBaseTest {
 		entity4.setSBuildId(build03.getBuildId());
 		entity4.setUri("ProjectName/BuildName/" + entity4.getSBuildId() + "/" + entity4.getFilename());
 		
-		debRepositoryManager = new DebRepositoryManagerImpl(projectManager, getDebRepositoryXmlPersister());
+		debRepositoryManager = new DebRepositoryManagerImpl(projectManager, getDebRepositoryXmlPersister(), debRepositoryConfigurationFactory);
 		debRepositoryConfigManager = (DebRepositoryConfigurationManager) debRepositoryManager;
-		DebRepositoryConfiguration config1 = getDebRepoConfig1();
+		DebRepositoryConfigurationJaxImpl config1 = getDebRepoConfig1();
 		DebRepositoryConfigurations configs = new DebRepositoryConfigurations();
-		DebRepositoryConfiguration config2 = getDebRepoConfig2();
+		DebRepositoryConfigurationJaxImpl config2 = getDebRepoConfig2();
 		configs.add(config1);
 		configs.add(config2);
 		debRepositoryConfigManager.updateRepositoryConfigurations(configs);
@@ -166,13 +167,12 @@ public class DebRepositoryBaseTest {
 		//debRepositoryManager.initialisePackageStore(config2);
 		//debRepositoryManager.registerBuildWithPackageStore("MyStoreName", BUILD_TYPE_ID_BT01);
 		//debRepositoryManager.registerBuildWithPackageStore("MyStoreName", BUILD_TYPE_ID_BT02);
-		
 		System.out.println("@Before has run");
 		
 	}
 
-	public DebRepositoryConfiguration getDebRepoConfig1() {
-		DebRepositoryConfiguration config1 = new DebRepositoryConfiguration("project01", "MyStoreName");
+	public DebRepositoryConfigurationJaxImpl getDebRepoConfig1() {
+		DebRepositoryConfigurationJaxImpl config1 = new DebRepositoryConfigurationJaxImpl("project01", "MyStoreName");
 		config1.addBuildType(new DebRepositoryBuildTypeConfig(bt01.getBuildTypeId())
 									.af(new DebRepositoryBuildTypeConfig.Filter(".+\\.deb", "wheezy", "main")));
 		config1.addBuildType(new DebRepositoryBuildTypeConfig(bt02.getBuildTypeId())
@@ -180,14 +180,14 @@ public class DebRepositoryBaseTest {
 		return config1;
 	}
 	
-	public DebRepositoryConfiguration getDebRepoConfig2() {
-		DebRepositoryConfiguration config2 = new DebRepositoryConfiguration("project02", "MyStoreName2");
+	public DebRepositoryConfigurationJaxImpl getDebRepoConfig2() {
+		DebRepositoryConfigurationJaxImpl config2 = new DebRepositoryConfigurationJaxImpl("project02", "MyStoreName2");
 		config2.addBuildType(new DebRepositoryBuildTypeConfig(bt03.getBuildTypeId())
 									.af(new DebRepositoryBuildTypeConfig.Filter(".+\\.deb", "squeeze", "main")));
 		return config2;
 	}
 
-	public XmlPersister<DebPackageStore, DebRepositoryConfiguration> getDebRepositoryXmlPersister() throws IOException, NonExistantRepositoryException {
+	public XmlPersister<DebPackageStore, DebRepositoryConfigurationJaxImpl> getDebRepositoryXmlPersister() throws IOException, NonExistantRepositoryException {
 		return debRepositoryDatabaseXmlPersister;
 	}
 	

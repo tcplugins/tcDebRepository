@@ -23,7 +23,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import debrepo.teamcity.entity.DebRepositoryBuildTypeConfig;
-import debrepo.teamcity.entity.DebRepositoryConfiguration;
+import debrepo.teamcity.entity.DebRepositoryConfigurationJaxImpl;
 import debrepo.teamcity.entity.DebRepositoryConfigurations;
 
 import static org.mockito.Mockito.*;
@@ -51,7 +51,7 @@ public class DebRepositoryConfigurationJaxHelperImplTest {
 	
 	@Test
 	public void testReadString() throws JAXBException, IOException {
-		DebRepositoryConfiguration config01 = new DebRepositoryConfiguration("project01", "TestRepoName01");
+		DebRepositoryConfigurationJaxImpl config01 = new DebRepositoryConfigurationJaxImpl("project01", "TestRepoName01");
 		config01.addBuildType(new DebRepositoryBuildTypeConfig("bt01")
 									.af(new DebRepositoryBuildTypeConfig.Filter(".+\\.deb", "wheezy", "main"))
 									.af(new DebRepositoryBuildTypeConfig.Filter("/prod/somthing.*\\.deb", "wheezy", "main")));
@@ -65,7 +65,7 @@ public class DebRepositoryConfigurationJaxHelperImplTest {
 
 	@Test
 	public void testWrite() throws JAXBException, IOException {
-		DebRepositoryConfiguration config01 = new DebRepositoryConfiguration("project01", "TestRepoName01");
+		DebRepositoryConfigurationJaxImpl config01 = new DebRepositoryConfigurationJaxImpl("project01", "TestRepoName01");
 		config01.addBuildType(new DebRepositoryBuildTypeConfig("bt01")
 									.af(new DebRepositoryBuildTypeConfig.Filter(".+\\.deb", "wheezy", "main"))
 									.af(new DebRepositoryBuildTypeConfig.Filter("/prod/somthing.*\\.deb", "wheezy", "main")));

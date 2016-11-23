@@ -49,7 +49,7 @@ public class DebRepoProjectSettingsPageTest {
 	
 	@Test
 	public void testFillModelMapOfStringObjectHttpServletRequest() {
-		DebRepoProjectSettingsPage page  = new DebRepoProjectSettingsPage(pagePlaces, descriptor, manager, configManager, sBuildServer);
+		//DebRepoProjectSettingsPage page  = new DebRepoProjectSettingsPage(pagePlaces, descriptor, manager, configManager, sBuildServer);
 		
 		//fail("Not yet implemented");
 	}

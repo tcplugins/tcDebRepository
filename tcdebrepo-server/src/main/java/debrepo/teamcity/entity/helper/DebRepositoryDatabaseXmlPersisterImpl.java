@@ -25,9 +25,9 @@ import debrepo.teamcity.Loggers;
 import debrepo.teamcity.entity.DebPackageEntity;
 import debrepo.teamcity.entity.DebPackageStore;
 import debrepo.teamcity.entity.DebPackageStoreEntity;
-import debrepo.teamcity.entity.DebRepositoryConfiguration;
+import debrepo.teamcity.entity.DebRepositoryConfigurationJaxImpl;
 
-public class DebRepositoryDatabaseXmlPersisterImpl implements XmlPersister<DebPackageStore, DebRepositoryConfiguration> {
+public class DebRepositoryDatabaseXmlPersisterImpl implements XmlPersister<DebPackageStore, DebRepositoryConfigurationJaxImpl> {
 	
 	private final PluginDataResolver myPluginDataDirectoryResolver;
 	private final JaxHelper<DebPackageStoreEntity> myDebRepositoryDatabaseJaxHelper;
@@ -63,7 +63,7 @@ public class DebRepositoryDatabaseXmlPersisterImpl implements XmlPersister<DebPa
 	}
 
 	@Override
-	public DebPackageStore loadfromXml(DebRepositoryConfiguration config) throws IOException {
+	public DebPackageStore loadfromXml(DebRepositoryConfigurationJaxImpl config) throws IOException {
 		String configFilePath = this.myPluginDataDirectoryResolver.getPluginDatabaseDirectory() 
 				+ File.separator + config.getUuid() + ".xml";
 		

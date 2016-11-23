@@ -41,7 +41,7 @@ import lombok.NoArgsConstructor;
 
 @XmlRootElement()
 @XmlType(propOrder = { "repoName", "projectId", "uuid", "buildTypes" })
-public class DebRepositoryConfiguration implements Comparable<DebRepositoryConfiguration>{
+public class DebRepositoryConfigurationJaxImpl implements Comparable<DebRepositoryConfigurationJaxImpl>{
 	
 	@NotNull @XmlAttribute(name="uuid")
 	private UUID uuid;
@@ -55,7 +55,7 @@ public class DebRepositoryConfiguration implements Comparable<DebRepositoryConfi
 	@XmlElement(name="build-type") @XmlElementWrapper(name="build-types")
 	private List<DebRepositoryBuildTypeConfig> buildTypes = new ArrayList<>();
 	
-	public DebRepositoryConfiguration(String projectId, String repoName) {
+	public DebRepositoryConfigurationJaxImpl(String projectId, String repoName) {
 		this.projectId = projectId;
 		this.repoName = repoName;
 		this.uuid = UUID.randomUUID();
@@ -89,7 +89,7 @@ public class DebRepositoryConfiguration implements Comparable<DebRepositoryConfi
 	}
 
 	@Override
-	public int compareTo(DebRepositoryConfiguration o) {
+	public int compareTo(DebRepositoryConfigurationJaxImpl o) {
 		return this.getUuid().compareTo(o.getUuid());
 	}
 

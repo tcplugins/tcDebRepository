@@ -8,8 +8,12 @@
      	class="debrepo.teamcity.web.DebDownloadController" 
      	/>
 
-       <bean id="debRepoProjectSettingsPage"
-     	class="debrepo.teamcity.web.DebRepoProjectSettingsPage" 
+       <bean id="debRepoProjectSettingsTab"
+     	class="debrepo.teamcity.web.DebRepoProjectSettingsTab" 
+     	/>
+
+       <bean id="debRepoConfigurationActionController"
+     	class="debrepo.teamcity.web.DebRepoConfigurationActionController" 
      	/>
      	
        <bean id="debRepositoryManager"
@@ -67,6 +71,10 @@
     
        <bean id="debFileReaderFactory"
      		class="debrepo.teamcity.archive.DebFileReaderFactory">
+       </bean>
+    
+       <bean id="debRepositoryConfigurationFactory"
+     		class="debrepo.teamcity.service.DebRepositoryConfigurationFactoryImpl">
        </bean>
        
 </beans>

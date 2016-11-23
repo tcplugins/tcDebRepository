@@ -35,9 +35,9 @@ import lombok.Data;
 public class DebRepositoryConfigurations {
 	
 	@XmlElement(name="deb-repository-configuration")// @XmlElementWrapper(name="deb-repositories")
-	List<DebRepositoryConfiguration> debRepositoryConfigurations = new ArrayList<>();
+	List<DebRepositoryConfigurationJaxImpl> debRepositoryConfigurations = new ArrayList<>();
 	
-	public void add(DebRepositoryConfiguration config) {
+	public void add(DebRepositoryConfigurationJaxImpl config) {
 		this.debRepositoryConfigurations.add(config);
 	}
 

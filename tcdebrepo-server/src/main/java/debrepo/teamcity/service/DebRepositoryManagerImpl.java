@@ -32,7 +32,7 @@ import debrepo.teamcity.entity.DebPackageEntity;
 import debrepo.teamcity.entity.DebPackageEntityKey;
 import debrepo.teamcity.entity.DebPackageStore;
 import debrepo.teamcity.entity.DebRepositoryBuildTypeConfig;
-import debrepo.teamcity.entity.DebRepositoryConfiguration;
+import debrepo.teamcity.entity.DebRepositoryConfigurationJaxImpl;
 import debrepo.teamcity.entity.DebRepositoryConfigurations;
 import debrepo.teamcity.entity.DebRepositoryStatistics;
 import debrepo.teamcity.entity.DebRepositoryBuildTypeConfig.Filter;
@@ -44,15 +44,17 @@ import jetbrains.buildServer.serverSide.SProject;
 @Service
 public class DebRepositoryManagerImpl implements DebRepositoryManager, DebRepositoryConfigurationManager  {
 	
-	Map<String, DebRepositoryConfiguration> repositoryMetaData = new TreeMap<String, DebRepositoryConfiguration>();
+	Map<String, DebRepositoryConfigurationJaxImpl> repositoryMetaData = new TreeMap<String, DebRepositoryConfigurationJaxImpl>();
 	Map<UUID, DebPackageStore> repositories = new TreeMap<UUID, DebPackageStore>();
 	
 	private final ProjectManager myProjectManager;
-	private final XmlPersister<DebPackageStore, DebRepositoryConfiguration> myDebRepositoryDatabaseXmlPersister;
+	private final XmlPersister<DebPackageStore, DebRepositoryConfigurationJaxImpl> myDebRepositoryDatabaseXmlPersister;
+	private final DebRepositoryConfigurationFactory myDebRepositoryConfigurationFactory;
 	
-	public DebRepositoryManagerImpl(ProjectManager projectManager, XmlPersister<DebPackageStore, DebRepositoryConfiguration> debRepositoryDatabaseXmlPersister) {
+	public DebRepositoryManagerImpl(ProjectManager projectManager, XmlPersister<DebPackageStore, DebRepositoryConfigurationJaxImpl> debRepositoryDatabaseXmlPersister, DebRepositoryConfigurationFactory debRepositoryConfigurationFactory) {
 		this.myProjectManager = projectManager;
 		this.myDebRepositoryDatabaseXmlPersister = debRepositoryDatabaseXmlPersister;
+		this.myDebRepositoryConfigurationFactory = debRepositoryConfigurationFactory;
 	}
 	
 	@Override
@@ -78,7 +80,7 @@ public class DebRepositoryManagerImpl implements DebRepositoryManager, DebReposi
 	
 	
 	@Override
-	public DebPackageStore initialisePackageStore(DebRepositoryConfiguration conf) {
+	public DebPackageStore initialisePackageStore(DebRepositoryConfigurationJaxImpl conf) {
 		
 		DebPackageStore newStore; 
 		try {
@@ -102,7 +104,7 @@ public class DebRepositoryManagerImpl implements DebRepositoryManager, DebReposi
 		List<DebPackageStore> stores = new ArrayList<>();
 		//Collections.reverse(projectPathList);
 		for (SProject sProject : projectPathList) {
-			for (DebRepositoryConfiguration meta : repositoryMetaData.values()){
+			for (DebRepositoryConfigurationJaxImpl meta : repositoryMetaData.values()){
 				if (meta.getProjectId().equals(sProject.getProjectId()) && meta.containsBuildType(buildTypeid)){
 					if (repositories.containsKey(meta.getUuid())){
 						stores.add(repositories.get(meta.getUuid()));
@@ -122,7 +124,7 @@ public class DebRepositoryManagerImpl implements DebRepositoryManager, DebReposi
 		List<DebPackageStore> stores = new ArrayList<>();
 		//Collections.reverse(projectPathList);
 		for (SProject sProject : projectPathList) {
-			for (DebRepositoryConfiguration meta : repositoryMetaData.values()){
+			for (DebRepositoryConfigurationJaxImpl meta : repositoryMetaData.values()){
 				if (meta.getProjectId().equals(sProject.getProjectId()) 
 						&& meta.containsBuildTypeAndFilter(entity) ){
 					if (repositories.containsKey(meta.getUuid())){
@@ -163,7 +165,7 @@ public class DebRepositoryManagerImpl implements DebRepositoryManager, DebReposi
 
 	@Override
 	public DebPackageStore getPackageStoreForProject(String projectId) throws NonExistantRepositoryException {
-		for (DebRepositoryConfiguration meta : repositoryMetaData.values()){
+		for (DebRepositoryConfigurationJaxImpl meta : repositoryMetaData.values()){
 			if (meta.getProjectId().equals(projectId)){
 				if (repositories.containsKey(meta.getUuid())){
 					return repositories.get(meta.getUuid());
@@ -191,7 +193,7 @@ public class DebRepositoryManagerImpl implements DebRepositoryManager, DebReposi
 			/* Apply the update to the config, flag repo as existing (add to existingRepos map)
 			 * and initialise if a repo with that UUID didn't exist already.
 			 */
-			for (DebRepositoryConfiguration newConfig : repoConfigurations.getDebRepositoryConfigurations()) {
+			for (DebRepositoryConfigurationJaxImpl newConfig : repoConfigurations.getDebRepositoryConfigurations()) {
 				repositoryMetaData.put(newConfig.getRepoName(), newConfig);
 				existingRepos.put(newConfig.getRepoName(), true);
 				if(!repositories.containsKey(newConfig.getUuid())){
@@ -213,9 +215,9 @@ public class DebRepositoryManagerImpl implements DebRepositoryManager, DebReposi
 	}
 
 	@Override
-	public List<DebRepositoryConfiguration> getConfigurationsForProject(String projectId) {
-		List<DebRepositoryConfiguration> configs = new ArrayList<>();
-		for (DebRepositoryConfiguration config : this.repositoryMetaData.values())
+	public List<DebRepositoryConfigurationJaxImpl> getConfigurationsForProject(String projectId) {
+		List<DebRepositoryConfigurationJaxImpl> configs = new ArrayList<>();
+		for (DebRepositoryConfigurationJaxImpl config : this.repositoryMetaData.values())
 			if (projectId.equals(config.getProjectId())) {
 				configs.add(config);
 			}
@@ -223,7 +225,7 @@ public class DebRepositoryManagerImpl implements DebRepositoryManager, DebReposi
 	}
 
 	@Override
-	public DebRepositoryStatistics getRepositoryStatistics(DebRepositoryConfiguration projectConfig, String repoURL) {
+	public DebRepositoryStatistics getRepositoryStatistics(DebRepositoryConfigurationJaxImpl projectConfig, String repoURL) {
 		return getRepositoryStatistics(projectConfig.getUuid().toString(), repoURL);
 	}
 	
@@ -233,9 +235,9 @@ public class DebRepositoryManagerImpl implements DebRepositoryManager, DebReposi
 	}
 
 	@Override
-	public Set<DebRepositoryConfiguration> findConfigurationsForBuildType(String buildTypeId) {
-		Set<DebRepositoryConfiguration> configs = new TreeSet<>();
-		for (DebRepositoryConfiguration config : this.repositoryMetaData.values()) {
+	public Set<DebRepositoryConfigurationJaxImpl> findConfigurationsForBuildType(String buildTypeId) {
+		Set<DebRepositoryConfigurationJaxImpl> configs = new TreeSet<>();
+		for (DebRepositoryConfigurationJaxImpl config : this.repositoryMetaData.values()) {
 			for (DebRepositoryBuildTypeConfig buildType : config.getBuildTypes()) {
 				if (buildTypeId.equals(buildType.getBuildTypeId())){
 					configs.add(config);
@@ -246,16 +248,16 @@ public class DebRepositoryManagerImpl implements DebRepositoryManager, DebReposi
 	}
 
 	@Override
-	public void addBuildPackage(DebRepositoryConfiguration config, DebPackageEntity debPackageEntity) {
+	public void addBuildPackage(DebRepositoryConfigurationJaxImpl config, DebPackageEntity debPackageEntity) {
 		this.repositories.get(config.getUuid()).put(debPackageEntity.buildKey(), debPackageEntity);
 		this.persist(config.getUuid());
 	}
 
 	@Override
-	public Set<DebRepositoryConfiguration> findConfigurationsForDebRepositoryEntity(DebPackageEntity debPackageEntity) {
+	public Set<DebRepositoryConfigurationJaxImpl> findConfigurationsForDebRepositoryEntity(DebPackageEntity debPackageEntity) {
 		// iterate of the list of configs and check the filters match.
-		Set<DebRepositoryConfiguration> configSet = new TreeSet<>();
-		for (DebRepositoryConfiguration config : repositoryMetaData.values()) {
+		Set<DebRepositoryConfigurationJaxImpl> configSet = new TreeSet<>();
+		for (DebRepositoryConfigurationJaxImpl config : repositoryMetaData.values()) {
 			for (DebRepositoryBuildTypeConfig bt : config.getBuildTypes()) {
 				if (debPackageEntity.getSBuildTypeId().equals(bt.getBuildTypeId())){
 					for (Filter filter : bt.getDebFilters()) {
@@ -304,6 +306,34 @@ public class DebRepositoryManagerImpl implements DebRepositoryManager, DebReposi
 			dists.add(e.getDist());
 		}
 		return dists;
+	}
+
+	@Override
+	public DebRepositoryConfigurationJaxImpl getDebRepositoryConfiguration(String debRepoUuid) {
+		for (DebRepositoryConfigurationJaxImpl config : this.repositoryMetaData.values()) {
+			if (debRepoUuid.equals(config.getUuid())) {
+				return myDebRepositoryConfigurationFactory.copyDebRepositoryConfiguration(config);
+			}
+		}
+		return this.repositoryMetaData.get(debRepoUuid);
+	}
+
+	@Override
+	public DebRepositoryActionResult addDebRepository(DebRepositoryConfigurationJaxImpl debRepositoryConfiguration) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public DebRepositoryActionResult removeDebRespository(String uuid) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public DebRepositoryActionResult editDebRepositoryConfiguration(DebRepositoryConfigurationJaxImpl debRepoConfig) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 	
 }

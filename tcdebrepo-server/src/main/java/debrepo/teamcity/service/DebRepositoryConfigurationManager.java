@@ -19,20 +19,38 @@ import java.util.List;
 import java.util.Set;
 
 import debrepo.teamcity.entity.DebPackageEntity;
-import debrepo.teamcity.entity.DebRepositoryConfiguration;
+import debrepo.teamcity.entity.DebRepositoryConfigurationJaxImpl;
 import debrepo.teamcity.entity.DebRepositoryConfigurations;
+import debrepo.teamcity.service.DebRepositoryConfigurationManager.DebRepositoryActionResult;
+import lombok.Value;
 
 public interface DebRepositoryConfigurationManager {
 
+
 	public void updateRepositoryConfigurations(DebRepositoryConfigurations repoConfigurations);
-	public List<DebRepositoryConfiguration> getConfigurationsForProject(String projectId);
-	public Set<DebRepositoryConfiguration> findConfigurationsForBuildType(String buildTypeId);
+	public DebRepositoryConfigurationJaxImpl getDebRepositoryConfiguration(String debRepoUuid);
+	public List<DebRepositoryConfigurationJaxImpl> getConfigurationsForProject(String projectId);
+	public Set<DebRepositoryConfigurationJaxImpl> findConfigurationsForBuildType(String buildTypeId);
 	/**
 	 * 
 	 * @param debPackageEntity which must be fully populated and variables resolved.
-	 * @return {@link Set} of {@link DebRepositoryConfiguration} items which have a matching buildTypeId, 
+	 * @return {@link Set} of {@link DebRepositoryConfigurationJaxImpl} items which have a matching buildTypeId, 
 	 * 			and a filter which matches the regex against the filename, the dist is equal and the component is equal. 
 	 */
-	public Set<DebRepositoryConfiguration> findConfigurationsForDebRepositoryEntity(DebPackageEntity debPackageEntity);
+	public Set<DebRepositoryConfigurationJaxImpl> findConfigurationsForDebRepositoryEntity(DebPackageEntity debPackageEntity);
+	public DebRepositoryActionResult addDebRepository(DebRepositoryConfigurationJaxImpl debRepositoryConfiguration);
+	public DebRepositoryActionResult removeDebRespository(String uuid);
 	
+	@Value
+	public class DebRepositoryActionResult {
+		String reason;
+		boolean error;
+		DebRepositoryConfigurationJaxImpl beforeAction;
+		DebRepositoryConfigurationJaxImpl afterAction;
+
+	}
+
+	public DebRepositoryActionResult editDebRepositoryConfiguration(DebRepositoryConfigurationJaxImpl debRepoConfig);
+
+
 }

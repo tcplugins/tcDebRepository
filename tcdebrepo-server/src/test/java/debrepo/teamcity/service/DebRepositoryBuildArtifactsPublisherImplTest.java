@@ -39,7 +39,7 @@ import debrepo.teamcity.archive.DebFileReaderFactory;
 import debrepo.teamcity.entity.DebPackageEntity;
 import debrepo.teamcity.entity.DebRepositoryBuildTypeConfig;
 import debrepo.teamcity.entity.DebRepositoryBuildTypeConfig.Filter;
-import debrepo.teamcity.entity.DebRepositoryConfiguration;
+import debrepo.teamcity.entity.DebRepositoryConfigurationJaxImpl;
 import debrepo.teamcity.entity.helper.PluginDataResolver;
 import jetbrains.buildServer.serverSide.SBuild;
 import jetbrains.buildServer.serverSide.SBuildType;
@@ -70,15 +70,15 @@ public class DebRepositoryBuildArtifactsPublisherImplTest {
 	BuildArtifacts buildArtifacts;
 	
 	DebFileReaderFactory debFileReaderFactory;
-	DebRepositoryConfiguration config;
+	DebRepositoryConfigurationJaxImpl config;
 	
-	Set<DebRepositoryConfiguration> configs = new TreeSet<>();
+	Set<DebRepositoryConfigurationJaxImpl> configs = new TreeSet<>();
 	
 	@Before
 	public void setup() {
 		MockitoAnnotations.initMocks(this);
 		debFileReaderFactory = new DebFileReaderFactory(pluginDataResolver, serverPaths);
-		config = new DebRepositoryConfiguration("project01", "MyTestRepoName");
+		config = new DebRepositoryConfigurationJaxImpl("project01", "MyTestRepoName");
 		config.addBuildType(new DebRepositoryBuildTypeConfig("bt01", "potato", "main", ".+\\.deb").af(new Filter(".+\\.deb", "whezzy", "main")));
 		configs.add(config);
 		when(buildType.getBuildTypeId()).thenReturn("bt01");

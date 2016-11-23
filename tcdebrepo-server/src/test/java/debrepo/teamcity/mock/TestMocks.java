@@ -23,9 +23,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import jetbrains.buildServer.controllers.AuthorizationInterceptor;
+import jetbrains.buildServer.serverSide.ConfigActionFactory;
 import jetbrains.buildServer.serverSide.ProjectManager;
 import jetbrains.buildServer.serverSide.SBuildServer;
 import jetbrains.buildServer.serverSide.ServerPaths;
+import jetbrains.buildServer.serverSide.auth.SecurityContext;
+import jetbrains.buildServer.serverSide.impl.ConfigActionFactoryImpl;
 import jetbrains.buildServer.serverSide.settings.ProjectSettingsManager;
 import jetbrains.buildServer.web.openapi.PagePlace;
 import jetbrains.buildServer.web.openapi.PagePlaces;
@@ -69,8 +72,14 @@ public class TestMocks {
 	@Bean
 	PluginDescriptor pluginDescriptor() {
 		PluginDescriptor pluginDescriptor = mock(PluginDescriptor.class);
+		when(pluginDescriptor.getPluginName()).thenReturn("tcDebRepository");
 		when(pluginDescriptor.getPluginResourcesPath(anyString())).thenReturn("something/debRepository/projectConfigTab.jsp");
 		return pluginDescriptor;
+	}
+	
+	@Bean
+	SecurityContext securityContext() {
+		return mock(SecurityContext.class);
 	}
 	
 	@Bean 
@@ -83,5 +92,10 @@ public class TestMocks {
 	@Bean 
 	PagePlace pagePlace() {
 		return mock(PagePlace.class);
+	}
+	
+	@Bean 
+	ConfigActionFactory configActionFactory() {
+		return new ConfigActionFactoryImpl(securityContext());
 	}
 }
