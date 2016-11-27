@@ -38,7 +38,7 @@
   <jsp:attribute name="body_include">
   	<h2>Debian Repository : ${repoConfig.repoName}</h2>
 
-      <table>
+      <table class=settings>
 <!-- <tr><td colspan=2><p>The repository name forms part of the URL for accessing this repository. Names MUST be unique across a TeamCity 
                     instance and must only contain URL compatible characters.</p> 
                 <p>Renaming a repository will require all Debian servers 
@@ -63,8 +63,32 @@
 <div class="sidebarAdmin">
 <h2>Artifact Filter Configuration</h2>
 <h3>Artifact Filename Match (regex)</h3>
-<p>This is the regular expression used to find matching artifacts to publish. The filter will be run against the list of artifacts copied to the server</p>
+<p>This is the regular expression used to find matching artifacts to publish. 
+   The filter will be run against the list of artifacts copied to the TeamCity server when a build completes.</p>
+<p>If the filter matches, the artifact will be indexed by the Debian Repository using the <code>dist</code>, 
+	<code>component</code> and meta-data extracted from the package file (name, version, architecture)</p>
+<dl><dt>Example regex:</dt>
+   <dd style="regexExample">build/package-name-.+\.deb$</dd>
+   <dd>This will match a file in the build directory with a name beginning with <i>package-name</i> and ending with <i>.deb</i>.</dd>
+</dl>
 
+<h3>Distribution (dist)</h3>
+<p>This is the <i>dist</i> value under which the matching package will be indexed. This represents a Debian (or Ubuntu and variants) 
+     distribution. Typical values for <i>dist</i> are the distribution name: eg, jessie, wheezy, squeeze for Debian, or xenial, yakkety, zesty for Ubuntu or a symbolic name: eg, devel</p>
+<p>This can be any name you choose. It is part of the configuration line added to a machine's <code>/etc/apt/sources.list</code></p>
+<dl><dt>Example dist:</dt>
+   <dd style="regexExample">jessie</dd>
+   <dd>If the filename matches the regex (above), the package will be indexed into <i>jessie</i> distribution's package list.</dd>
+</dl>
+
+<h3>Component</h3>
+<p>This is the <i>component</i> value under which the matching package will be indexed. This represents a Debian (or Ubuntu and variants) 
+     component name. Typical values for <i>component</i> are: main, stable, unstable, testing, experimental</p>
+<p>This can be any name you choose. It forms part of the configuration line added to a machine's <code>/etc/apt/sources.list</code></p>
+<dl><dt>Example dist:</dt>
+   <dd style="regexExample">main</dd>
+   <dd>If the filename matches the regex (above), the package will be indexed into <i>main</i> component list.</dd>
+</dl>
 </div>
   </jsp:attribute>
 </bs:page>
