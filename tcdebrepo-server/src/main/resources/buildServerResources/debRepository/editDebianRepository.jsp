@@ -57,7 +57,14 @@
       </table>
 
 	<br>
+ <div class="filterTableContainer">	
     <%@ include file="editDebianRepositoryViewDetails.jsp" %>
+</div>
+<div class="sidebarAdmin">
+<h2>Artifact Filter Configuration</h2>
+<h3>Artifact Filename Match (regex)</h3>
+<p>This is the regular expression used to find matching artifacts to publish. The filter will be run against the list of artifacts copied to the server</p>
 
+</div>
   </jsp:attribute>
 </bs:page>

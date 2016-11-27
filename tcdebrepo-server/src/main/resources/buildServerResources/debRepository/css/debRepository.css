@@ -19,6 +19,15 @@ div.alert pre {
 	margin-top: 1em; 
 }
 
+div.filterTableContainer {
+	background-color:white; 
+	float:left; 
+	margin:0; 
+	padding:0;
+	padding-right: 40px; 
+	width:70%;
+}
+
 table.filterTable {
 	border:none;
 }
