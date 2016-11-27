@@ -29,9 +29,11 @@ import org.mockito.MockitoAnnotations;
 import debrepo.teamcity.entity.DebPackageEntity;
 import debrepo.teamcity.entity.DebPackageStore;
 import debrepo.teamcity.entity.DebRepositoryBuildTypeConfig;
+import debrepo.teamcity.entity.DebRepositoryConfiguration;
 import debrepo.teamcity.entity.DebRepositoryConfigurationJaxImpl;
 import debrepo.teamcity.entity.DebRepositoryConfigurations;
 import debrepo.teamcity.entity.helper.XmlPersister;
+import debrepo.teamcity.settings.DebRepositoryConfigurationChangePersister;
 import jetbrains.buildServer.serverSide.ProjectManager;
 import jetbrains.buildServer.serverSide.SBuild;
 import jetbrains.buildServer.serverSide.SBuildType;
@@ -44,8 +46,9 @@ public class DebRepositoryBaseTest {
 	final protected String BUILD_TYPE_ID_BT03 = "bt03";
 	protected DebRepositoryManager debRepositoryManager;
 	protected DebRepositoryConfigurationManager debRepositoryConfigManager;
+	@Mock protected DebRepositoryConfigurationChangePersister debRepositoryConfigurationChangePersister;
 	@Mock protected ProjectManager projectManager;
-	@Mock protected XmlPersister<DebPackageStore, DebRepositoryConfigurationJaxImpl> debRepositoryDatabaseXmlPersister;
+	@Mock protected XmlPersister<DebPackageStore, DebRepositoryConfiguration> debRepositoryDatabaseXmlPersister;
 	protected DebRepositoryConfigurationFactory debRepositoryConfigurationFactory = new DebRepositoryConfigurationFactoryImpl();
 	@Mock protected SProject project01;
 	@Mock protected SProject project02;
@@ -155,7 +158,7 @@ public class DebRepositoryBaseTest {
 		entity4.setSBuildId(build03.getBuildId());
 		entity4.setUri("ProjectName/BuildName/" + entity4.getSBuildId() + "/" + entity4.getFilename());
 		
-		debRepositoryManager = new DebRepositoryManagerImpl(projectManager, getDebRepositoryXmlPersister(), debRepositoryConfigurationFactory);
+		debRepositoryManager = new DebRepositoryManagerImpl(projectManager, getDebRepositoryXmlPersister(), debRepositoryConfigurationFactory, debRepositoryConfigurationChangePersister);
 		debRepositoryConfigManager = (DebRepositoryConfigurationManager) debRepositoryManager;
 		DebRepositoryConfigurationJaxImpl config1 = getDebRepoConfig1();
 		DebRepositoryConfigurations configs = new DebRepositoryConfigurations();
@@ -187,7 +190,7 @@ public class DebRepositoryBaseTest {
 		return config2;
 	}
 
-	public XmlPersister<DebPackageStore, DebRepositoryConfigurationJaxImpl> getDebRepositoryXmlPersister() throws IOException, NonExistantRepositoryException {
+	public XmlPersister<DebPackageStore, DebRepositoryConfiguration> getDebRepositoryXmlPersister() throws IOException, NonExistantRepositoryException {
 		return debRepositoryDatabaseXmlPersister;
 	}
 	

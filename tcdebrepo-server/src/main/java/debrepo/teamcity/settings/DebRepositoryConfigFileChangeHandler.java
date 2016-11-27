@@ -34,20 +34,18 @@ public class DebRepositoryConfigFileChangeHandler implements ChangeListener, Deb
 
 	final DebRepositoryManager myDebRepoManager;
 	final DebRepositoryConfigurationManager myDebRepoConfigManager;
-	final JaxHelper<DebRepositoryConfigurations> jaxHelper;
 	final PluginDataResolver myPluginDataResolver;
+	final DebRepositoryConfigurationChangePersister myChangePersister;
 	File configFile;
 	FileWatcher fw;
-	final ServerPaths serverPaths;
 	
 	public DebRepositoryConfigFileChangeHandler(
 			ServerPaths serverPaths, DebRepositoryManager debRepositoryManager, DebRepositoryConfigurationManager debRepositoryConfigManager, 
-			JaxHelper<DebRepositoryConfigurations> jaxHelper, PluginDataResolver pluginDataResolver) {
+			PluginDataResolver pluginDataResolver, DebRepositoryConfigurationChangePersister changePersister) {
 		this.myDebRepoManager = debRepositoryManager;
 		this.myDebRepoConfigManager = debRepositoryConfigManager;
-		this.jaxHelper = jaxHelper;
-		this.serverPaths = serverPaths;
 		this.myPluginDataResolver = pluginDataResolver;
+		this.myChangePersister = changePersister;
 		Loggers.SERVER.info("DebRepositoryConfigFileChangeHandler :: Starting");
 	}
 	
@@ -75,19 +73,18 @@ public class DebRepositoryConfigFileChangeHandler implements ChangeListener, Deb
 
 	@Override
 	public void handleConfigFileChange() {
-		try {
-			DebRepositoryConfigurations repoConfigurations =  jaxHelper.read(configFile.getPath());
-			this.myDebRepoConfigManager.updateRepositoryConfigurations(repoConfigurations);
-		} catch (FileNotFoundException e) {
-			Loggers.SERVER.warn("DebRepositoryConfigFileChangeHandler :: Exception occurred attempting to reload DebRepositoryConfigurations. File not found: " + this.configFile.getPath());
-			Loggers.SERVER.debug(e);
-		} catch (JAXBException e) {
-			Loggers.SERVER.warn("DebRepositoryConfigFileChangeHandler :: Exception occurred attempting to reload DebRepositoryConfigurations. Could not parse: " + this.configFile.getPath());
-			Loggers.SERVER.debug(e);
+		synchronized (configFile) {
+			try {
+				DebRepositoryConfigurations repoConfigurations =  myChangePersister.readDebRespositoryConfigurationChanges();
+				this.myDebRepoConfigManager.updateRepositoryConfigurations(repoConfigurations);
+			} catch (FileNotFoundException e) {
+				Loggers.SERVER.warn("DebRepositoryConfigFileChangeHandler :: Exception occurred attempting to reload DebRepositoryConfigurations. File not found: " + this.configFile.getPath());
+				Loggers.SERVER.debug(e);
+			} catch (JAXBException e) {
+				Loggers.SERVER.warn("DebRepositoryConfigFileChangeHandler :: Exception occurred attempting to reload DebRepositoryConfigurations. Could not parse: " + this.configFile.getPath());
+				Loggers.SERVER.debug(e);
+			}
 		}
-		
 	}
-	
-	
 
 }

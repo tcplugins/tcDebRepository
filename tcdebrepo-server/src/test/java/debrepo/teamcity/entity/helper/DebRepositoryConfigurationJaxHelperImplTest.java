@@ -23,6 +23,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import debrepo.teamcity.entity.DebRepositoryBuildTypeConfig;
+import debrepo.teamcity.entity.DebRepositoryConfiguration;
 import debrepo.teamcity.entity.DebRepositoryConfigurationJaxImpl;
 import debrepo.teamcity.entity.DebRepositoryConfigurations;
 

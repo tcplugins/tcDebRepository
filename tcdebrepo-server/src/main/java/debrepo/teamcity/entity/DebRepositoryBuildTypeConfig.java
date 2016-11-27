@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.UUID;
 import java.util.regex.Pattern;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -28,6 +29,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
+import javax.xml.bind.annotation.XmlType;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -106,6 +108,7 @@ public class DebRepositoryBuildTypeConfig {
 	 * and setters provided by Lombok */
 	@XmlAccessorType(XmlAccessType.FIELD)
 	@XmlRootElement @AllArgsConstructor @NoArgsConstructor @Data
+	@XmlType(propOrder = { "regex", "dist", "component", "id" })
 	public static class Filter implements Comparable<Filter>{
 		@XmlTransient
 		final int BEFORE = -1;
@@ -113,6 +116,9 @@ public class DebRepositoryBuildTypeConfig {
 		final int EQUAL = 0;
 		@XmlTransient
 		final int AFTER = 1;
+		
+		@XmlAttribute
+		private String id = UUID.randomUUID().toString();
 		
 		@XmlAttribute
 		private String regex;
@@ -123,13 +129,21 @@ public class DebRepositoryBuildTypeConfig {
 		@XmlAttribute
 		private String component;
 		
+		public Filter(String regex, String dist, String component) {
+			this(UUID.randomUUID().toString(), regex, dist, component);
+		}
+		
 		public boolean matches(String filename) {
 			return (Pattern.matches(this.regex, filename));
 		}
 
 		@Override
 		public int compareTo(Filter o) {
-			int comparison = this.dist.compareTo(o.getDist());
+			
+			int comparison = this.id.compareTo(o.getId());
+			if (comparison != EQUAL) return comparison;
+			
+			comparison = this.dist.compareTo(o.getDist());
 			if (comparison != EQUAL) return comparison;
 			
 			comparison = this.component.compareTo(o.getComponent());

@@ -41,7 +41,7 @@ public class DebRepositoryManagerImplTest extends DebRepositoryBaseTest {
 	@Test
 	public void testGetParentPackageStore() throws NonExistantRepositoryException {
 		
-		DebRepositoryManager manager = new DebRepositoryManagerImpl(projectManager, debRepositoryDatabaseXmlPersister, debRepositoryConfigurationFactory);
+		DebRepositoryManager manager = new DebRepositoryManagerImpl(projectManager, debRepositoryDatabaseXmlPersister, debRepositoryConfigurationFactory, debRepositoryConfigurationChangePersister);
 		DebRepositoryConfigurationJaxImpl config1 = new DebRepositoryConfigurationJaxImpl("project01", "MyStoreName");
 		config1.addBuildType(new DebRepositoryBuildTypeConfig(bt01.getBuildTypeId())
 										.af(new Filter(".*\\.deb", "wheezy", "main")));
@@ -64,7 +64,7 @@ public class DebRepositoryManagerImplTest extends DebRepositoryBaseTest {
 	public void testGetNonExistantPackageStore() throws NonExistantRepositoryException {
 		
 		DebRepositoryConfigurationJaxImpl config1 = new DebRepositoryConfigurationJaxImpl("project01", "MyStoreName");
-		DebRepositoryManager manager = new DebRepositoryManagerImpl(projectManager, debRepositoryDatabaseXmlPersister, debRepositoryConfigurationFactory);
+		DebRepositoryManager manager = new DebRepositoryManagerImpl(projectManager, debRepositoryDatabaseXmlPersister, debRepositoryConfigurationFactory, debRepositoryConfigurationChangePersister);
 		manager.initialisePackageStore(config1);
 		manager.getPackageStore("MystoreMame2");
 		
@@ -73,7 +73,7 @@ public class DebRepositoryManagerImplTest extends DebRepositoryBaseTest {
 	@Test
 	public void testGetNullPackageStoreForBuild() throws NonExistantRepositoryException {
 		
-		DebRepositoryManager manager = new DebRepositoryManagerImpl(projectManager, debRepositoryDatabaseXmlPersister, debRepositoryConfigurationFactory);
+		DebRepositoryManager manager = new DebRepositoryManagerImpl(projectManager, debRepositoryDatabaseXmlPersister, debRepositoryConfigurationFactory, debRepositoryConfigurationChangePersister);
 		DebRepositoryConfigurationJaxImpl config1 = new DebRepositoryConfigurationJaxImpl("project01", "MyStoreName");
 		DebRepositoryConfigurationJaxImpl config2 = new DebRepositoryConfigurationJaxImpl("project02", "MyStoreName2");
 		manager.initialisePackageStore(config1);
@@ -85,7 +85,7 @@ public class DebRepositoryManagerImplTest extends DebRepositoryBaseTest {
 	@Test
 	public void testGetAddPackageToPackageStore() throws NonExistantRepositoryException {
 		
-		debRepositoryManager = new DebRepositoryManagerImpl(projectManager, debRepositoryDatabaseXmlPersister, debRepositoryConfigurationFactory);
+		debRepositoryManager = new DebRepositoryManagerImpl(projectManager, debRepositoryDatabaseXmlPersister, debRepositoryConfigurationFactory, debRepositoryConfigurationChangePersister);
 		debRepositoryManager.initialisePackageStore(getDebRepoConfig1());
 		debRepositoryManager.initialisePackageStore(getDebRepoConfig2());
 		List<DebPackageStore> store = debRepositoryManager.getPackageStoresForBuildType("bt01");

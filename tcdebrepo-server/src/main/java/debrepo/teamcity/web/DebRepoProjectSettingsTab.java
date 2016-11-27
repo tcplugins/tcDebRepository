@@ -24,6 +24,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.jetbrains.annotations.NotNull;
 
+import debrepo.teamcity.entity.DebRepositoryConfiguration;
 import debrepo.teamcity.entity.DebRepositoryConfigurationJaxImpl;
 import debrepo.teamcity.entity.DebRepositoryStatistics;
 import debrepo.teamcity.service.DebRepositoryConfigurationManager;
@@ -40,7 +41,7 @@ import lombok.AllArgsConstructor;
 import lombok.Value;
 
 public class DebRepoProjectSettingsTab extends EditProjectTab {
-	private static final String TAB_TITLE = "Deb Repository";
+	private static final String TAB_TITLE = "Debian Repositories";
 	private final DebRepositoryManager myDebRepositoryManager;
 	private final DebRepositoryConfigurationManager myDebRepositoryConfigManager;
 	private final SBuildServer myServer;
@@ -57,7 +58,7 @@ public class DebRepoProjectSettingsTab extends EditProjectTab {
 		this.myDebRepositoryConfigManager = debRepositoryConfigManager;
         this.mySecurityContext = securityContext;
         this.myServer = sBuildServer;
-        addCssFile(pluginDescriptor.getPluginResourcesPath("debRepository/debRepository.css"));
+        addCssFile(pluginDescriptor.getPluginResourcesPath("debRepository/css/debRepository.css"));
         addJsFile(pluginDescriptor.getPluginResourcesPath("debRepository/projectConfigSettings.js"));
     }
 
@@ -68,7 +69,7 @@ public class DebRepoProjectSettingsTab extends EditProjectTab {
         if (currentProject == null) {
             return TAB_TITLE;
         }
-        final List<DebRepositoryConfigurationJaxImpl> repoConfigs = myDebRepositoryConfigManager.getConfigurationsForProject(currentProject.getProjectId());
+        final List<DebRepositoryConfiguration> repoConfigs = myDebRepositoryConfigManager.getConfigurationsForProject(currentProject.getProjectId());
         if (repoConfigs.isEmpty()) {
             return TAB_TITLE;
         }
@@ -95,7 +96,7 @@ public class DebRepoProjectSettingsTab extends EditProjectTab {
                 break;
             }
             final List<DebRepositoryConfigAndStatsWrapper> infoPack = new ArrayList<>();
-            for (DebRepositoryConfigurationJaxImpl config :this.myDebRepositoryConfigManager.getConfigurationsForProject(project.getProjectId())) {
+            for (DebRepositoryConfiguration config :this.myDebRepositoryConfigManager.getConfigurationsForProject(project.getProjectId())) {
             	infoPack.add(new DebRepositoryConfigAndStatsWrapper(config, 
             										   myDebRepositoryManager.getRepositoryStatistics(
             												   						config, 
@@ -121,7 +122,7 @@ public class DebRepoProjectSettingsTab extends EditProjectTab {
 	
 	@Value @AllArgsConstructor
 	public static class DebRepositoryConfigAndStatsWrapper {
-		DebRepositoryConfigurationJaxImpl debRepositoryConfiguration;
+		DebRepositoryConfiguration debRepositoryConfiguration;
 		DebRepositoryStatistics debRepositoryStatistics;
 	}
 

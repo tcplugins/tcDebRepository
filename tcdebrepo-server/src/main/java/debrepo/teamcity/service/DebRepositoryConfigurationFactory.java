@@ -1,6 +1,6 @@
 package debrepo.teamcity.service;
 
-import debrepo.teamcity.entity.DebRepositoryConfigurationJaxImpl;
+import debrepo.teamcity.entity.DebRepositoryConfiguration;
 
 public interface DebRepositoryConfigurationFactory {
 	/**
@@ -9,7 +9,8 @@ public interface DebRepositoryConfigurationFactory {
 	 * @param repositoryName
 	 * @return
 	 */
-	public abstract DebRepositoryConfigurationJaxImpl createDebRepositoryConfiguration(String uuid, String repositoryName);
-	public abstract DebRepositoryConfigurationJaxImpl copyDebRepositoryConfiguration(DebRepositoryConfigurationJaxImpl sourceConfig);
+	public abstract DebRepositoryConfiguration createDebRepositoryConfiguration(String projectId, String repositoryName);
+	public abstract DebRepositoryConfiguration copyDebRepositoryConfiguration(DebRepositoryConfiguration sourceConfig);
+	public abstract DebRepositoryConfiguration copyDebRepositoryConfiguration(DebRepositoryConfigurationManager manager, String uuid);
 
 }

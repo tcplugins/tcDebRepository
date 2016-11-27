@@ -12,13 +12,26 @@
      	class="debrepo.teamcity.web.DebRepoProjectSettingsTab" 
      	/>
 
-       <bean id="debRepoConfigurationActionController"
-     	class="debrepo.teamcity.web.DebRepoConfigurationActionController" 
+       <bean id="debRepoProjectSettingsTabActionController"
+     	class="debrepo.teamcity.web.DebRepoProjectSettingsTabActionController" 
+     	/>
+
+       <bean id="debRepoConfigurationEditPageController"
+     	class="debrepo.teamcity.web.DebRepoConfigurationEditPageController" 
+     	/>
+
+       <bean id="debRepoConfigurationEditPageActionController"
+     	class="debrepo.teamcity.web.DebRepoConfigurationEditPageActionController" 
      	/>
      	
        <bean id="debRepositoryManager"
      	class="debrepo.teamcity.service.DebRepositoryManagerImpl"
      	/>
+     	
+       <bean id="debRepositoryConfigurationChangePersister"
+     	class="debrepo.teamcity.settings.DebRepositoryConfigurationChangePersisterImpl">
+     	    <constructor-arg ref="jaxConfigHelper"/>
+     	</bean>
      	
        <bean id="pluginDataResolver"
      	class="debrepo.teamcity.entity.helper.PluginDataResolverImpl"

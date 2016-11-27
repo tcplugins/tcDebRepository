@@ -31,7 +31,7 @@ public class StringUtils {
     }
 
 	public static String getDebRepoUrl(String rootUrl, String repositoryName) {
-		return stripTrailingSlash(rootUrl) + DebDownloadController.DEBREPO_BASE_URL + "/" + repositoryName;
+		return stripTrailingSlash(rootUrl) + DebDownloadController.DEBREPO_BASE_URL + "/" + repositoryName + "/";
 	}
 
 }

@@ -15,7 +15,7 @@
  * 
  * 
  * Code in this class is based on the UI classes in the 
- * TeamCity.TeamCity.SonarQubePlugin by Andrey Titov (@linfar on Github)
+ * TeamCity.SonarQubePlugin by Andrey Titov (@linfar on Github)
  *
  * 
  *******************************************************************************/
@@ -23,37 +23,36 @@
 
 package debrepo.teamcity.web;
 
+import java.io.IOException;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.jdom.Element;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import debrepo.teamcity.entity.DebRepositoryConfiguration;
+import debrepo.teamcity.service.DebRepositoryConfigurationFactory;
+import debrepo.teamcity.service.DebRepositoryConfigurationManager;
+import debrepo.teamcity.service.DebRepositoryManager;
 import jetbrains.buildServer.controllers.BaseAjaxActionController;
-import jetbrains.buildServer.controllers.PublicKeyUtil;
 import jetbrains.buildServer.serverSide.ConfigAction;
 import jetbrains.buildServer.serverSide.ConfigActionFactory;
 import jetbrains.buildServer.serverSide.ProjectManager;
 import jetbrains.buildServer.serverSide.SProject;
 import jetbrains.buildServer.serverSide.auth.AuthUtil;
 import jetbrains.buildServer.serverSide.auth.SecurityContext;
-import jetbrains.buildServer.serverSide.crypt.RSACipher;
 import jetbrains.buildServer.util.StringUtil;
 import jetbrains.buildServer.web.openapi.ControllerAction;
 import jetbrains.buildServer.web.openapi.WebControllerManager;
-import org.jdom.Element;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
-import debrepo.teamcity.entity.DebRepositoryConfigurationJaxImpl;
-import debrepo.teamcity.service.DebRepositoryConfigurationFactory;
-import debrepo.teamcity.service.DebRepositoryConfigurationManager;
-import debrepo.teamcity.service.DebRepositoryManager;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 
 /**
  * Controller class to receive Ajax events from the {@link DebRepoProjectSettingsTab}
  * Manages the configuration of a project's DebRepositories.
  */
-public class DebRepoConfigurationActionController extends BaseAjaxActionController implements ControllerAction {
-    private static final String DEBREPO_UUID = "debrepo.id";
+public class DebRepoProjectSettingsTabActionController extends BaseAjaxActionController implements ControllerAction {
+    private static final String DEBREPO_UUID = "debrepo.uuid";
     private static final String DEBREPO_NAME = "debrepo.name";
     private static final String SONAR_URL = "sonar.host.url";
     private static final String SONAR_LOGIN = "sonar.login";
@@ -77,11 +76,11 @@ public class DebRepoConfigurationActionController extends BaseAjaxActionControll
     @NotNull
     private final ProjectManager myProjectManager;
     @NotNull
-    private final SecurityContext securityContext;
+    private final SecurityContext mySecurityContext;
     @NotNull
     private final ConfigActionFactory myConfigActionFactory;
 
-    public DebRepoConfigurationActionController(@NotNull final WebControllerManager controllerManager,
+    public DebRepoProjectSettingsTabActionController(@NotNull final WebControllerManager controllerManager,
                                      @NotNull final DebRepositoryManager debRepositoryManager,
                                      @NotNull final DebRepositoryConfigurationManager debRepositoryConfigurationManager,
                                      @NotNull final DebRepositoryConfigurationFactory debRepositoryConfigurationFactory,
@@ -97,7 +96,7 @@ public class DebRepoConfigurationActionController extends BaseAjaxActionControll
         myDebRepositoryConfigurationManager = debRepositoryConfigurationManager;
         myDebRepositoryConfigurationFactory = debRepositoryConfigurationFactory;
         myProjectManager = projectManager;
-        this.securityContext = securityContext;
+        mySecurityContext = securityContext;
     }
 
     public boolean canProcess(@NotNull final HttpServletRequest request) {
@@ -120,7 +119,7 @@ public class DebRepoConfigurationActionController extends BaseAjaxActionControll
         }
 
         // Security test (user without management permission could access this controller)
-        if (!AuthUtil.hasPermissionToManageProject(securityContext.getAuthorityHolder(), project.getProjectId())){
+        if (!AuthUtil.hasPermissionToManageProject(mySecurityContext.getAuthorityHolder(), project.getProjectId())){
             ajaxResponse.setAttribute("error", "User does not have permission to manage repositories for this project");
             return;
         }
@@ -129,17 +128,17 @@ public class DebRepoConfigurationActionController extends BaseAjaxActionControll
         try {
             ConfigAction configAction = null;
             if (ADD_DEBREPO_ACTION.equals(action)) {
-                final DebRepositoryConfigurationJaxImpl debRepoInfo = addDebRepoConfig(request, project, ajaxResponse);
+                final DebRepositoryConfiguration debRepoInfo = addDebRepoConfig(request, project, ajaxResponse);
                 if (debRepoInfo != null) {
                     configAction = myConfigActionFactory.createAction(project, "Debian Repository '" + debRepoInfo.getRepoName() + "' has been created");
                 }
             } else if (REMOVE_DEBREPO_ACTION.equals(action)) {
-                final DebRepositoryConfigurationJaxImpl debRepoInfo = removeDebRepositoryConfiguration(request, project, ajaxResponse);
+                final DebRepositoryConfiguration debRepoInfo = removeDebRepositoryConfiguration(request, project, ajaxResponse);
                 if (debRepoInfo != null) {
                     configAction = myConfigActionFactory.createAction(project, "Debian Repository '" + debRepoInfo.getRepoName() + "' was removed");
                 }
             } else if (EDIT_DEBREPO_ACTION.equals(action)) {
-                final DebRepositoryConfigurationJaxImpl debRepoInfo = editDebRepoConfig(request, project, ajaxResponse);
+                final DebRepositoryConfiguration debRepoInfo = editDebRepoConfig(request, project, ajaxResponse);
                 if (debRepoInfo != null) {
                     configAction = myConfigActionFactory.createAction(project, "Debian Repository settings '" + debRepoInfo.getRepoName() + "' were changed");
                 }
@@ -152,7 +151,7 @@ public class DebRepoConfigurationActionController extends BaseAjaxActionControll
         }
     }
 
-    private DebRepositoryConfigurationJaxImpl editDebRepoConfig(@NotNull final HttpServletRequest request,
+    private DebRepositoryConfiguration editDebRepoConfig(@NotNull final HttpServletRequest request,
                                 @NotNull final SProject project,
                                 @NotNull final Element ajaxResponse) {
         if (!validate(request, ajaxResponse)) {
@@ -165,12 +164,12 @@ public class DebRepoConfigurationActionController extends BaseAjaxActionControll
             return null;
         }
 
-        final DebRepositoryConfigurationJaxImpl old = myDebRepositoryConfigurationManager.getDebRepositoryConfiguration(debRepoUuid);
+        final DebRepositoryConfiguration old = myDebRepositoryConfigurationManager.getDebRepositoryConfiguration(debRepoUuid);
         if (old == null) {
             return null;
         }
 
-        final DebRepositoryConfigurationJaxImpl debRepoConfig = createDebRepoConfig(request, debRepoUuid);
+        final DebRepositoryConfiguration debRepoConfig = buildDebRepoConfigFromRequest(request, project);
         final DebRepositoryConfigurationManager.DebRepositoryActionResult result = myDebRepositoryConfigurationManager.editDebRepositoryConfiguration(debRepoConfig);
         if (!result.isError()) {
             ajaxResponse.setAttribute("status", "OK");
@@ -182,19 +181,32 @@ public class DebRepoConfigurationActionController extends BaseAjaxActionControll
 
 
     @NotNull
-    private DebRepositoryConfigurationJaxImpl createDebRepoConfig(@NotNull HttpServletRequest request, String uuid) {
-        return myDebRepositoryConfigurationFactory.createDebRepositoryConfiguration(uuid,
-                StringUtil.nullIfEmpty(request.getParameter(DEBREPO_NAME)));
+    private DebRepositoryConfiguration buildDebRepoConfigFromRequest(@NotNull HttpServletRequest request, SProject project) {
+    	DebRepositoryConfiguration existing;
+    	
+    	if (StringUtil.nullIfEmpty(request.getParameter(DEBREPO_UUID)) == null){
+    		existing = myDebRepositoryConfigurationFactory.createDebRepositoryConfiguration(project.getProjectId(),
+        			StringUtil.nullIfEmpty(request.getParameter(DEBREPO_NAME)));
+    	} else {
+    		existing = myDebRepositoryConfigurationFactory.copyDebRepositoryConfiguration(myDebRepositoryConfigurationManager, StringUtil.nullIfEmpty(request.getParameter(DEBREPO_UUID))); 
+    	}
+    	
+        if (StringUtil.nullIfEmpty(request.getParameter(DEBREPO_NAME)) != null){
+        	existing.setRepoName(request.getParameter(DEBREPO_NAME));
+        }
+        return existing;
+    	
     }
 
-    private DebRepositoryConfigurationJaxImpl removeDebRepositoryConfiguration(@NotNull final HttpServletRequest request,
+    private DebRepositoryConfiguration removeDebRepositoryConfiguration(@NotNull final HttpServletRequest request,
                                   @NotNull final SProject project,
                                   @NotNull final Element ajaxResponse) throws IOException {
         final String repoUuid = getRepoUUID(request);
         if (repoUuid == null) {
             ajaxResponse.setAttribute("error", "ID is not set");
         } else {
-            final DebRepositoryConfigurationManager.DebRepositoryActionResult result = myDebRepositoryConfigurationManager.removeDebRespository(repoUuid);
+        	final DebRepositoryConfiguration debRepoConfig = buildDebRepoConfigFromRequest(request, project);
+            final DebRepositoryConfigurationManager.DebRepositoryActionResult result = myDebRepositoryConfigurationManager.removeDebRespository(debRepoConfig);
             if (!result.isError()) {
                 ajaxResponse.setAttribute("status", result.getReason());
                 return result.getBeforeAction();
@@ -205,25 +217,25 @@ public class DebRepoConfigurationActionController extends BaseAjaxActionControll
         return null;
     }
 
-    private DebRepositoryConfigurationJaxImpl addDebRepoConfig(@NotNull final HttpServletRequest request,
+    private DebRepositoryConfiguration addDebRepoConfig(@NotNull final HttpServletRequest request,
                                   @NotNull final SProject project,
                                   @NotNull final Element ajaxResponse) throws IOException {
         if (validate(request, ajaxResponse)) {
-            final DebRepositoryConfigurationJaxImpl serverInfo = createDebRepoConfig(request, null);
-            final DebRepositoryConfigurationManager.DebRepositoryActionResult result = myDebRepositoryConfigurationManager.addDebRepository(serverInfo);
+            final DebRepositoryConfiguration repoConfig = buildDebRepoConfigFromRequest(request, project);
+            final DebRepositoryConfigurationManager.DebRepositoryActionResult result = myDebRepositoryConfigurationManager.addDebRepository(repoConfig);
             if (!result.isError()) {
                 ajaxResponse.setAttribute("status", "OK");
             } else {
                 ajaxResponse.setAttribute("error", result.getReason());
             }
-            return serverInfo;
+            return repoConfig;
         }
         return null;
     }
 
     private boolean validate(HttpServletRequest request, Element ajaxResponse) {
         if (request.getParameter(DEBREPO_NAME) == null) {
-            ajaxResponse.setAttribute("error", "Server name should be set");
+            ajaxResponse.setAttribute("error", "Respository name must be set");
             return false;
         }
         return true;

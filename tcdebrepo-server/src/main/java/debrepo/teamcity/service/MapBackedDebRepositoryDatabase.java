@@ -22,7 +22,7 @@ import java.util.List;
 import debrepo.teamcity.Loggers;
 import debrepo.teamcity.entity.DebPackageEntity;
 import debrepo.teamcity.entity.DebPackageStore;
-import debrepo.teamcity.entity.DebRepositoryConfigurationJaxImpl;
+import debrepo.teamcity.entity.DebRepositoryConfiguration;
 import jetbrains.buildServer.serverSide.ProjectManager;
 import jetbrains.buildServer.serverSide.SBuild;
 import jetbrains.buildServer.serverSide.SBuildType;
@@ -45,7 +45,7 @@ public class MapBackedDebRepositoryDatabase implements DebRepositoryDatabase {
 	@Override
 	public boolean addPackage(DebPackageEntity entity) {
 		boolean added = false;
-		for (DebRepositoryConfigurationJaxImpl config : this.myDebRepositoryConfigurationManager.findConfigurationsForDebRepositoryEntity(entity)) {
+		for (DebRepositoryConfiguration config : this.myDebRepositoryConfigurationManager.findConfigurationsForDebRepositoryEntity(entity)) {
 			this.myDebRepositoryManager.addBuildPackage(config, entity);
 			added = true;
 		}

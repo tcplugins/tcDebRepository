@@ -29,6 +29,7 @@ import org.mockito.Mock;
 
 import debrepo.teamcity.entity.DebPackageStore;
 import debrepo.teamcity.entity.DebPackageStoreEntity;
+import debrepo.teamcity.entity.DebRepositoryConfiguration;
 import debrepo.teamcity.entity.DebRepositoryConfigurationJaxImpl;
 import debrepo.teamcity.service.DebRepositoryBaseTest;
 import debrepo.teamcity.service.MapBackedDebRepositoryDatabase;
@@ -37,7 +38,7 @@ import jetbrains.buildServer.serverSide.ServerPaths;
 
 public class DebRepositoryDatabaseXmlPersisterImplTest extends DebRepositoryBaseTest {
 
-	XmlPersister<DebPackageStore,DebRepositoryConfigurationJaxImpl> debRepositoryDatabaseXmlPersister;
+	XmlPersister<DebPackageStore,DebRepositoryConfiguration> debRepositoryDatabaseXmlPersister;
 	@Mock ServerPaths serverPaths;
 
 	@Before
@@ -53,7 +54,7 @@ public class DebRepositoryDatabaseXmlPersisterImplTest extends DebRepositoryBase
 	}
 	
 	@Override
-	public XmlPersister<DebPackageStore, DebRepositoryConfigurationJaxImpl> getDebRepositoryXmlPersister() throws IOException, NonExistantRepositoryException {
+	public XmlPersister<DebPackageStore, DebRepositoryConfiguration> getDebRepositoryXmlPersister() throws IOException, NonExistantRepositoryException {
 		setuplocal();
 		return debRepositoryDatabaseXmlPersister;
 	}

@@ -199,7 +199,7 @@ public class DebDownloadController extends BaseController {
 					linkItems.add(LinkItem.builder().text("binary-" + arch).type(LINK_TYPE_REPO_DIR).url("./binary-" + arch + "/").build());
 				}
 				params.put("linkItems", linkItems);
-				params.put("alertInfo", StringUtils.getDebRepoUrl(myServer.getRootUrl(), repoName) + "/  " + distName + "  " + component);
+				params.put("alertInfo", StringUtils.getDebRepoUrl(myServer.getRootUrl(), repoName) + "  " + distName + "  " + component);
 				params.put("directoryTitle", repoName);
 				params.put("currentPathLevel", component);
 				

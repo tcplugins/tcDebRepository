@@ -11,6 +11,7 @@
 
     <!-- Bootstrap -->
     <link href="${jspHome}debRepository/css/bootstrap.min.css" rel="stylesheet">
+    <link href="${jspHome}debRepository/css/debRepository.css" rel="stylesheet">
 
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -18,12 +19,6 @@
       <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
       <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
     <![endif]-->
-
-    <style>
-      ul.indexcrumb { padding-left: 5px; }
-      ul.indexcrumb li { padding-right: 0; padding-left: 0; margin-left:0; margin-right:0; }
-      div.alert pre { padding-top: 1em; margin-top: 1em; }
-    </style>
   </head>
   <body>
     <div class="jumbotron">

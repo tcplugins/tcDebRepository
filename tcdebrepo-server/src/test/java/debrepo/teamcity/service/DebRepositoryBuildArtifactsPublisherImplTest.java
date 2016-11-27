@@ -39,6 +39,7 @@ import debrepo.teamcity.archive.DebFileReaderFactory;
 import debrepo.teamcity.entity.DebPackageEntity;
 import debrepo.teamcity.entity.DebRepositoryBuildTypeConfig;
 import debrepo.teamcity.entity.DebRepositoryBuildTypeConfig.Filter;
+import debrepo.teamcity.entity.DebRepositoryConfiguration;
 import debrepo.teamcity.entity.DebRepositoryConfigurationJaxImpl;
 import debrepo.teamcity.entity.helper.PluginDataResolver;
 import jetbrains.buildServer.serverSide.SBuild;
@@ -70,9 +71,9 @@ public class DebRepositoryBuildArtifactsPublisherImplTest {
 	BuildArtifacts buildArtifacts;
 	
 	DebFileReaderFactory debFileReaderFactory;
-	DebRepositoryConfigurationJaxImpl config;
+	DebRepositoryConfiguration config;
 	
-	Set<DebRepositoryConfigurationJaxImpl> configs = new TreeSet<>();
+	Set<DebRepositoryConfiguration> configs = new TreeSet<>();
 	
 	@Before
 	public void setup() {

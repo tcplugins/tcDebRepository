@@ -21,20 +21,21 @@ import java.util.UUID;
 
 import debrepo.teamcity.entity.DebPackageEntity;
 import debrepo.teamcity.entity.DebPackageStore;
+import debrepo.teamcity.entity.DebRepositoryConfiguration;
 import debrepo.teamcity.entity.DebRepositoryConfigurationJaxImpl;
 import debrepo.teamcity.entity.DebRepositoryStatistics;
 
 public interface DebRepositoryManager {
 
 	public DebPackageStore getPackageStore(String storeName) throws NonExistantRepositoryException;
-	public DebPackageStore initialisePackageStore(DebRepositoryConfigurationJaxImpl conf);
+	public DebPackageStore initialisePackageStore(DebRepositoryConfiguration conf);
 	public List<DebPackageStore> getPackageStoresForBuildType(String buildTypeid) throws NonExistantRepositoryException;
 	public List<DebPackageStore> getPackageStoresForDebPackage(DebPackageEntity entity) throws NonExistantRepositoryException;
 	public DebPackageStore getPackageStoreForProject(String projectId) throws NonExistantRepositoryException;
 	public boolean persist(UUID uuid);
 	public DebRepositoryStatistics getRepositoryStatistics(String uuid, String repoUrl);
-	public DebRepositoryStatistics getRepositoryStatistics(DebRepositoryConfigurationJaxImpl projectConfig, String repoUrl);
-	public void addBuildPackage(DebRepositoryConfigurationJaxImpl config, DebPackageEntity newEntity);
+	public DebRepositoryStatistics getRepositoryStatistics(DebRepositoryConfiguration projectConfig, String repoUrl);
+	public void addBuildPackage(DebRepositoryConfiguration config, DebPackageEntity newEntity);
 	public Set<String> findUniqueArchByDistAndComponent(String repoName, String distName, String component) throws NonExistantRepositoryException;
 	public Set<String> findUniqueComponentByDist(String repoName, String distName) throws NonExistantRepositoryException;
 	public Set<String> findUniqueDist(String repoName) throws NonExistantRepositoryException;

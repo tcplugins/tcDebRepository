@@ -1,26 +1,26 @@
 
 DebRepoPlugin = {
-    removeRepo: function(projectId, serverId) {
+    removeDebRepo: function(projectId, repoUuid) {
         if (!confirm("The repository will be permanently deleted. Proceed?")) {
             return;
         }
         BS.ajaxRequest(window['base_uri'] + '/admin/tcDebRepository/manageDebianRepositories.html', {
             parameters: Object.toQueryString({
-                action: 'removeRepo',
+                action: 'removeDebRepo',
                 projectId: projectId,
-                'serverinfo.uuid': repoUuid
+                'debrepo.uuid': repoUuid
             }),
             onComplete: function(transport) {
                 $("DebRepos").refresh();
             }
         });
     },
-    editServer: function(data) {
-    	DebRepoPlugin.RepoConfigurationDialog.showDialog('editRepo', data);
-        $j(".runnerFormTable input[id='serverinfo.uuid']").prop("disabled", true);
+    editDebRepo: function(data) {
+    	DebRepoPlugin.RepoConfigurationDialog.showDialog("Edit Debian Repository", 'editDebRepo', data);
+        $j(".runnerFormTable input[id='debrepo.uuid']").prop("disabled", true);
     },
-    addRepo: function(projectId) {
-    	DebRepoPlugin.RepoConfigurationDialog.showDialog('addRepo', {uuid: '', name: '', projectId: projectId});
+    addDebRepo: function(projectId) {
+    	DebRepoPlugin.RepoConfigurationDialog.showDialog("Add Debian Repository", 'addDebRepo', {uuid: '', name: '', projectId: projectId});
     },
     RepoConfigurationDialog: OO.extend(BS.AbstractWebForm, OO.extend(BS.AbstractModalDialog, {
         getContainer: function () {
@@ -31,23 +31,24 @@ DebRepoPlugin = {
             return $('repoConfigForm');
         },
 
-        showDialog: function (action, data) {
+        showDialog: function (title, action, data) {
             $j("input[id='DebRepoaction']").val(action);
+            $j(".dialogTitle").val(title);
             this.cleanFields(data);
             this.cleanErrors();
             this.showCentered();
         },
 
         cleanFields: function (data) {
-            $j("input[id='serverinfo.uuid']").val(data.uuid);
-            $j(".runnerFormTable input[id='serverinfo.name']").val(data.name);
-            $j("#debRepoForm input[id='projectId']").val(data.projectId);
+            $j("input[id='debrepo.uuid']").val(data.uuid);
+            $j(".runnerFormTable input[id='debrepo.name']").val(data.name);
+            $j("#repoConfigForm input[id='projectId']").val(data.projectId);
 
             this.cleanErrors();
         },
 
         cleanErrors: function () {
-            $j("#debRepoForm .error").remove();
+            $j("#repoConfigForm .error").remove();
         },
 
         error: function($element, message) {
@@ -58,11 +59,20 @@ DebRepoPlugin = {
                 $element.after("<p class='error'>" + message + "</p>");
             }
         },
+        
+        ajaxError: function(message) {
+        	var next = $j("#ajaxResult").next();
+        	if (next != null && next.prop("class") != null && next.prop("class").indexOf('error') > 0) {
+        		next.text(message);
+        	} else {
+        		$j("#ajaxResult").after("<p class='error'>" + message + "</p>");
+        	}
+        },
 
         doValidate: function() {
             var errorFound = false;
 
-            var name = $j('input[id="serverinfo.name"]');
+            var name = $j('input[id="debrepo.name"]');
             if (name.val() == "") {
                 this.error(name, "Please set the repository name");
                 errorFound = true;
@@ -79,10 +89,10 @@ DebRepoPlugin = {
             }
 
             var parameters = {
-                "serverinfo.name": $j(".runnerFormTable input[id='serverinfo.name']").val(),
+                "debrepo.name": $j(".runnerFormTable input[id='debrepo.name']").val(),
                 "projectId": $j("#repoConfigForm #projectId").val(),
-                action: $j("#debRepoForm #DebRepoaction").val(),
-                "serverinfo.uuid": $j("#debRepoForm input[id='serverinfo.uuid']").val()
+                action: $j("#repoConfigForm #DebRepoaction").val(),
+                "debrepo.uuid": $j("#repoConfigForm input[id='debrepo.uuid']").val()
             };
 
              var dialog = this;
@@ -98,9 +108,8 @@ DebRepoPlugin = {
                             var error = responseTag.getAttribute("error");
                             if (error != null) {
                                 shouldClose = false;
-                                alert(error);
-                            }
-                            if (responseTag.getAttribute("status") == "OK") {
+                                dialog.ajaxError(error);
+                            } else if (responseTag.getAttribute("status") == "OK") {
                                 shouldClose = true;
                             } else if (responseTag.firstChild == null) {
                                 shouldClose = false;

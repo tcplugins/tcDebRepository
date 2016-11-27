@@ -26,7 +26,7 @@ import debrepo.teamcity.archive.DebFileReaderFactory;
 import debrepo.teamcity.entity.DebPackageEntity;
 import debrepo.teamcity.entity.DebRepositoryBuildTypeConfig;
 import debrepo.teamcity.entity.DebRepositoryBuildTypeConfig.Filter;
-import debrepo.teamcity.entity.DebRepositoryConfigurationJaxImpl;
+import debrepo.teamcity.entity.DebRepositoryConfiguration;
 import jetbrains.buildServer.parameters.ParametersProvider;
 import jetbrains.buildServer.parameters.impl.ReferenceResolver;
 import jetbrains.buildServer.serverSide.SBuild;
@@ -64,9 +64,9 @@ public class DebRepositoryBuildArtifactsPublisherImpl implements DebRepositoryBu
 			
 			
 			// Get a list of configs for this build.
-			Set<DebRepositoryConfigurationJaxImpl> configs = this.myDepRepositoryConfigManager.findConfigurationsForBuildType(build.getBuildTypeId());
+			Set<DebRepositoryConfiguration> configs = this.myDepRepositoryConfigManager.findConfigurationsForBuildType(build.getBuildTypeId());
 			// iterate of the list of configs and check the filters match.
-			for (DebRepositoryConfigurationJaxImpl config : configs) {
+			for (DebRepositoryConfiguration config : configs) {
 				for (DebRepositoryBuildTypeConfig bt : config.getBuildTypes()) {
 					if (build.getBuildType().getBuildTypeId().equals(bt.getBuildTypeId())){
 						for (Filter filter : bt.getDebFilters()) {
