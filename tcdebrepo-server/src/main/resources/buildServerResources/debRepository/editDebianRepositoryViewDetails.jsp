@@ -20,7 +20,7 @@
   
   <p>Artifact Filters are run against a build when it completes. Any artifacts which match a filter are added to the 
      Debian Repository using the <b>dist</b> and <b>component</b> values specified with the filter. An artifact may 
-     match mutiple filters, and will be indexed in each category. This is a common case, where an artifact may be 
+     match multiple filters, and will be indexed in each category. This is a common case, where an artifact may be 
      compatible with multiple distributions or components.</p> 
   </div>   
      
@@ -34,7 +34,10 @@
 	      	<tr class="filterHeading"><th>Artifact Filename Match (regex)</th><th>Distribution (dist)</th><th colspan=2>Component</th></tr>
 	      	<c:forEach items="${filterTypeEntry.value}" var="filterAndBuild">
 	      		<c:set var="filter" value="${filterAndBuild.filter}"/>
-	      		<tr><td>${filter.regex}</td><td>${filter.dist}</td><td>${filter.component}</td><td><a href="#">edit</a></td></tr>     
+	      		<tr>
+	      			<td>${filter.regex}</td><td>${filter.dist}</td><td>${filter.component}</td>
+	      			<td><a id="editDebFilter" href="#" onclick="DebRepoFilterPlugin.editFilter({ uuid: '${debRepoBean.uuid}', name: '${debRepoBean.name}', id: '${filter.id}', dist:'${filter.dist}' }); return false">edit...</a></td>
+	      		</tr>     
 	      	</c:forEach>
 	      	<tr><td colspan=4><a href="">Add Artifact Filter </a></td></tr>
 	      	<tr class="blankline"><td colspan=4>&nbsp;</td></tr>

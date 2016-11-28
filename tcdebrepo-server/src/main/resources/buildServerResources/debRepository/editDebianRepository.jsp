@@ -94,5 +94,52 @@
 		</dl>
 	</div>
 </div>
+
+    <bs:dialog dialogId="editFilterDialog"
+               dialogClass="editFilterDialog"
+               title="Edit Debian Repository"
+               closeCommand="DebRepoFilterPlugin.RepoEditFilterDialog.close()">
+        <forms:multipartForm id="repoEditFilterForm"
+                             action="/admin/tcDebRepository/manageDebianRepositories.html"
+                             targetIframe="hidden-iframe"
+                             onsubmit="return DebRepoFilterPlugin.RepoEditFilterDialog.doPost();">
+
+            <table class="runnerFormTable">
+                <tr>
+                    <th>regex<l:star/></th>
+                    <td>
+                        <div><input type="text" id="debrepofilter.regex" name="debrepofilter.regex"/></div>
+                        <div id="ajaxResultRegex"></div>
+                    </td>
+                </tr>
+                <tr>
+                    <th>dist<l:star/></th>
+                    <td>
+                        <div><input type="text" id="debrepofilter.dist" name="debrepofilter.dist"/></div>
+                        <div id="ajaxResultDist"></div>
+                    </td>
+                </tr>
+                <tr>
+                    <th>component<l:star/></th>
+                    <td>
+                        <div><input type="text" id="debrepofilter.component" name="debrepofilter.component"/></div>
+                        <div id="ajaxResultComponent"></div>
+                    </td>
+                </tr>
+            </table>
+            <input type="hidden" id="debrepofilter.id" name="debrepofilter.id"/>
+            <input type="hidden" id="debrepo.uuid" name="debrepo.uuid"/>
+            <input type="hidden" name="action" id="DebRepoaction" value="editFilter"/>
+            <input type="hidden" name="projectId" id="projectId" value="${debRepoBean.project.projectId}"/>
+            <div class="popupSaveButtonsBlock">
+                <forms:submit id="repoEditFilterDialogSubmit" label="Save"/>
+                <forms:cancel onclick="DebRepoFilterPlugin.RepoEditFilterDialog.close()"/>
+            </div>
+        </forms:multipartForm>
+    </bs:dialog>
+
+
+
+
   </jsp:attribute>
 </bs:page>
