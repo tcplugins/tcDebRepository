@@ -1,25 +1,47 @@
 <%@ include file="/include.jsp" %>
 
-<c:set var="configurationsNum" value="${fn:length(repoConfig.buildTypes)}"/>
+<c:set var="filtersNum" value="${fn:length(debRepoBean.filtersAndBuildTypes)}"/>
 <bs:refreshable containerId="repoBuildTypesContainer" pageUrl="${pageUrl}">
   <a name="artifactFilters"></a><h2 class="title_underlined">Artifact Filters</h2>
-  <p>Artifact Filters are run against a build when it completes. Any artifacts which match a filter are added to the Debian Repository using the <b>dist</b> and <b>component</b> values specified with the filter.</p>  
+      <c:if test="${filtersNum == 0}">
+      
+    	<div class="icon_before icon16 attentionComment clearfix noFilterWarning">There are no Artifact Filters configured for this Debian Repository yet.
+          Please add one or more Artifact Filters to enable TeamCity build artifacts to be indexed by this repository.
+	    </div>
+      </c:if>
+      
+    <%--c:if test="${userHasPermissionManagement}" --%>
+        <div class="add addNewFilter">
+            <forms:addButton id="addNewFilter" onclick="DebRepoPlugin.addDebRepo('${projectId}'); return false">Add Artifact Filter</forms:addButton>
+        </div>
+    <%--/c:if --%>
+  <div>  
+  
+  
+  <p>Artifact Filters are run against a build when it completes. Any artifacts which match a filter are added to the 
+     Debian Repository using the <b>dist</b> and <b>component</b> values specified with the filter. An artifact may 
+     match mutiple filters, and will be indexed in each category. This is a common case, where an artifact may be 
+     compatible with multiple distributions or components.</p> 
+  </div>   
+     
       <bs:messages key="buildTypesUnassigned"/>
       <bs:messages key="buildTypesAssigned"/>
       
-      <table class="settings filterTable">
-      <c:forEach items="${debRepoBean.filtersAndBuildTypes}" var="filterTypeEntry">
-      <tr class="filterHeading"><td colspan=4 class="filterTableBuildTitle">${filterTypeEntry.key}</td></tr>
-      	<tr class="filterHeading"><th>Artifact Filename Match (regex)</th><th>Distribution (dist)</th><th colspan=2>Component</th></tr>
-      	<c:forEach items="${filterTypeEntry.value}" var="filterAndBuild">
-      		<c:set var="filter" value="${filterAndBuild.filter}"/>
-      		<tr><td>${filter.regex}</td><td>${filter.dist}</td><td>${filter.component}</td><td><a href="#">edit</a></td></tr>     
-      	</c:forEach>
-      	<tr><td colspan=4><a href="">Add Artifact Filter </a></td></tr>
-      	<tr class="blankline"><td colspan=4>&nbsp;</td></tr>
-      </c:forEach>
-      
-      </table>
+      <c:if test="${filtersNum > 0}">
+	      <table class="settings filterTable">
+	      <c:forEach items="${debRepoBean.filtersAndBuildTypes}" var="filterTypeEntry">
+	      <tr class="filterHeading"><td colspan=4 class="filterTableBuildTitle">${filterTypeEntry.key}</td></tr>
+	      	<tr class="filterHeading"><th>Artifact Filename Match (regex)</th><th>Distribution (dist)</th><th colspan=2>Component</th></tr>
+	      	<c:forEach items="${filterTypeEntry.value}" var="filterAndBuild">
+	      		<c:set var="filter" value="${filterAndBuild.filter}"/>
+	      		<tr><td>${filter.regex}</td><td>${filter.dist}</td><td>${filter.component}</td><td><a href="#">edit</a></td></tr>     
+	      	</c:forEach>
+	      	<tr><td colspan=4><a href="">Add Artifact Filter </a></td></tr>
+	      	<tr class="blankline"><td colspan=4>&nbsp;</td></tr>
+	      </c:forEach>
+	      
+	      </table>
+	  </c:if>
 <%--
       <c:set var="canAddRemoveConfigurations" value="true"/>
       <c:set var="addButton"><c:if test="${canAddRemoveConfigurations}">

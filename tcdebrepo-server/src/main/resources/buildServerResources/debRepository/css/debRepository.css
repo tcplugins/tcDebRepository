@@ -28,6 +28,47 @@ div.filterTableContainer {
 	width:70%;
 }
 
+div.filterDocsContainer {
+	background-color:white; 
+	float:right; 
+	margin:0; 
+	padding:0;
+	width:25%;
+}
+
+div.noFilterWarning {
+	margin-top: 1em;
+}
+
+div.addNewFilter {
+	float:right;
+	padding: 2em 0 2em 2em;
+}
+
+div.filterDocsContainer div.filterDocsItem {
+	margin-bottom: 2em;
+}
+
+div.filterDocsItem h3 {
+	padding-bottom: 0;
+	margin-bottom: 0;
+}
+
+div.filterDocsItem p {
+	padding-top: 0.25em;
+	margin-top: 0;
+}
+
+dl.regexExample dt {
+	font-style: italic;
+}
+
+dl.regexExample dt code {
+	font-weight: bold;
+	font-style: normal;
+	font-size: 120%; 
+}
+
 table.filterTable {
 	border:none;
 }
