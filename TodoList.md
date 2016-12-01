@@ -10,6 +10,8 @@ In order of urgency
  - [ ] Add filter count to statistics
  - [x] Add license file to github
  - [ ] Migrate to DB.
+ - [ ] Test on windows.
+ - [ ] Test on TC 8, TC 9 and TC 10.0.3
  - [ ] Handle case were editing a repository that has been deleted returns empty response (and error popup).
  - [ ] Refactor Dialog classes into single class in javascript.
  - [ ] Add artifact chooser (like build editing screen has)

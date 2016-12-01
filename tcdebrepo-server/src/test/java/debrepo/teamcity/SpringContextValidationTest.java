@@ -42,7 +42,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 public class SpringContextValidationTest {
 	
 	@Test
-	public void CreatingSpringContextShouldThrowReturnIllegalStateException() {
+	public void CreatingSpringContextShouldNotThrowReturnIllegalStateException() {
 		/*
 		 * If we get an illegal state exception, it means Spring was not able to 
 		 * wire up the dependencies correctly.

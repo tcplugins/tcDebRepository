@@ -1,29 +1,70 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  <parent>
-    <artifactId>tcdebrepo</artifactId>
-    <groupId>netwolfuk.teamcity.plugins.tcdebrepo</groupId>
-    <version>1.0-SNAPSHOT</version>
-  </parent>
-  <artifactId>tcdebrepo-server</artifactId>
-  <packaging>jar</packaging>
-  <dependencies>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<artifactId>tcdebrepo</artifactId>
+		<groupId>netwolfuk.teamcity.plugins.tcdebrepo</groupId>
+		<version>1.0-SNAPSHOT</version>
+	</parent>
+	<artifactId>tcdebrepo-server</artifactId>
+	<packaging>jar</packaging>
 
-    <dependency>
-      <groupId>org.jetbrains.teamcity</groupId>
-      <artifactId>server-api</artifactId>
-      <version>${teamcity-version}</version>
-      <scope>provided</scope>
-    </dependency>
+	<properties>
+		<ebean-maven-plugin.args>debug=2</ebean-maven-plugin.args>
+		<ebean-version>8.1.1</ebean-version>
+	</properties>
+	<repositories>
+	    <repository>
+	        <id>Local</id>
+	        <url>file:${basedir}/mvn-repo</url>
+    	</repository>
+  	</repositories>
+	
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.avaje.ebean</groupId>
+				<artifactId>ebean-maven-plugin</artifactId>
+				<version>${ebean-version}</version>
+				<executions>
+					<execution>
+						<id>main</id>
+						<phase>process-classes</phase>
+						<configuration>
+							<transformArgs>debug=1</transformArgs>
+						</configuration>
+						<goals>
+							<goal>enhance</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>			
+			
+	<dependencies>
+		<dependency>
+			<groupId>org.jetbrains.teamcity</groupId>
+			<artifactId>server-api</artifactId>
+			<version>${teamcity-version}</version>
+			<scope>provided</scope>
+		</dependency>
+		
+<!--  		<dependency>
+			<groupId>org.jetbrains.teamcity</groupId>
+			<artifactId>common-impl</artifactId>
+			<version>${teamcity-version}</version>
+			<scope>provided</scope>
+		</dependency> -->
 
-    <dependency>
-      <groupId>org.jetbrains.teamcity</groupId>
-      <artifactId>server-web-api</artifactId>
-      <version>${teamcity-version}</version>
-      <type>war</type>
-      <scope>provided</scope>
-    </dependency>
+		<dependency>
+			<groupId>org.jetbrains.teamcity</groupId>
+			<artifactId>server-web-api</artifactId>
+			<version>${teamcity-version}</version>
+			<type>war</type>
+			<scope>provided</scope>
+		</dependency>
 
 		<dependency>
 			<groupId>junit</groupId>
@@ -83,13 +124,57 @@
 	    <scope>test</scope>
 	</dependency>
 	
-	
+		<dependency>
+			<groupId>org.avaje.ebean</groupId>
+			<artifactId>ebean</artifactId>
+			<version>${ebean-version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.avaje.ebean</groupId>
+			<artifactId>ebean-querybean</artifactId>
+			<version>${ebean-version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.avaje.ebean</groupId>
+			<artifactId>querybean-generator</artifactId>
+			<version>${ebean-version}</version>
+			<scope>provided</scope>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.avaje/avaje-datasource -->
+		<dependency>
+			<groupId>org.avaje</groupId>
+			<artifactId>avaje-datasource</artifactId>
+			<version>1.1.4</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/com.h2database/h2 -->
+		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
+			<version>1.4.192</version>
+		</dependency>
+
 		<dependency>
 			<groupId>org.mockito</groupId>
 			<artifactId>mockito-core</artifactId>
 			<version>2.2.7</version>
 			<scope>test</scope>
 		</dependency>
-		    
-  </dependencies>
+
+		<dependency>
+		    <groupId>org.slf4j</groupId>
+		    <artifactId>slf4j-api</artifactId>
+		    <version>1.7.21</version>
+		</dependency>
+		
+		<dependency>
+		    <groupId>org.slf4j</groupId>
+		    <artifactId>slf4j-log4j12</artifactId>
+		    <version>1.7.21</version>
+		</dependency>
+
+	</dependencies>
 </project>
