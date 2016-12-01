@@ -48,6 +48,7 @@ import jetbrains.buildServer.serverSide.ServerPaths;
 import jetbrains.buildServer.serverSide.artifacts.BuildArtifact;
 import jetbrains.buildServer.serverSide.artifacts.BuildArtifactHolder;
 import jetbrains.buildServer.serverSide.artifacts.BuildArtifacts;
+import jetbrains.buildServer.util.PluralUtil;
 
 public class DebRepositoryBuildArtifactsPublisherImplTest {
 	@Mock
@@ -78,6 +79,7 @@ public class DebRepositoryBuildArtifactsPublisherImplTest {
 	@Before
 	public void setup() {
 		MockitoAnnotations.initMocks(this);
+		when(pluginDataResolver.getPluginTempFileDirectory()).thenReturn("target/temp");
 		debFileReaderFactory = new DebFileReaderFactory(pluginDataResolver, serverPaths);
 		config = new DebRepositoryConfigurationJaxImpl("project01", "MyTestRepoName");
 		config.addBuildType(new DebRepositoryBuildTypeConfig("bt01", "potato", "main", ".+\\.deb").af(new Filter(".+\\.deb", "whezzy", "main")));

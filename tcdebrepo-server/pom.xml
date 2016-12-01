@@ -14,12 +14,6 @@
 		<ebean-maven-plugin.args>debug=2</ebean-maven-plugin.args>
 		<ebean-version>8.1.1</ebean-version>
 	</properties>
-	<repositories>
-	    <repository>
-	        <id>Local</id>
-	        <url>file:${basedir}/mvn-repo</url>
-    	</repository>
-  	</repositories>
 	
 	<build>
 		<plugins>
@@ -51,13 +45,6 @@
 			<scope>provided</scope>
 		</dependency>
 		
-<!--  		<dependency>
-			<groupId>org.jetbrains.teamcity</groupId>
-			<artifactId>common-impl</artifactId>
-			<version>${teamcity-version}</version>
-			<scope>provided</scope>
-		</dependency> -->
-
 		<dependency>
 			<groupId>org.jetbrains.teamcity</groupId>
 			<artifactId>server-web-api</artifactId>

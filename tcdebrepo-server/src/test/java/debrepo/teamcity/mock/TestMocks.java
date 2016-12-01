@@ -19,6 +19,8 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.io.File;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -66,7 +68,9 @@ public class TestMocks {
 
 	@Bean
 	ServerPaths serverPaths() {
-		return mock(ServerPaths.class);
+		ServerPaths serverPaths = mock(ServerPaths.class);
+		when(serverPaths.getPluginDataDirectory()).thenReturn(new File("target/pluginData"));
+		return serverPaths;
 	}
 	
 	@Bean
