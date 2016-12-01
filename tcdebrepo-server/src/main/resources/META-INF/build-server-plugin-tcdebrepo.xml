@@ -24,6 +24,26 @@
      	class="debrepo.teamcity.web.DebRepoConfigurationEditPageActionController" 
      	/>
      	
+       <bean id="debRepoListingPageController"
+     	class="debrepo.teamcity.web.DebRepoListingPageController" 
+     	/>
+
+       <bean id="deleteRepositoryAction"
+     	class="debrepo.teamcity.web.action.DeleteRepositoryAction" 
+     	/>
+     	
+       <bean id="addArtifactFilterAction"
+     	class="debrepo.teamcity.web.action.AddArtifactFilterAction" 
+     	/>
+
+       <bean id="editArtifactFilterAction"
+     	class="debrepo.teamcity.web.action.EditArtifactFilterAction" 
+     	/>
+     	
+       <bean id="deleteArtifactFilterAction"
+     	class="debrepo.teamcity.web.action.DeleteArtifactFilterAction" 
+     	/>
+     	
        <bean id="debRepositoryManager"
      	class="debrepo.teamcity.service.DebRepositoryManagerImpl"
      	/>

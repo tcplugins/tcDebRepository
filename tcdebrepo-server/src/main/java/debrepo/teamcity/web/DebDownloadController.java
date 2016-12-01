@@ -15,7 +15,6 @@
  *******************************************************************************/
 package debrepo.teamcity.web;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -23,16 +22,19 @@ import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPOutputStream;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.xml.bind.annotation.XmlTransient;
 
 import org.jetbrains.annotations.NotNull;
 import org.springframework.web.servlet.ModelAndView;
@@ -67,10 +69,10 @@ public class DebDownloadController extends BaseController {
 	/**                                                             /debrepo/{RepoName}/dists/{Distribution}/{Component}/binary-{Arch}/Packages.gz		*/
 	final private Pattern packagesGzPattern      = Pattern.compile("^" + DEBREPO_URL_PART + "/(\\S+)/dists/(\\S+?)/(\\S+?)/binary-(\\S+?)/[Pp]ackages.gz");
 	
-	/**                                                             /debrepo/{RepoName}/dists/{Distribution}/{Component}/{Arch}/Packages.bz2		        */
+	/**                                                             /debrepo/{RepoName}/dists/{Distribution}/{Component}/{Arch}/Packages.bz2		    */
 	final private Pattern packagesBz2Pattern     = Pattern.compile("^" + DEBREPO_URL_PART + "/(\\S+?)/dists/(\\S+?)/(\\S+?)/(\\S+?)/[Pp]ackages.bz2");
 	
-	/**                                                             /debrepo/{RepoName}/dists/{Distribution}/{Component}/{Arch}/Packages		            */
+	/**                                                             /debrepo/{RepoName}/dists/{Distribution}/{Component}/{Arch}/Packages		        */
 	final private Pattern packagesPattern        = Pattern.compile("^" + DEBREPO_URL_PART + "/(\\S+?)/dists/(\\S+?)/(\\S+?)/binary-(\\S+?)/[Pp]ackages");
 	
 	/**                                                             /debrepo/{RepoName}/dists/{Distribution}/{Component}/binary-{Arch}/		            */
@@ -83,10 +85,19 @@ public class DebDownloadController extends BaseController {
 	final private Pattern browseDistPattern      = Pattern.compile("^" + DEBREPO_URL_PART + "/(\\S+?)/dists/(\\S+?)/$");
 	
 	/**                                                             /debrepo/{RepoName}/dists/		                                                    */
-	final private Pattern browseRepoDistPattern      = Pattern.compile("^" + DEBREPO_URL_PART + "/(\\S+?)/dists/$");
+	final private Pattern browseRepoDistPattern  = Pattern.compile("^" + DEBREPO_URL_PART + "/(\\S+?)/dists/$");
 	
-	/**                                                             /debrepo/{RepoName}/pool/{Component}/{packageName}		                            */
+	/**                                                             /debrepo/{RepoName}/pool/{Component}/{packageName}/		                            */
+	final private Pattern browsePoolPackagePat   = Pattern.compile("^" + DEBREPO_URL_PART + "/(\\S+?)/pool/(\\S+?)/(\\S+?)/");
+	
+	/**                                                             /debrepo/{RepoName}/pool/{Component}/{packageName/packageFile}		                */
     final private Pattern packageFilenamePattern = Pattern.compile("^" + DEBREPO_URL_PART + "/(\\S+?)/pool/(\\S+?)/(.+)");
+
+    /**                                                             /debrepo/{RepoName}/pool/{Component}/		                                        */
+    final private Pattern browsePoolComponentPat = Pattern.compile("^" + DEBREPO_URL_PART + "/(\\S+?)/pool/(\\S+?)/");
+
+    /**                                                             /debrepo/{RepoName}/pool/    		                                                */
+    final private Pattern browsePoolPattern      = Pattern.compile("^" + DEBREPO_URL_PART + "/(\\S+?)/pool/");
     
     /**                                                             /debrepo/{RepoName}                    		                                        */
     final private Pattern infoPattern            = Pattern.compile("^" + DEBREPO_URL_PART + "/(\\S+?)/$");
@@ -283,6 +294,107 @@ public class DebDownloadController extends BaseController {
 				return null;
 			}
 		}
+
+		
+		/* /debrepo/{RepoName}/pool/{Component}/{packageName}/ */
+		matcher = browsePoolPackagePat.matcher(uriPath);
+		if (matcher.matches()) {
+			String repoName = matcher.group(1);
+			String component= matcher.group(2);
+			String packageName = matcher.group(3);
+			try {
+				List<LinkItem> linkItems = new ArrayList<>();
+				List<DebPackageEntity> debs = myDebRepositoryManager.getUniquePackagesByComponentAndPackageName(repoName, component, packageName);
+				Collections.sort(debs, new DebPackageComparator());
+				for (DebPackageEntity deb : debs) {
+					linkItems.add(LinkItem.builder().text(deb.getFilename()).type(LINK_TYPE_REPO_FILE).url("../../../" + deb.getUri()).build());
+				}
+				params.put("linkItems", linkItems);
+				params.put("directoryTitle", repoName);
+				params.put("currentPathLevel", packageName);
+				
+				List<LinkItem> breadcrumbItems = new ArrayList<>();
+				breadcrumbItems.add(LinkItem.builder().text("<b>Index of</b> ").type(LINK_TYPE_REP_DIR_SLASH).url("").build());
+				breadcrumbItems.add(LinkItem.builder().text("/").type(LINK_TYPE_REP_DIR_SLASH).url("").build());
+				breadcrumbItems.add(LinkItem.builder().text(repoName).type(LINK_TYPE_REPO_DIR).url(request.getServletPath() + DEBREPO_URL_PART + "/" + repoName + "/").build());
+				breadcrumbItems.add(LinkItem.builder().text("/").type(LINK_TYPE_REP_DIR_SLASH).url("").build());
+				breadcrumbItems.add(LinkItem.builder().text("pool").type(LINK_TYPE_REPO_DIR).url(request.getServletPath() + DEBREPO_URL_PART  + "/" + repoName + "/pool/").build());
+				breadcrumbItems.add(LinkItem.builder().text("/").type(LINK_TYPE_REP_DIR_SLASH).url("").build());
+				breadcrumbItems.add(LinkItem.builder().text(component).type(LINK_TYPE_REPO_DIR).url(request.getServletPath() + DEBREPO_URL_PART + "/" + repoName + "/pool/" + component + "/").build());
+				breadcrumbItems.add(LinkItem.builder().text("/").type(LINK_TYPE_REP_DIR_SLASH).url("").build());
+				breadcrumbItems.add(LinkItem.builder().text(packageName).type(LINK_TYPE_REPO_DIR).url(request.getServletPath() + DEBREPO_URL_PART + "/" + repoName + "/pool/" + component + "/"+ packageName + "/").build());
+				breadcrumbItems.add(LinkItem.builder().text("/").type(LINK_TYPE_REP_DIR_SLASH).url("").build());
+				params.put("breadcrumbItems", breadcrumbItems);
+				return new ModelAndView(myPluginDescriptor.getPluginResourcesPath("debRepository/directoryListing.jsp"), params);				
+			} catch (NonExistantRepositoryException ex){
+				response.sendError(HttpServletResponse.SC_NOT_FOUND);
+				Loggers.SERVER.info("DebDownloadController:: Returning 404 : Not Found: No Deb Repository exists with the name: " + request.getPathInfo());
+				Loggers.SERVER.debug(ex);
+				return null;
+			}
+		}
+		/* /debrepo/{RepoName}/pool/{Component}/ */
+		matcher = browsePoolComponentPat.matcher(uriPath);
+		if (matcher.matches()) {
+			String repoName = matcher.group(1);
+			String component= matcher.group(2);
+			try {
+				List<LinkItem> linkItems = new ArrayList<>();
+				for (String packageName : myDebRepositoryManager.findUniquePackageNameByComponent(repoName, component)) {
+					linkItems.add(LinkItem.builder().text(packageName).type(LINK_TYPE_REPO_FILE).url("./" + packageName + "/").build());
+				}
+				params.put("linkItems", linkItems);
+				params.put("directoryTitle", repoName);
+				params.put("currentPathLevel", component);
+				
+				List<LinkItem> breadcrumbItems = new ArrayList<>();
+				breadcrumbItems.add(LinkItem.builder().text("<b>Index of</b> ").type(LINK_TYPE_REP_DIR_SLASH).url("").build());
+				breadcrumbItems.add(LinkItem.builder().text("/").type(LINK_TYPE_REP_DIR_SLASH).url("").build());
+				breadcrumbItems.add(LinkItem.builder().text(repoName).type(LINK_TYPE_REPO_DIR).url(request.getServletPath() + DEBREPO_URL_PART + "/" + repoName + "/").build());
+				breadcrumbItems.add(LinkItem.builder().text("/").type(LINK_TYPE_REP_DIR_SLASH).url("").build());
+				breadcrumbItems.add(LinkItem.builder().text("pool").type(LINK_TYPE_REPO_DIR).url(request.getServletPath() + DEBREPO_URL_PART  + "/" + repoName + "/pool/").build());
+				breadcrumbItems.add(LinkItem.builder().text("/").type(LINK_TYPE_REP_DIR_SLASH).url("").build());
+				breadcrumbItems.add(LinkItem.builder().text(component).type(LINK_TYPE_REPO_DIR).url(request.getServletPath() + DEBREPO_URL_PART + "/" + repoName + "/pool/" + component + "/").build());
+				breadcrumbItems.add(LinkItem.builder().text("/").type(LINK_TYPE_REP_DIR_SLASH).url("").build());
+				params.put("breadcrumbItems", breadcrumbItems);
+				return new ModelAndView(myPluginDescriptor.getPluginResourcesPath("debRepository/directoryListing.jsp"), params);				
+			} catch (NonExistantRepositoryException ex){
+				response.sendError(HttpServletResponse.SC_NOT_FOUND);
+				Loggers.SERVER.info("DebDownloadController:: Returning 404 : Not Found: No Deb Repository exists with the name: " + request.getPathInfo());
+				Loggers.SERVER.debug(ex);
+				return null;
+			}
+		}
+		
+	    /* /debrepo/{RepoName}/pool/ */
+		matcher = browsePoolPattern.matcher(uriPath);
+		if (matcher.matches()) {
+			String repoName = matcher.group(1);
+			try {
+				List<LinkItem> linkItems = new ArrayList<>();
+				for (String component : myDebRepositoryManager.findUniqueComponent(repoName)) {
+					linkItems.add(LinkItem.builder().text(component).type(LINK_TYPE_REPO_FILE).url("./" + component + "/").build());
+				}
+				params.put("linkItems", linkItems);
+				params.put("directoryTitle", repoName);
+				params.put("currentPathLevel", "pool");
+				
+				List<LinkItem> breadcrumbItems = new ArrayList<>();
+				breadcrumbItems.add(LinkItem.builder().text("<b>Index of</b> ").type(LINK_TYPE_REP_DIR_SLASH).url("").build());
+				breadcrumbItems.add(LinkItem.builder().text("/").type(LINK_TYPE_REP_DIR_SLASH).url("").build());
+				breadcrumbItems.add(LinkItem.builder().text(repoName).type(LINK_TYPE_REPO_DIR).url(request.getServletPath() + DEBREPO_URL_PART + "/" + repoName + "/").build());
+				breadcrumbItems.add(LinkItem.builder().text("/").type(LINK_TYPE_REP_DIR_SLASH).url("").build());
+				breadcrumbItems.add(LinkItem.builder().text("pool").type(LINK_TYPE_REPO_DIR).url(request.getServletPath() + DEBREPO_URL_PART  + "/" + repoName + "/pool/").build());
+				breadcrumbItems.add(LinkItem.builder().text("/").type(LINK_TYPE_REP_DIR_SLASH).url("").build());
+				params.put("breadcrumbItems", breadcrumbItems);
+				return new ModelAndView(myPluginDescriptor.getPluginResourcesPath("debRepository/directoryListing.jsp"), params);						
+			} catch (NonExistantRepositoryException ex){
+				response.sendError(HttpServletResponse.SC_NOT_FOUND);
+				Loggers.SERVER.info("DebDownloadController:: Returning 404 : Not Found: No Deb Repository exists with the name: " + request.getPathInfo());
+				Loggers.SERVER.debug(ex);
+				return null;
+			}			
+		}
 		
 		/* /debrepo/{RepoName}/pool/{Component}/{packageName} */
 		matcher = packageFilenamePattern.matcher(uriPath);
@@ -307,6 +419,7 @@ public class DebDownloadController extends BaseController {
 				return null;
 			}			
 		}
+
 		
 		/* /debrepo/{RepoName}/ */
 		matcher = infoPattern.matcher(uriPath);
@@ -412,6 +525,28 @@ public class DebDownloadController extends BaseController {
 		String text;
 		String url;
 		String type;
+	}
+	
+	private static class DebPackageComparator implements Comparator<DebPackageEntity> {
+		final int BEFORE = -1;
+		final int EQUAL = 0;
+		final int AFTER = 1;
+		
+		@Override
+		public int compare(DebPackageEntity o1, DebPackageEntity o2) {
+			
+			int comparison = o1.getPackageName().compareToIgnoreCase(o2.getPackageName());
+			if (comparison != EQUAL) return comparison;
+
+			comparison = o1.getVersion().compareToIgnoreCase(o2.getVersion());
+			if (comparison != EQUAL) return comparison;
+			
+			comparison = o1.getArch().compareToIgnoreCase(o2.getArch());
+			if (comparison != EQUAL) return comparison;
+			
+			return EQUAL;
+		}
+		
 	}
 
 }

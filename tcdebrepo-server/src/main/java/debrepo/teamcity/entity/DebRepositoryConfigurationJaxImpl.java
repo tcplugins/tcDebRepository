@@ -18,6 +18,7 @@ package debrepo.teamcity.entity;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -53,7 +54,7 @@ public class DebRepositoryConfigurationJaxImpl implements DebRepositoryConfigura
 	private String repoName;
 	
 	@XmlElement(name="build-type") @XmlElementWrapper(name="build-types")
-	private List<DebRepositoryBuildTypeConfig> buildTypes = new ArrayList<>();
+	private List<DebRepositoryBuildTypeConfig> buildTypes = new CopyOnWriteArrayList<>();
 	
 	public DebRepositoryConfigurationJaxImpl(String projectId, String repoName) {
 		this.projectId = projectId;

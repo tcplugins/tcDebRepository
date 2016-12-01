@@ -49,6 +49,13 @@ public class DebRepositoryBuildArtifactsPublisherImpl implements DebRepositoryBu
 		this.myDebFileReaderFactory = debFileReaderFactory;
 		Loggers.SERVER.info("DebRepositoryBuildArtifactsPublisherImpl :: Starting");
 	}
+	
+
+	@Override
+	public void removeArtifactsFromRepositories(SBuild build, BuildArtifacts buildArtifacts) {
+		// TODO Auto-generated method stub
+		
+	}
 
 	@Override
 	public void addArtifactsToRepositories(SBuild build, BuildArtifacts buildArtifacts) {

@@ -58,13 +58,13 @@ public class EditDebRepositoryBean {
 	@Getter
 	private final CameFromSupport cameFromSupport = new CameFromSupport();
 
-	EditDebRepositoryBean() {
+	public EditDebRepositoryBean() {
 		name = "";
 		uuid = "";
 		editAction = "create";
 	}
 
-	EditDebRepositoryBean(@NotNull final DebRepositoryConfiguration repoConfig, @NotNull SProject sproject) {
+	public EditDebRepositoryBean(@NotNull final DebRepositoryConfiguration repoConfig, @NotNull SProject sproject) {
 		name = repoConfig.getRepoName();
 		uuid = repoConfig.getUuid().toString();
 		project = sproject;

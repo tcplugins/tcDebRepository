@@ -30,6 +30,7 @@ public interface DebRepositoryConfigurationManager {
 	public DebRepositoryConfiguration getDebRepositoryConfiguration(String debRepoUuid);
 	public DebRepositoryConfiguration getDebRepositoryConfigurationByName(String debRepoName);
 	public List<DebRepositoryConfiguration> getConfigurationsForProject(String projectId);
+	public List<DebRepositoryConfiguration> getAllConfigurations();
 	public Set<DebRepositoryConfiguration> findConfigurationsForBuildType(String buildTypeId);
 	/**
 	 * 

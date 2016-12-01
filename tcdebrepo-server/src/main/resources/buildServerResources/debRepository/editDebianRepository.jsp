@@ -16,6 +16,7 @@
 <%@ include file="/include.jsp" %>
 
 <c:set var="pageTitle" value="Edit Debian Repository ${repoConfig.repoName}" scope="request"/>
+<c:set var="projectExternalId" value="${debRepoBean.project.externalId}" scope="request"/>
 
 <bs:page>
   <jsp:attribute name="head_include">
@@ -28,17 +29,47 @@
     </bs:linkScript>
     <script type="text/javascript">
       BS.Navigation.items = [
-        {title: "Build Queue", url: '<c:url value="/queue.html"/>'},
-        {title: "Priority Classes", url: '<c:url value="${teamcityPluginResourcesPath}priorityClassList.html"/>'},
+        {title: "Administration", url: '<c:url value="/admin/admin.html"/>'},
+        {title: "Debian Repositories", url: '<c:url value="/admin/debianRepositories.html"/>'},
         {title: '<c:out value="${debRepoBean.name}"/>', selected: true}
       ];
     </script>
   </jsp:attribute>
 
+  <jsp:attribute name="quickLinks_include">
+    <div class="toolbarItem">
+	    <c:set var="menuItems">
+		    <authz:authorize allPermissions="EDIT_PROJECT" projectId="${debRepoBean.project.projectId}">
+		      <jsp:body>
+		        <l:li>
+			      <a href="#" title="Edit Respository Name and Project affilliation" onclick="return DebRepoPlugin.showDialog('${projectExternalId}');">Edit repository...</a>
+		        </l:li>
+		        <l:li>
+			      <a href="#" title="Delete Repository Configuration and Index" onclick="DebRepoPlugin.removeDebRepo('${repoConfig.uuid}'); return false">Delete repository...</a>
+		        </l:li>
+		      </jsp:body>
+		    </authz:authorize>
+		</c:set>
+		<c:if test="${not empty fn:trim(menuItems)}">
+		  <bs:actionsPopup controlId="prjActions${projectExternalId}"
+		                   popup_options="shift: {x: -150, y: 20}, className: 'quickLinksMenuPopup'">
+		    <jsp:attribute name="content">
+		      <div>
+		        <ul class="menuList">
+		          ${menuItems}
+		        </ul>
+		      </div>
+		    </jsp:attribute>
+		    <jsp:body>Actions</jsp:body>
+		  </bs:actionsPopup>
+		</c:if>
+    </div>
+  </jsp:attribute>
+
   <jsp:attribute name="body_include">
   	<h2>Debian Repository : ${repoConfig.repoName}</h2>
 
-      <table class=settings>
+      <table class="settings parameterTable">
 <!-- <tr><td colspan=2><p>The repository name forms part of the URL for accessing this repository. Names MUST be unique across a TeamCity 
                     instance and must only contain URL compatible characters.</p> 
                 <p>Renaming a repository will require all Debian servers 
@@ -95,45 +126,106 @@
 	</div>
 </div>
 
-    <bs:dialog dialogId="editFilterDialog"
-               dialogClass="editFilterDialog"
-               title="Edit Debian Repository"
+    <bs:dialog dialogId="repoEditFilterDialog"
+               dialogClass="repoEditFilterDialog"
+               title="Edit Artifact Filter"
                closeCommand="DebRepoFilterPlugin.RepoEditFilterDialog.close()">
         <forms:multipartForm id="repoEditFilterForm"
-                             action="/admin/tcDebRepository/manageDebianRepositories.html"
+                             action="/admin/debianRepositoryAction.html"
                              targetIframe="hidden-iframe"
                              onsubmit="return DebRepoFilterPlugin.RepoEditFilterDialog.doPost();">
 
             <table class="runnerFormTable">
                 <tr>
+                    <th>Build Type<l:star/></th>
+                    <td>
+                        <div>
+                        	<select id="debrepofilter.buildtypeid" name="debrepofilter.buildtypeid">
+                        	<c:forEach items="${sortedProjectBuildTypes}" var="buildType">
+                        		<option value="${buildType.buildTypeId}">${buildType.fullName}</option>
+                        	</c:forEach>
+                        	</select>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
                     <th>regex<l:star/></th>
                     <td>
                         <div><input type="text" id="debrepofilter.regex" name="debrepofilter.regex"/></div>
-                        <div id="ajaxResultRegex"></div>
                     </td>
                 </tr>
                 <tr>
                     <th>dist<l:star/></th>
                     <td>
                         <div><input type="text" id="debrepofilter.dist" name="debrepofilter.dist"/></div>
-                        <div id="ajaxResultDist"></div>
                     </td>
                 </tr>
                 <tr>
                     <th>component<l:star/></th>
                     <td>
                         <div><input type="text" id="debrepofilter.component" name="debrepofilter.component"/></div>
-                        <div id="ajaxResultComponent"></div>
+                        <div id="ajaxResult"></div>
                     </td>
                 </tr>
             </table>
             <input type="hidden" id="debrepofilter.id" name="debrepofilter.id"/>
-            <input type="hidden" id="debrepo.uuid" name="debrepo.uuid"/>
+            <input type="hidden" id="debrepo.uuid" name="debrepo.uuid" value="${repoConfig.uuid}"/>
             <input type="hidden" name="action" id="DebRepoaction" value="editFilter"/>
             <input type="hidden" name="projectId" id="projectId" value="${debRepoBean.project.projectId}"/>
             <div class="popupSaveButtonsBlock">
                 <forms:submit id="repoEditFilterDialogSubmit" label="Save"/>
                 <forms:cancel onclick="DebRepoFilterPlugin.RepoEditFilterDialog.close()"/>
+            </div>
+        </forms:multipartForm>
+    </bs:dialog>
+
+    <bs:dialog dialogId="repoDeleteFilterDialog"
+               dialogClass="repoDeleteFilterDialog"
+               title="Delete Artifact Filter"
+               closeCommand="DebRepoFilterPlugin.RepoDeleteFilterDialog.close()">
+        <forms:multipartForm id="repoDeleteFilterForm"
+                             action="/admin/debianRepositoryAction.html"
+                             targetIframe="hidden-iframe"
+                             onsubmit="return DebRepoFilterPlugin.RepoDeleteFilterDialog.doPost();">
+
+            <table class="runnerFormTable">
+                <tr><td><h3>Confirm Artifact Filter deletion</h3></td></tr>
+                <tr><td>Deleting an Artifact Filter does not remove previously added artifacts from the repository.
+                        <div id="ajaxDeleteResult"></div>
+                </td></tr>
+            </table>
+            <input type="hidden" id="debrepofilter.id" name="debrepofilter.id"/>
+            <input type="hidden" id="debrepo.uuid" name="debrepo.uuid" value="${repoConfig.uuid}"/>
+            <input type="hidden" id="debrepofilter.buildtypeid" name="debrepofilter.buildtypeid"/>
+            <input type="hidden" name="action" id="DebRepoaction" value="deleteFilter"/>
+            <div class="popupSaveButtonsBlock">
+                <forms:submit id="repoDeleteFilterDialogSubmit" label="Delete Filter"/>
+                <forms:cancel onclick="DebRepoFilterPlugin.RepoDeleteFilterDialog.close()"/>
+            </div>
+        </forms:multipartForm>
+    </bs:dialog>
+    
+    <bs:dialog dialogId="deleteRepoDialog"
+               dialogClass="deleteRepoDialog"
+               title="Delete Debian Repository"
+               closeCommand="DebRepoPlugin.DeleteRepoDialog.close()">
+        <forms:multipartForm id="deleteRepoForm"
+                             action="/admin/debianRepositoryAction.html"
+                             targetIframe="hidden-iframe"
+                             onsubmit="return DebRepoPlugin.DeleteRepoDialog.doPost();">
+
+            <table class="runnerFormTable">
+                <tr><td><h3>Confirm Debian Repository deletion</h3></td></tr>
+                <tr><td>Deleting a Debian Repository removes all repository configuration and  artifacts from the repository listing.<br>
+                		It does not delete the build artifacts from disk.
+                        <div id="ajaxRepoDeleteResult"></div>
+                </td></tr>
+            </table>
+            <input type="hidden" id="debrepo.uuid" name="debrepo.uuid" value="${repoConfig.uuid}"/>
+            <input type="hidden" name="action" id="DebRepoaction" value="deleteRepo"/>
+            <div class="popupSaveButtonsBlock">
+                <forms:submit id="deleteRepoDialogSubmit" label="Delete Repository"/>
+                <forms:cancel onclick="DebRepoPlugin.DeleteRepoDialog.close()"/>
             </div>
         </forms:multipartForm>
     </bs:dialog>

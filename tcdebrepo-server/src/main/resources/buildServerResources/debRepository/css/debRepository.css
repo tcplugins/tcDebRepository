@@ -110,3 +110,8 @@ table.filterTable tr td.filterTableBuildTitle {
 tr.filterHeading {
 	background-color: rgb(245, 245, 245);
 }
+
+#repoDeleteFilterDialogSubmit, #deleteRepoDialogSubmit {
+	background-color: red;
+	background-image: linear-gradient(to bottom, #e06667, #e50000);
+}

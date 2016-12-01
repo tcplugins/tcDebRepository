@@ -22,46 +22,45 @@ Example:
   http://ppa.launchpad.net/graphics-drivers/ppa/ubuntu/dists/zesty/InRelease
 
 ## Debian Repository Layout diagram.
-
- {RepositoryName}
-  |
-  -- pool
-  |  |
-  |  -- {componentName}, eg, main
-  |     |
-  |     -- /some/dir/debfilename1.deb
-  |     -- /some/dir/debfilename2.deb
-  |     -- /some/dir/debfilename3.deb
-  |
-  |
-  -- dists 
-     |
-     -- {distName}, eg, trusty
-     |  |
-     |  -- InRelease
-     |  -- Release
-     |  -- Release.gpg
-     |  -- {componentName}, eg main
-     |     |
-     |     -- {archName}, eg binary-amd64
-     |        |
-     |        -- Packages.bz2
-     |        -- Packages.gz
-     |        -- Packages (not required, but useful for debugging)
-     |        -- Release (optional)
-     |
-     |     -- {archName}, eg binary-i386
-     |        |
-     |        -- Packages.bz2
-     |        -- Packages.gz
-     |        -- Packages (not required, but useful for debugging)
-     |        -- Release (optional)
-     |
-     |     -- {archName}, eg source
-     |        |
-     |        -- Packages.bz2
-     |        -- Packages.gz
-     |        -- Packages (not required, but useful for debugging)
-     |        -- Release (optional)
-     |
-     -- {distname}, eg, zesty
+	 {RepositoryName}
+	  |
+	  -- pool
+	  |  |
+	  |  -- {componentName}, eg, main
+	  |     |
+	  |     -- /some/dir/debfilename1.deb
+	  |     -- /some/dir/debfilename2.deb
+	  |     -- /some/dir/debfilename3.deb
+	  |
+	  |
+	  -- dists 
+	     |
+	     -- {distName}, eg, trusty
+	     |  |
+	     |  -- InRelease
+	     |  -- Release
+	     |  -- Release.gpg
+	     |  -- {componentName}, eg main
+	     |     |
+	     |     -- {archName}, eg binary-amd64
+	     |        |
+	     |        -- Packages.bz2
+	     |        -- Packages.gz
+	     |        -- Packages (not required, but useful for debugging)
+	     |        -- Release (optional)
+	     |
+	     |     -- {archName}, eg binary-i386
+	     |        |
+	     |        -- Packages.bz2
+	     |        -- Packages.gz
+	     |        -- Packages (not required, but useful for debugging)
+	     |        -- Release (optional)
+	     |
+	     |     -- {archName}, eg source
+	     |        |
+	     |        -- Packages.bz2
+	     |        -- Packages.gz
+	     |        -- Packages (not required, but useful for debugging)
+	     |        -- Release (optional)
+	     |
+	     -- {distname}, eg, zesty

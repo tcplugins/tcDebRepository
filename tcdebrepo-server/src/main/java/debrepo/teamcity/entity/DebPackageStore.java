@@ -87,6 +87,16 @@ public class DebPackageStore extends TreeMap<DebPackageEntityKey, DebPackageEnti
 		}
 		return debs;
 	}
+	
+	public List<DebPackageEntity> findAllForPackageNameAndComponent(String packageName, String component) {
+		List<DebPackageEntity> debs = new ArrayList<>();
+		for (DebPackageEntity deb: this.values()){
+			if (deb.getPackageName().equalsIgnoreCase(packageName) && deb.getComponent().equalsIgnoreCase(component)){
+				debs.add(deb);
+			}
+		}
+		return debs;
+	}
 
 	public List<DebPackageEntity> findAllForPackageNameAndVersion(String packageName, String version) {
 		List<DebPackageEntity> debs = new ArrayList<>();

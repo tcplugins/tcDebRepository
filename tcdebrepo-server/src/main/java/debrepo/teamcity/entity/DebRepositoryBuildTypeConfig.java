@@ -80,8 +80,13 @@ public class DebRepositoryBuildTypeConfig {
 		return this.debFilters.add(filter);
 	}
 	
-	public boolean removeFilter(String filter) {
-		return this.debFilters.remove(filter);
+	public boolean removeFilter(String id) {
+		for (Filter f : this.debFilters) {
+			if (id.equals(f.getId())) {
+				return this.debFilters.remove(f);
+			}
+		}
+		return false;
 	}
 	
 	/**
@@ -107,7 +112,7 @@ public class DebRepositoryBuildTypeConfig {
 	/* Use the XmlAttributes on the fields rather than the getters
 	 * and setters provided by Lombok */
 	@XmlAccessorType(XmlAccessType.FIELD)
-	@XmlRootElement @AllArgsConstructor @NoArgsConstructor @Data
+	@XmlRootElement @NoArgsConstructor @Data
 	@XmlType(propOrder = { "regex", "dist", "component", "id" })
 	public static class Filter implements Comparable<Filter>{
 		@XmlTransient
@@ -117,19 +122,26 @@ public class DebRepositoryBuildTypeConfig {
 		@XmlTransient
 		final int AFTER = 1;
 		
-		@XmlAttribute
+		@XmlAttribute @NotNull
 		private String id = UUID.randomUUID().toString();
 		
-		@XmlAttribute
+		@XmlAttribute @NotNull
 		private String regex;
 		
-		@XmlAttribute
+		@XmlAttribute @NotNull
 		private String dist;
 		
-		@XmlAttribute
+		@XmlAttribute @NotNull
 		private String component;
 		
-		public Filter(String regex, String dist, String component) {
+		public Filter(@NotNull String id, @NotNull String regex, @NotNull String dist, @NotNull String component) {
+			this.id = id;
+			this.regex = regex;
+			this.dist = dist;
+			this.component = component;
+		}
+		
+		public Filter(@NotNull String regex, @NotNull String dist, @NotNull String component) {
 			this(UUID.randomUUID().toString(), regex, dist, component);
 		}
 		
@@ -140,16 +152,16 @@ public class DebRepositoryBuildTypeConfig {
 		@Override
 		public int compareTo(Filter o) {
 			
-			int comparison = this.id.compareTo(o.getId());
-			if (comparison != EQUAL) return comparison;
-			
-			comparison = this.dist.compareTo(o.getDist());
+			int comparison = this.dist.compareTo(o.getDist());
 			if (comparison != EQUAL) return comparison;
 			
 			comparison = this.component.compareTo(o.getComponent());
 			if (comparison != EQUAL) return comparison;
 			
 			comparison = this.regex.compareTo(o.getRegex());
+			if (comparison != EQUAL) return comparison;
+			
+			comparison = this.id.compareTo(o.getId());
 			if (comparison != EQUAL) return comparison;
 			
 			assert this.equals(o) : "DebRepositoryBuildTypeConfig.Filter :: compareTo inconsistant with equals";

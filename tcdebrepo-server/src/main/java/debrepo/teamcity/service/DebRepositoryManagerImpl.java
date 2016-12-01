@@ -17,6 +17,10 @@ package debrepo.teamcity.service;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -126,7 +130,7 @@ public class DebRepositoryManagerImpl implements DebRepositoryManager, DebReposi
 		return stores;
 	}
 	
-	@Override
+/*	@Override
 	public List<DebPackageStore> getPackageStoresForDebPackage(DebPackageEntity entity) throws NonExistantRepositoryException {
 		SBuildType sBuildType = myProjectManager.findBuildTypeById(entity.getSBuildTypeId());
 		List<SProject> projectPathList = this.myProjectManager.findProjectById(sBuildType.getProjectId()).getProjectPath();
@@ -145,7 +149,7 @@ public class DebRepositoryManagerImpl implements DebRepositoryManager, DebReposi
 			}
 		}
 		return stores;
-	}
+	}*/
 	
 	@Override
 	public DebPackageStore getPackageStoreForProject(String projectId) throws NonExistantRepositoryException {
@@ -344,6 +348,7 @@ public class DebRepositoryManagerImpl implements DebRepositoryManager, DebReposi
 			for (Entry<String,DebRepositoryConfiguration> config : repositoryMetaData.entrySet()) {
 				if (debRepositoryConfiguration.getUuid().toString().equals(config.getValue().getUuid().toString())){
 					Loggers.SERVER.info("DebRepositoryManagerImpl:removeDebRespository :: Removing old repository '" + debRepositoryConfiguration.getRepoName() + "(" + debRepositoryConfiguration.getUuid() + ")");
+					repositories.put(config.getValue().getUuid(), null);
 					repositories.remove(config.getValue().getUuid());
 					repositoryMetaData.remove(config.getKey());
 					try {
@@ -401,6 +406,55 @@ public class DebRepositoryManagerImpl implements DebRepositoryManager, DebReposi
 			}
 		}
 		throw new NonExistantRepositoryException();
+	}
+
+	@Override
+	public List<DebRepositoryConfiguration> getAllConfigurations() {
+		List<DebRepositoryConfiguration> copiedConfigs = new ArrayList<>();
+		for (DebRepositoryConfiguration config : repositoryMetaData.values()){
+			copiedConfigs.add(myDebRepositoryConfigurationFactory.copyDebRepositoryConfiguration(config));
+		}
+		Collections.sort(copiedConfigs, new DebRepositoryConfigurationAlphabeticComparator());
+		return copiedConfigs;
+	}
+	
+	private static class DebRepositoryConfigurationAlphabeticComparator implements Comparator<DebRepositoryConfiguration> {
+		@Override
+		public int compare(DebRepositoryConfiguration o1, DebRepositoryConfiguration o2) {
+			return o1.getRepoName().compareToIgnoreCase(o2.getRepoName());
+		}
+	}
+
+	@Override
+	public Set<String> findUniqueComponent(String repoName) throws NonExistantRepositoryException {
+		DebPackageStore store = getPackageStore(repoName);
+		Set<String> components = new TreeSet<>();
+		for (DebPackageEntityKey e : store.keySet()) {
+			components.add(e.getComponent());
+		}
+		return components;
+	}
+
+	@Override
+	public Set<String> findUniquePackageNameByComponent(String repoName, String component) throws NonExistantRepositoryException {
+		DebPackageStore store = getPackageStore(repoName);
+		Set<String> packageNames = new TreeSet<>();
+		for (DebPackageEntityKey e : store.keySet()) {
+			if (component.equals(e.getComponent())) {
+				packageNames.add(e.getPackageName());
+			}
+		}
+		return packageNames;
+	}
+
+	@Override
+	public List<DebPackageEntity> getUniquePackagesByComponentAndPackageName(String repoName, String component, String packageName) throws NonExistantRepositoryException {
+		DebPackageStore store = getPackageStore(repoName);
+		Map<String, DebPackageEntity> uniquePackages = new HashMap<>();
+		for (DebPackageEntity deb : store.findAllForPackageNameAndComponent(packageName, component)) {
+			uniquePackages.put(deb.getFilename(), deb);
+		}
+		return new ArrayList<DebPackageEntity>(uniquePackages.values());
 	}
 	
 }

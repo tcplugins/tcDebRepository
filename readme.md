@@ -1,5 +1,7 @@
 
- TeamCity server-side plugin
+
+# tcDebrepository - A TeamCity plugin to serve package updates to Debian/Ubuntu servers 
+
 
  This is an empty project to develop TeamCity plugin that operates on server-side only.
 

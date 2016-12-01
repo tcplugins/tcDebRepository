@@ -21,20 +21,20 @@
     </c:if>
 
     <bs:refreshable containerId="DebRepos" pageUrl="${pageUrl}">
-        <div class="sqsList">
+        <div class="repoList">
             <c:choose>
                 <c:when test="${fn:length(repositoriesMap) > 0}">
-                    <table class="sqsTable parametersTable">
+                    <table class="repoTable parametersTable">
                         <tr>
                             <th class="name">Name</th>
                             <th class="name">Information</th>
                             <c:if test="${userHasPermissionManagement}">
-                                <th class="actions" colspan="2">Rename</th>
+                                <th class="actions" colspan="2">Actions</th>
                             </c:if>
                         </tr>
                         <c:forEach items="${repositoriesMap}" var="projectReposEntry">
                             <c:forEach items="${projectReposEntry.value}" var="repo">
-                                <tr class="sqsInfo">
+                                <tr class="repoInfo">
                                     <td class="name" rowspan=3><c:out value="${repo.debRepositoryConfiguration.repoName}"/>
                                         <c:if test="${projectReposEntry.key.externalId != projectId}"> belongs to
                                             <admin:editProjectLink projectId="${projectReposEntry.key.externalId}">
@@ -52,7 +52,8 @@
                                         </td>
                                     </c:if>
                                     <c:if test="${userHasPermissionManagement && not afn:permissionGrantedForProject(projectReposEntry.key, 'EDIT_PROJECT')}">
-                                        <td colspan="2" class="grayNote"></td>
+                                        <td rowspan=3 class="grayNote edit"><span title="PROJECT_EDIT permission required">edit</span></td>
+                                        
                                     </c:if>
                                 </tr>
                                 <tr><td>Package Listings: ${repo.debRepositoryStatistics.totalPackageCount}</td></tr>
