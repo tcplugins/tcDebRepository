@@ -48,9 +48,49 @@
      	class="debrepo.teamcity.web.action.DeleteArtifactFilterAction" 
      	/>
      	
-       <bean id="debRepositoryManager"
+     	<!-- This impl of debRepositoryManager uses a map backed in-memory cache
+     	     Uncomment the following commented out classes to use it
+     		 (and make sure the ebean backed one below is commented out). -->
+		<!-- Begin map backed XML DB impl  -->
+		
+    	<bean id="debRepositoryManager"
      	class="debrepo.teamcity.service.DebRepositoryManagerImpl"
      	/>
+     	
+     	<bean id="jaxDatabaseHelper"
+     		class="debrepo.teamcity.entity.helper.DebRepositoryDatabaseJaxHelperImpl">
+        </bean>
+       
+        <bean id="xmlDatabasePersister"
+     		class="debrepo.teamcity.entity.helper.DebRepositoryDatabaseXmlPersisterImpl">
+     	     <constructor-arg ref="pluginDataResolver">
+    		</constructor-arg>
+     	     <constructor-arg ref="jaxDatabaseHelper">
+    		</constructor-arg>
+     	</bean>
+     	
+        <bean id="debRepositoryDatabase"
+     		class="debrepo.teamcity.service.MapBackedDebRepositoryDatabase">
+     	     <constructor-arg ref="debRepositoryManager">
+    		</constructor-arg>     		
+        </bean>
+       
+     	<!-- End map backed XML DB impl -->
+     	
+     	
+     	
+     	<!-- This impl of debRepositoryManager uses ebean to persist to a DB 
+     	     Uncomment the following commented out class to use it 
+     	     (and make sure the XML backed ones above are commented out). -->
+     	      
+		<!-- Begin ebean backed DB impl  -->
+		<!--
+       <bean id="debRepositoryManager"
+     	class="debrepo.teamcity.ebean.server.DebRepositoryManagerImpl"
+     	/>
+     	-->
+     	<!-- End ebean backed DB impl -->
+     	
      	
        <bean id="debRepositoryConfigurationChangePersister"
      	class="debrepo.teamcity.settings.DebRepositoryConfigurationChangePersisterImpl">
@@ -60,19 +100,6 @@
        <bean id="pluginDataResolver"
      	class="debrepo.teamcity.entity.helper.PluginDataResolverImpl"
      	/>
-     	
-       <bean id="jaxDatabaseHelper"
-     		class="debrepo.teamcity.entity.helper.DebRepositoryDatabaseJaxHelperImpl">
-
-       </bean>
-     	
-       <bean id="xmlDatabasePersister"
-     		class="debrepo.teamcity.entity.helper.DebRepositoryDatabaseXmlPersisterImpl">
-     	     <constructor-arg ref="pluginDataResolver">
-    		</constructor-arg>
-     	     <constructor-arg ref="jaxDatabaseHelper">
-    		</constructor-arg>
-     	</bean>
 
        <bean id="jaxConfigHelper"
      		class="debrepo.teamcity.entity.helper.DebRepositoryConfigurationJaxHelperImpl">
@@ -84,12 +111,6 @@
      	     <constructor-arg ref="debRepositoryManager">
     		</constructor-arg>     		
      	     <constructor-arg ref="jaxConfigHelper">
-    		</constructor-arg>     		
-       </bean>
-       
-       <bean id="debRepositoryDatabase"
-     		class="debrepo.teamcity.service.MapBackedDebRepositoryDatabase">
-     	     <constructor-arg ref="debRepositoryManager">
     		</constructor-arg>     		
        </bean>
        

@@ -97,7 +97,7 @@ public class DebRepositoryManagerImplTest extends DebRepositoryBaseTest {
 		e.setDist("wheezy");
 		e.setComponent("main");
 		e.setFilename("package-123.deb");
-		e.setUri("ProjectName/BuildName/" + e.getSBuildId() + "/" + e.getFilename());
+		e.setUri("ProjectName/BuildName/" + e.getBuildId() + "/" + e.getFilename());
 		store.get(0).put(e.buildKey(), e);
 		assertEquals(1, store.get(0).size());
 		

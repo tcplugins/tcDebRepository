@@ -34,13 +34,12 @@ import java.util.zip.GZIPOutputStream;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.xml.bind.annotation.XmlTransient;
 
 import org.jetbrains.annotations.NotNull;
 import org.springframework.web.servlet.ModelAndView;
 
+import debrepo.teamcity.DebPackage;
 import debrepo.teamcity.Loggers;
-import debrepo.teamcity.entity.DebPackageEntity;
 import debrepo.teamcity.entity.DebPackageNotFoundInStoreException;
 import debrepo.teamcity.entity.DebPackageStore;
 import debrepo.teamcity.entity.DebRepositoryStatistics;
@@ -133,8 +132,7 @@ public class DebDownloadController extends BaseController {
 			String component= matcher.group(3);
 			String archName = matcher.group(4);
 			try {
-				DebPackageStore store = myDebRepositoryManager.getPackageStore(repoName);
-				return servePackagesGzFile(request, response, store.findAllByDistComponentArch(distName, component, archName));
+				return servePackagesGzFile(request, response, myDebRepositoryManager.findAllByDistComponentArch(repoName, distName, component, archName));
 			} catch (NonExistantRepositoryException ex){
 				response.sendError(HttpServletResponse.SC_NOT_FOUND);
 				Loggers.SERVER.info("DebDownloadController:: Returning 404 : Not Found: No Deb Repository exists with the name: " + request.getPathInfo());
@@ -149,8 +147,7 @@ public class DebDownloadController extends BaseController {
 			String component= matcher.group(3);
 			String archName = matcher.group(4);
 			try {
-				DebPackageStore store = myDebRepositoryManager.getPackageStore(repoName);
-				return servePackagesFile(request, response, store.findAllByDistComponentArch(distName, component, archName));
+				return servePackagesFile(request, response, myDebRepositoryManager.findAllByDistComponentArch(repoName, distName, component, archName));
 			} catch (NonExistantRepositoryException ex){
 				response.sendError(HttpServletResponse.SC_NOT_FOUND);
 				Loggers.SERVER.info("DebDownloadController:: Returning 404 : Not Found: No Deb Repository exists with the name: " + request.getPathInfo());
@@ -166,8 +163,7 @@ public class DebDownloadController extends BaseController {
 			String component= matcher.group(3);
 			String archName = matcher.group(4);
 			try {
-				DebPackageStore store = myDebRepositoryManager.getPackageStore(repoName);
-				if (store.findAllByDistComponentArch(distName, component, archName).size() > 0) {
+				if (myDebRepositoryManager.findAllByDistComponentArch(repoName, distName, component, archName).size() > 0) {
 					List<LinkItem> breadcrumbItems = new ArrayList<>();
 					breadcrumbItems.add(LinkItem.builder().text("<b>Index of</b> ").type(LINK_TYPE_REP_DIR_SLASH).url("").build());
 					breadcrumbItems.add(LinkItem.builder().text("/").type(LINK_TYPE_REP_DIR_SLASH).url("").build());
@@ -304,9 +300,9 @@ public class DebDownloadController extends BaseController {
 			String packageName = matcher.group(3);
 			try {
 				List<LinkItem> linkItems = new ArrayList<>();
-				List<DebPackageEntity> debs = myDebRepositoryManager.getUniquePackagesByComponentAndPackageName(repoName, component, packageName);
+				List<? extends DebPackage> debs = myDebRepositoryManager.getUniquePackagesByComponentAndPackageName(repoName, component, packageName);
 				Collections.sort(debs, new DebPackageComparator());
-				for (DebPackageEntity deb : debs) {
+				for (DebPackage deb : debs) {
 					linkItems.add(LinkItem.builder().text(deb.getFilename()).type(LINK_TYPE_REPO_FILE).url("../../../" + deb.getUri()).build());
 				}
 				params.put("linkItems", linkItems);
@@ -402,10 +398,9 @@ public class DebDownloadController extends BaseController {
 			String repoName = matcher.group(1);
 			String uri = matcher.group(3);
 			try {
-				DebPackageStore store = myDebRepositoryManager.getPackageStore(repoName);
 				uri = uriPath.substring(DEBREPO_URL_PART.length() + 1 + repoName.length() + 1);
-				DebPackageEntity debPackage = store.findByUri(uri);
-				SBuild build = this.myServer.findBuildInstanceById(debPackage.getSBuildId());
+				DebPackage debPackage = myDebRepositoryManager.findByUri(repoName, uri);
+				SBuild build = this.myServer.findBuildInstanceById(debPackage.getBuildId());
 				return servePackage(request, response, new File(build.getArtifactsDirectory() + File.separator + debPackage.getFilename()));
 			} catch (DebPackageNotFoundInStoreException ex){
 				response.sendError(HttpServletResponse.SC_NOT_FOUND);
@@ -425,9 +420,7 @@ public class DebDownloadController extends BaseController {
 		matcher = infoPattern.matcher(uriPath);
 		if (matcher.matches()) {
 			String repoName = matcher.group(1);
-			try {
-				
-				myDebRepositoryManager.getPackageStore(repoName);
+			if (myDebRepositoryManager.isExistingRepository(repoName)){
 				List<LinkItem> linkItems = new ArrayList<>();
 				linkItems.add(LinkItem.builder().text("dists").type(LINK_TYPE_REPO_DIR).url("./dists/").build());
 				linkItems.add(LinkItem.builder().text("pool").type(LINK_TYPE_REPO_DIR).url("./pool/").build());
@@ -441,7 +434,7 @@ public class DebDownloadController extends BaseController {
 				breadcrumbItems.add(LinkItem.builder().text("/").type(LINK_TYPE_REP_DIR_SLASH).url("").build());
 				params.put("breadcrumbItems", breadcrumbItems);
 				return new ModelAndView(myPluginDescriptor.getPluginResourcesPath("debRepository/directoryListing.jsp"), params);
-			} catch (NonExistantRepositoryException ex){
+			} else {
 				response.sendError(HttpServletResponse.SC_NOT_FOUND);
 				Loggers.SERVER.info("DebDownloadController:: Returning 404 : Not Found: No Deb Repository exists with the name: " + request.getPathInfo());
 				return null;
@@ -468,18 +461,18 @@ public class DebDownloadController extends BaseController {
     }	
 	
     /**
-     * <p>Takes a List of {@link DebPackageEntity}s, builds the Debian Package text file and then serves it as a 
+     * <p>Takes a List of {@link DebPackage}s, builds the Debian Package text file and then serves it as a 
      * GZIP'd compressed stream to the HttpServletResponse OutputStream. </p>
      * <p>Packages.gz is one of the files which apt retrieves when <code>apt-get update</code> is executed
      * on a debian system. It contains the list of packages available.</p>
      * 
      * @param request - The {@link HttpServletRequest} object the page was requested with.
      * @param response - The {@link HttpServletResponse} that GZIP the stream to written to.
-     * @param packages - A List of {@link DebPackageEntity} containing the package metadata which is  
+     * @param packages - A List of {@link DebPackage} containing the package metadata which is  
      * @return
      * @throws IOException
      */
-	private ModelAndView servePackagesGzFile(HttpServletRequest request, HttpServletResponse response, List<DebPackageEntity> packages) throws IOException {
+	private ModelAndView servePackagesGzFile(HttpServletRequest request, HttpServletResponse response, List<? extends DebPackage> packages) throws IOException {
 		
 		String packagesString = DebPackageToPackageDescriptionBuilder.buildPackageDescriptionList(packages);
 		response.setContentType("application/x-gzip");
@@ -488,7 +481,7 @@ public class DebDownloadController extends BaseController {
 		return null;
 	}
 	
-	private ModelAndView servePackagesFile(HttpServletRequest request, HttpServletResponse response, List<DebPackageEntity> packages) {
+	private ModelAndView servePackagesFile(HttpServletRequest request, HttpServletResponse response, List<? extends DebPackage> packages) {
 		response.setContentType("text/plain");
 		final ModelAndView mv = new ModelAndView(myPluginDescriptor.getPluginResourcesPath("debRepository/packages.jsp"));
 		mv.getModel().put("packages", packages);
@@ -527,13 +520,13 @@ public class DebDownloadController extends BaseController {
 		String type;
 	}
 	
-	private static class DebPackageComparator implements Comparator<DebPackageEntity> {
+	private static class DebPackageComparator implements Comparator<DebPackage> {
 		final int BEFORE = -1;
 		final int EQUAL = 0;
 		final int AFTER = 1;
 		
 		@Override
-		public int compare(DebPackageEntity o1, DebPackageEntity o2) {
+		public int compare(DebPackage o1, DebPackage o2) {
 			
 			int comparison = o1.getPackageName().compareToIgnoreCase(o2.getPackageName());
 			if (comparison != EQUAL) return comparison;

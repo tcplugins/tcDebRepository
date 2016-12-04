@@ -28,6 +28,7 @@ import javax.xml.bind.annotation.XmlType;
 
 import org.jetbrains.annotations.NotNull;
 
+import debrepo.teamcity.DebPackage;
 import jetbrains.buildServer.serverSide.SBuild;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -39,7 +40,7 @@ import lombok.Data;
 @Data  // Let Lombok generate the getters and setters.
 
 @XmlRootElement
-public class DebPackageEntity implements Cloneable {
+public class DebPackageEntity implements DebPackage, Cloneable {
 	
 	@NotNull @XmlAttribute(name="Package")
 	private String packageName;
@@ -57,10 +58,10 @@ public class DebPackageEntity implements Cloneable {
 	private String component;
 	
 	@NotNull @XmlAttribute(name="sBuildId")
-	private Long sBuildId;
+	private Long buildId;
 	
 	@NotNull @XmlAttribute(name="sBuildTypeId")
-	private String sBuildTypeId;
+	private String buildTypeId;
 	
 	@NotNull @XmlAttribute(name="filename")
 	private String filename;
@@ -71,19 +72,6 @@ public class DebPackageEntity implements Cloneable {
 	@XmlElement(name="parameter") @XmlElementWrapper(name="package-parameters")
 	private Map<String, String> parameters = new TreeMap<>();
 	
-	@XmlType(name = "format") @Data  @XmlAccessorType(XmlAccessType.FIELD) @AllArgsConstructor
-	public static class PackageParameter {
-		@XmlAttribute
-		String name;
-		
-		@XmlAttribute
-		String value;
-		
-		PackageParameter() {
-			// empty constructor for JAXB
-		}
-	}
-
 	/**
 	 * setComponent which also updates the uri. This version overrides the Lombok one.
 	 * 
@@ -114,26 +102,22 @@ public class DebPackageEntity implements Cloneable {
 		this.buildUri();
 	}
 	
-	public DebPackageEntity clone() {
-		DebPackageEntity e = new DebPackageEntity();
-		e.setArch(this.getArch());
-		e.setComponent(this.getComponent());
-		e.setDist(this.getDist());
-		e.setFilename(this.getFilename());
-		e.setPackageName(this.getPackageName());
-		e.parameters.putAll(this.getParameters());
-		e.setSBuildId(this.getSBuildId());
-		e.setSBuildTypeId(this.getSBuildTypeId());
-		e.setUri(this.getUri());
-		e.setVersion(this.getVersion());
-		return e;
+	public DebPackage clone() {
+		return copy(this);
 	}
 	
-	public static DebPackageEntity buildFromArtifact(SBuild build, String filename) {
+	public static DebPackageEntity copy(DebPackage deb) {
 		DebPackageEntity e = new DebPackageEntity();
-		e.setSBuildId(build.getBuildId());
-		e.setSBuildTypeId(build.getBuildTypeId());
-		e.setFilename(filename);
+		e.setArch(deb.getArch());
+		e.setComponent(deb.getComponent());
+		e.setDist(deb.getDist());
+		e.setFilename(deb.getFilename());
+		e.setPackageName(deb.getPackageName());
+		e.parameters.putAll(deb.getParameters());
+		e.setBuildId(deb.getBuildId());
+		e.setBuildTypeId(deb.getBuildTypeId());
+		e.setUri(deb.getUri());
+		e.setVersion(deb.getVersion());
 		return e;
 	}
 	

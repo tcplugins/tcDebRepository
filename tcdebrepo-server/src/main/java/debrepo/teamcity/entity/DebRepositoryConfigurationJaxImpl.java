@@ -30,6 +30,7 @@ import javax.xml.bind.annotation.XmlType;
 
 import org.jetbrains.annotations.NotNull;
 
+import debrepo.teamcity.DebPackage;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -72,16 +73,6 @@ public class DebRepositoryConfigurationJaxImpl implements DebRepositoryConfigura
 				return true;
 			}
 		}
-		return false;
-	}
-
-	public boolean containsBuildTypeAndFilter(DebPackageEntity entity) {
-//		for (DebRepositoryBuildTypeConfig config : this.buildTypes) {
-//			if (entity.getSBuildTypeId().equals(config.getBuildTypeId()) &&
-//				config.matchAgainstFilter(entity.getFilename())) {
-//					return true;
-//			}
-//		}
 		return false;
 	}
 

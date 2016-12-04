@@ -10,7 +10,6 @@ public interface DebRepositoryConfiguration extends Comparable<DebRepositoryConf
 	public abstract String getRepoName();
 	public abstract void setRepoName(String repoName);
 	public abstract boolean containsBuildType(String buildTypeid);
-	public abstract boolean containsBuildTypeAndFilter(DebPackageEntity entity);
 	public abstract List<DebRepositoryBuildTypeConfig> getBuildTypes();
 	public abstract boolean addBuildType(DebRepositoryBuildTypeConfig buildTypeConfig);
 

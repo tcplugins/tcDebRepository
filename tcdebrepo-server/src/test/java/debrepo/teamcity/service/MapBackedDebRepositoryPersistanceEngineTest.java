@@ -20,6 +20,7 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.Test;
 
+import debrepo.teamcity.DebPackage;
 import debrepo.teamcity.entity.DebPackageEntity;
 
 public class MapBackedDebRepositoryPersistanceEngineTest extends DebRepositoryBaseTest {
@@ -59,7 +60,7 @@ public class MapBackedDebRepositoryPersistanceEngineTest extends DebRepositoryBa
 		engine.removePackage(entity);
 		assertEquals(1, engine.findPackageByName("MyStoreName", entity2.getPackageName()).size());
 		
-		DebPackageEntity e = engine.findPackageByName("MyStoreName", entity2.getPackageName()).get(0);
+		DebPackage e = engine.findPackageByName("MyStoreName", entity2.getPackageName()).get(0);
 		assertEquals(entity2.getPackageName(), e.getPackageName());
 		assertEquals(entity2.getVersion(), e.getVersion());
 		assertEquals(entity2.getArch(), e.getArch());
@@ -161,28 +162,6 @@ public class MapBackedDebRepositoryPersistanceEngineTest extends DebRepositoryBa
 		assertEquals(2, engine.findAllByBuildType(bt02).size());
 		
 		assertEquals(0, engine.findAllByBuildType(bt03).size());		
-	}
-
-	@Test
-	public void testFindAllByProject() {
-		engine.addPackage(entity);
-		assertEquals(1, engine.findAllByProject(project01).size());
-		
-		engine.addPackage(entity2);
-		assertEquals(2, engine.findAllByProject(project01).size());
-		
-		assertEquals(0, engine.findAllByProject(project02).size());
-	}
-
-	@Test
-	public void testFindAllByProjectId() {
-		engine.addPackage(entity);
-		assertEquals(1, engine.findAllByProjectId(project01.getProjectId()).size());
-		
-		engine.addPackage(entity2);
-		assertEquals(2, engine.findAllByProjectId(project01.getProjectId()).size());
-		
-		assertEquals(0, engine.findAllByProjectId(project02.getProjectId()).size());
 	}
 
 }

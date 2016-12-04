@@ -17,31 +17,23 @@ package debrepo.teamcity.service;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.UUID;
 
-import javax.xml.bind.JAXBException;
-
 import org.springframework.stereotype.Service;
 
+import debrepo.teamcity.DebPackage;
 import debrepo.teamcity.Loggers;
 import debrepo.teamcity.entity.DebPackageEntity;
 import debrepo.teamcity.entity.DebPackageEntityKey;
+import debrepo.teamcity.entity.DebPackageNotFoundInStoreException;
 import debrepo.teamcity.entity.DebPackageStore;
-import debrepo.teamcity.entity.DebRepositoryBuildTypeConfig;
-import debrepo.teamcity.entity.DebRepositoryBuildTypeConfig.Filter;
 import debrepo.teamcity.entity.DebRepositoryConfiguration;
-import debrepo.teamcity.entity.DebRepositoryConfigurationJaxImpl;
-import debrepo.teamcity.entity.DebRepositoryConfigurations;
 import debrepo.teamcity.entity.DebRepositoryStatistics;
 import debrepo.teamcity.entity.helper.XmlPersister;
 import debrepo.teamcity.settings.DebRepositoryConfigurationChangePersister;
@@ -50,27 +42,23 @@ import jetbrains.buildServer.serverSide.SBuildType;
 import jetbrains.buildServer.serverSide.SProject;
 
 @Service
-public class DebRepositoryManagerImpl implements DebRepositoryManager, DebRepositoryConfigurationManager  {
+public class DebRepositoryManagerImpl extends  DebRepositoryConfigurationManagerImpl implements DebRepositoryManager, DebRepositoryConfigurationManager {
 	
-	Map<String, DebRepositoryConfiguration> repositoryMetaData = new TreeMap<String, DebRepositoryConfiguration>();
 	Map<UUID, DebPackageStore> repositories = new TreeMap<UUID, DebPackageStore>();
 	
 	private final ProjectManager myProjectManager;
 	private final XmlPersister<DebPackageStore, DebRepositoryConfiguration> myDebRepositoryDatabaseXmlPersister;
-	private final DebRepositoryConfigurationFactory myDebRepositoryConfigurationFactory;
-	private final DebRepositoryConfigurationChangePersister myDebRepositoryConfigurationChangePersister;
 	
 	public DebRepositoryManagerImpl(ProjectManager projectManager, 
-									XmlPersister<DebPackageStore, DebRepositoryConfiguration> debRepositoryDatabaseXmlPersister, 
+									XmlPersister<DebPackageStore, DebRepositoryConfiguration> debRepositoryDatabaseXmlPersister,
 									DebRepositoryConfigurationFactory debRepositoryConfigurationFactory, 
 									DebRepositoryConfigurationChangePersister debRepositoryConfigurationChangePersister) {
+		super(debRepositoryConfigurationFactory, debRepositoryConfigurationChangePersister);
 		this.myProjectManager = projectManager;
 		this.myDebRepositoryDatabaseXmlPersister = debRepositoryDatabaseXmlPersister;
-		this.myDebRepositoryConfigurationFactory = debRepositoryConfigurationFactory;
-		this.myDebRepositoryConfigurationChangePersister = debRepositoryConfigurationChangePersister;
+
 	}
 	
-	@Override
 	public DebPackageStore getPackageStore(String storeName) throws NonExistantRepositoryException {
 		
 		if (!repositoryMetaData.containsKey(storeName)) {
@@ -129,88 +117,6 @@ public class DebRepositoryManagerImpl implements DebRepositoryManager, DebReposi
 		}
 		return stores;
 	}
-	
-/*	@Override
-	public List<DebPackageStore> getPackageStoresForDebPackage(DebPackageEntity entity) throws NonExistantRepositoryException {
-		SBuildType sBuildType = myProjectManager.findBuildTypeById(entity.getSBuildTypeId());
-		List<SProject> projectPathList = this.myProjectManager.findProjectById(sBuildType.getProjectId()).getProjectPath();
-		List<DebPackageStore> stores = new ArrayList<>();
-		//Collections.reverse(projectPathList);
-		for (SProject sProject : projectPathList) {
-			for (DebRepositoryConfiguration meta : repositoryMetaData.values()){
-				if (meta.getProjectId().equals(sProject.getProjectId()) 
-						&& meta.containsBuildTypeAndFilter(entity) ){
-					if (repositories.containsKey(meta.getUuid())){
-						stores.add(repositories.get(meta.getUuid()));
-					} else {
-						throw new NonExistantRepositoryException();
-					}
-				}
-			}
-		}
-		return stores;
-	}*/
-	
-	@Override
-	public DebPackageStore getPackageStoreForProject(String projectId) throws NonExistantRepositoryException {
-		for (DebRepositoryConfiguration meta : repositoryMetaData.values()){
-			if (meta.getProjectId().equals(projectId)){
-				if (repositories.containsKey(meta.getUuid())){
-					return repositories.get(meta.getUuid());
-				} else {
-					throw new NonExistantRepositoryException();
-				}
-			}			
-		}
-		return null;
-	}
-
-	@Override
-	public void updateRepositoryConfigurations(DebRepositoryConfigurations repoConfigurations) {
-		
-		synchronized (repositoryMetaData) {
-			
-			/* Build a list of the existing entries.
-			 * Any that don't exist in the new config will be deleted later.
-			 */
-			Map<String, Boolean> existingRepos = new TreeMap<>();
-			for (String keyName : repositoryMetaData.keySet()) {
-				existingRepos.put(keyName, false);
-			}
-			
-			/* Apply the update to the config, flag repo as existing (add to existingRepos map)
-			 * and initialise if a repo with that UUID didn't exist already.
-			 */
-			for (DebRepositoryConfiguration newConfig : repoConfigurations.getDebRepositoryConfigurations()) {
-				repositoryMetaData.put(newConfig.getRepoName(), newConfig);
-				existingRepos.put(newConfig.getRepoName(), true);
-				if(!repositories.containsKey(newConfig.getUuid())){
-					initialisePackageStore(newConfig);
-				}
-			}
-			
-			/* Now remove old repos in the config map and their corresponding repos. */
-			for (Entry<String,Boolean> existing  : existingRepos.entrySet()) {
-				if (existing.getValue() == false) {
-					Loggers.SERVER.info("DebRepositoryManagerImpl:updateRepositoryConfigurations :: Removing old repository '" + existing.getKey());
-					repositories.remove(repositoryMetaData.get(existing.getKey()).getUuid());
-					repositoryMetaData.remove(existing.getKey());
-				}
-			}
-			
-		} /* End Syncronized block */
-		
-	}
-
-	@Override
-	public List<DebRepositoryConfiguration> getConfigurationsForProject(String projectId) {
-		List<DebRepositoryConfiguration> configs = new ArrayList<>();
-		for (DebRepositoryConfiguration config : this.repositoryMetaData.values())
-			if (projectId.equals(config.getProjectId())) {
-				configs.add(config);
-			}
-		return configs;
-	}
 
 	@Override
 	public DebRepositoryStatistics getRepositoryStatistics(DebRepositoryConfiguration projectConfig, String repoURL) {
@@ -221,47 +127,14 @@ public class DebRepositoryManagerImpl implements DebRepositoryManager, DebReposi
 	public DebRepositoryStatistics getRepositoryStatistics(String uuid, String repoURL) {
 		return new DebRepositoryStatistics(repositories.get(UUID.fromString(uuid)).size(), repoURL);
 	}
-
+	
 	@Override
-	public Set<DebRepositoryConfiguration> findConfigurationsForBuildType(String buildTypeId) {
-		Set<DebRepositoryConfiguration> configs = new TreeSet<>();
-		for (DebRepositoryConfiguration config : this.repositoryMetaData.values()) {
-			for (DebRepositoryBuildTypeConfig buildType : config.getBuildTypes()) {
-				if (buildTypeId.equals(buildType.getBuildTypeId())){
-					configs.add(config);
-				}
-			}
-		}
-		return configs;
-	}
-
-	@Override
-	public void addBuildPackage(DebRepositoryConfiguration config, DebPackageEntity debPackageEntity) {
+	public void addBuildPackage(DebRepositoryConfiguration config, DebPackage debPackage) {
+		DebPackageEntity debPackageEntity = DebPackageEntity.copy(debPackage);
 		this.repositories.get(config.getUuid()).put(debPackageEntity.buildKey(), debPackageEntity);
 		this.persist(config.getUuid());
 	}
-
-	@Override
-	public Set<DebRepositoryConfiguration> findConfigurationsForDebRepositoryEntity(DebPackageEntity debPackageEntity) {
-		// iterate of the list of configs and check the filters match.
-		Set<DebRepositoryConfiguration> configSet = new TreeSet<>();
-		for (DebRepositoryConfiguration config : repositoryMetaData.values()) {
-			for (DebRepositoryBuildTypeConfig bt : config.getBuildTypes()) {
-				if (debPackageEntity.getSBuildTypeId().equals(bt.getBuildTypeId())){
-					for (Filter filter : bt.getDebFilters()) {
-						if (filter.matches(debPackageEntity.getFilename())
-							&& debPackageEntity.getComponent().equals(filter.getComponent())
-							&& debPackageEntity.getDist().equals(filter.getDist())) 
-						{
-								configSet.add(config);
-						}
-					}
-				}
-			}
-		}
-		return configSet;
-	}
-
+	
 	@Override
 	public Set<String> findUniqueArchByDistAndComponent(String repoName, String distName, String component)	throws NonExistantRepositoryException {
 		DebPackageStore store = getPackageStore(repoName);
@@ -295,136 +168,7 @@ public class DebRepositoryManagerImpl implements DebRepositoryManager, DebReposi
 		}
 		return dists;
 	}
-
-	@Override
-	public DebRepositoryConfiguration getDebRepositoryConfiguration(String debRepoUuid) {
-		for (DebRepositoryConfiguration config : this.repositoryMetaData.values()) {
-			if (debRepoUuid.equals(config.getUuid().toString())) {
-				return myDebRepositoryConfigurationFactory.copyDebRepositoryConfiguration(config);
-			}
-		}
-		return null;
-	}
 	
-	@Override
-	public DebRepositoryConfiguration getDebRepositoryConfigurationByName(String debRepoName) {
-		if (this.repositoryMetaData.containsKey(debRepoName)) {
-			return this.repositoryMetaData.get(debRepoName);
-		}
-		return null;
-	}
-
-	@Override
-	public DebRepositoryActionResult addDebRepository(DebRepositoryConfiguration debRepositoryConfiguration) {
-		if (this.repositoryMetaData.containsKey(debRepositoryConfiguration.getRepoName())) {
-			return new DebRepositoryActionResult("Repository with that name already exists.", true, debRepositoryConfiguration, null);
-		}
-		
-		repositoryMetaData.put(debRepositoryConfiguration.getRepoName(), debRepositoryConfiguration);
-		if(!repositories.containsKey(debRepositoryConfiguration.getUuid())) {
-			initialisePackageStore(debRepositoryConfiguration);
-		}
-		try {
-			this.myDebRepositoryConfigurationChangePersister.writeDebRespositoryConfigurationChanges(getRepositoryConfigurations());
-			return new DebRepositoryActionResult("Added new repository", false, null, debRepositoryConfiguration);
-		} catch (JAXBException e) {
-			Loggers.SERVER.error("DebRepositoryManagerImpl:addDebRepository :: Failed to add new repository '" + debRepositoryConfiguration.getRepoName() + "(" + debRepositoryConfiguration.getUuid() + ")");
-			Loggers.SERVER.debug(e);
-			return new DebRepositoryActionResult("Failed to add new repository", true, null, debRepositoryConfiguration);
-		}
-	}
-
-	private DebRepositoryConfigurations getRepositoryConfigurations() {
-		DebRepositoryConfigurations configs = new DebRepositoryConfigurations();
-		for (DebRepositoryConfiguration config : repositoryMetaData.values()){
-			configs.add((DebRepositoryConfigurationJaxImpl) myDebRepositoryConfigurationFactory.copyDebRepositoryConfiguration(config));
-		}
-		return configs;
-	}
-
-	@Override
-	public DebRepositoryActionResult removeDebRespository(DebRepositoryConfiguration debRepositoryConfiguration) {
-		if (repositories.containsKey(debRepositoryConfiguration.getUuid())) {
-			for (Entry<String,DebRepositoryConfiguration> config : repositoryMetaData.entrySet()) {
-				if (debRepositoryConfiguration.getUuid().toString().equals(config.getValue().getUuid().toString())){
-					Loggers.SERVER.info("DebRepositoryManagerImpl:removeDebRespository :: Removing old repository '" + debRepositoryConfiguration.getRepoName() + "(" + debRepositoryConfiguration.getUuid() + ")");
-					repositories.put(config.getValue().getUuid(), null);
-					repositories.remove(config.getValue().getUuid());
-					repositoryMetaData.remove(config.getKey());
-					try {
-						this.myDebRepositoryConfigurationChangePersister.writeDebRespositoryConfigurationChanges(getRepositoryConfigurations());
-						return new DebRepositoryActionResult("Respository removed", false, config.getValue(), null);
-					} catch (JAXBException e) {
-						Loggers.SERVER.error("DebRepositoryManagerImpl:removeDebRespository :: Failed to remove repository '" + debRepositoryConfiguration.getRepoName() + "(" + debRepositoryConfiguration.getUuid() + ")");
-						Loggers.SERVER.debug(e);
-						return new DebRepositoryActionResult("Failed to persist repository removal. Repository may re-appear after TeamCity restart", true, null, debRepositoryConfiguration);
-					}
-				}
-			}
-		}
-		return new DebRepositoryActionResult("Respository not found", true, debRepositoryConfiguration, debRepositoryConfiguration);
-	}
-
-	@Override
-	public DebRepositoryActionResult editDebRepositoryConfiguration(DebRepositoryConfiguration debRepositoryConfiguration) {
-		try {
-			final DebRepositoryConfiguration existingRepo = findRepoConfigWithUuid(debRepositoryConfiguration.getUuid());
-			
-			// The UUID and the name match an existing repo, just update it.
-			if (existingRepo.getUuid().equals(debRepositoryConfiguration.getUuid()) && existingRepo.getRepoName().equals(debRepositoryConfiguration.getRepoName())){
-				this.repositoryMetaData.put(debRepositoryConfiguration.getRepoName(), debRepositoryConfiguration);
-				this.myDebRepositoryConfigurationChangePersister.writeDebRespositoryConfigurationChanges(getRepositoryConfigurations());
-				return new DebRepositoryActionResult("Repository config updated", false, existingRepo, debRepositoryConfiguration);
-			} else if (this.repositoryMetaData.containsKey(debRepositoryConfiguration.getRepoName())) {
-				// We already have a repo with that name.
-				return new DebRepositoryActionResult("Repository of that name already exists", true, debRepositoryConfiguration, debRepositoryConfiguration);
-			} else {
-				// Looks like the repo has changed names, and the name does not conflict.
-				// Remove the old one and add the new one.
-				this.repositoryMetaData.remove(existingRepo.getRepoName());
-				this.repositoryMetaData.put(debRepositoryConfiguration.getRepoName(), debRepositoryConfiguration);
-				this.myDebRepositoryConfigurationChangePersister.writeDebRespositoryConfigurationChanges(getRepositoryConfigurations());
-				return new DebRepositoryActionResult("Repository config updated", false, existingRepo, debRepositoryConfiguration);
-			}
-		} catch (NonExistantRepositoryException nere) {
-			return new DebRepositoryActionResult("Cannot update non-existant repository", true, debRepositoryConfiguration, debRepositoryConfiguration);
-		} catch (JAXBException jaxbe) {
-			Loggers.SERVER.error("DebRepositoryManagerImpl:editDebRepositoryConfiguration :: Failed to persist repository changes for '" + debRepositoryConfiguration.getRepoName() + "(" + debRepositoryConfiguration.getUuid() + ")");
-			Loggers.SERVER.debug(jaxbe);
-			return new DebRepositoryActionResult("Failed to persist repository change. Repository might revert after TeamCity restart", true, null, debRepositoryConfiguration);
-		}
-	}
-
-	private DebRepositoryConfiguration findRepoConfigWithUuid(UUID uuid) throws NonExistantRepositoryException {
-		for (DebRepositoryConfiguration config : repositoryMetaData.values()){
-			if(uuid.equals(config.getUuid())){
-				if (repositories.containsKey(config.getUuid())){
-					return config;
-				} else {
-					throw new NonExistantRepositoryException();
-				}
-			}
-		}
-		throw new NonExistantRepositoryException();
-	}
-
-	@Override
-	public List<DebRepositoryConfiguration> getAllConfigurations() {
-		List<DebRepositoryConfiguration> copiedConfigs = new ArrayList<>();
-		for (DebRepositoryConfiguration config : repositoryMetaData.values()){
-			copiedConfigs.add(myDebRepositoryConfigurationFactory.copyDebRepositoryConfiguration(config));
-		}
-		Collections.sort(copiedConfigs, new DebRepositoryConfigurationAlphabeticComparator());
-		return copiedConfigs;
-	}
-	
-	private static class DebRepositoryConfigurationAlphabeticComparator implements Comparator<DebRepositoryConfiguration> {
-		@Override
-		public int compare(DebRepositoryConfiguration o1, DebRepositoryConfiguration o2) {
-			return o1.getRepoName().compareToIgnoreCase(o2.getRepoName());
-		}
-	}
-
 	@Override
 	public Set<String> findUniqueComponent(String repoName) throws NonExistantRepositoryException {
 		DebPackageStore store = getPackageStore(repoName);
@@ -448,13 +192,44 @@ public class DebRepositoryManagerImpl implements DebRepositoryManager, DebReposi
 	}
 
 	@Override
-	public List<DebPackageEntity> getUniquePackagesByComponentAndPackageName(String repoName, String component, String packageName) throws NonExistantRepositoryException {
+	public List<DebPackage> getUniquePackagesByComponentAndPackageName(String repoName, String component, String packageName) throws NonExistantRepositoryException {
 		DebPackageStore store = getPackageStore(repoName);
 		Map<String, DebPackageEntity> uniquePackages = new HashMap<>();
 		for (DebPackageEntity deb : store.findAllForPackageNameAndComponent(packageName, component)) {
 			uniquePackages.put(deb.getFilename(), deb);
 		}
-		return new ArrayList<DebPackageEntity>(uniquePackages.values());
+		return new ArrayList<DebPackage>(uniquePackages.values());
+	}
+
+	@Override
+	public List<DebPackage> findAllByDistComponentArch(String repoName, String distName, String component, String archName) throws NonExistantRepositoryException {
+		return getPackageStore(repoName).findAllByDistComponentArch(distName, component, archName);
+	}
+
+	@Override
+	public DebPackage findByUri(String repoName, String uri) throws NonExistantRepositoryException, DebPackageNotFoundInStoreException {
+		return getPackageStore(repoName).findByUri(uri);
+	}
+
+	@Override
+	public boolean isExistingRepository(String repoName) {
+		try {
+			getPackageStore(repoName);
+			return true;
+		} catch (NonExistantRepositoryException e) {
+			return false;
+		}
+	}
+	
+	@Override
+	public boolean isExistingRepository(UUID uuid) {
+		return repositories.containsKey(uuid);
+	}
+	
+	@Override
+	public void removeRepository(UUID uuid) {
+		repositories.put(uuid, null);
+		repositories.remove(uuid);
 	}
 	
 }

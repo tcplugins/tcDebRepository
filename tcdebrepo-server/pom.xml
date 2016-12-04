@@ -12,7 +12,9 @@
 
 	<properties>
 		<ebean-maven-plugin.args>debug=2</ebean-maven-plugin.args>
-		<ebean-version>8.1.1</ebean-version>
+		<ebean-version>8.8.1</ebean-version>
+		<ebean-query-bean-version>8.1.4</ebean-query-bean-version>
+		<ebean-maven-plugin-version>8.2.1</ebean-maven-plugin-version>
 	</properties>
 	
 	<build>
@@ -20,7 +22,7 @@
 			<plugin>
 				<groupId>org.avaje.ebean</groupId>
 				<artifactId>ebean-maven-plugin</artifactId>
-				<version>${ebean-version}</version>
+				<version>${ebean-maven-plugin-version}</version>
 				<executions>
 					<execution>
 						<id>main</id>
@@ -120,13 +122,13 @@
 		<dependency>
 			<groupId>org.avaje.ebean</groupId>
 			<artifactId>ebean-querybean</artifactId>
-			<version>${ebean-version}</version>
+			<version>8.4.1</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.avaje.ebean</groupId>
 			<artifactId>querybean-generator</artifactId>
-			<version>${ebean-version}</version>
+			<version>8.1.4</version>
 			<scope>provided</scope>
 		</dependency>
 
@@ -141,7 +143,7 @@
 		<dependency>
 			<groupId>com.h2database</groupId>
 			<artifactId>h2</artifactId>
-			<version>1.4.192</version>
+			<version>1.4.193</version>
 		</dependency>
 
 		<dependency>
@@ -155,12 +157,14 @@
 		    <groupId>org.slf4j</groupId>
 		    <artifactId>slf4j-api</artifactId>
 		    <version>1.7.21</version>
+		    <scope>test</scope>
 		</dependency>
 		
 		<dependency>
 		    <groupId>org.slf4j</groupId>
 		    <artifactId>slf4j-log4j12</artifactId>
 		    <version>1.7.21</version>
+		    <scope>test</scope>
 		</dependency>
 
 	</dependencies>

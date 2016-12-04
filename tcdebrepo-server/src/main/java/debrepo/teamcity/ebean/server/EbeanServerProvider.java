@@ -31,7 +31,7 @@ public class EbeanServerProvider {
 	 * 
 	 * @param pluginDataResolver Used to find the directory to store the H2 files in.
 	 */
-	protected EbeanServerProvider(PluginDataResolver pluginDataResolver) {
+	public EbeanServerProvider(PluginDataResolver pluginDataResolver) {
 		Loggers.SERVER.info("EbeanServerProvider :: Getting EBeanServer via testing method.");
 		this.myEbeanServer = createEbeanServerInstance(pluginDataResolver);
 	}

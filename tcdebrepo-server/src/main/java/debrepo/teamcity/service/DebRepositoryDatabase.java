@@ -18,6 +18,7 @@ package debrepo.teamcity.service;
 
 import java.util.List;
 
+import debrepo.teamcity.DebPackage;
 import debrepo.teamcity.entity.DebPackageEntity;
 import jetbrains.buildServer.serverSide.SBuild;
 import jetbrains.buildServer.serverSide.SBuildType;
@@ -25,15 +26,13 @@ import jetbrains.buildServer.serverSide.SProject;
 
 public interface DebRepositoryDatabase {
 	
-	public boolean addPackage(DebPackageEntity entity);
-	public boolean removePackage(DebPackageEntity entity);
-	public List<DebPackageEntity> findPackageByName(String repositoryName, String name);
-	public List<DebPackageEntity> findPackageByNameAndVersion(String repositoryName, String name, String version);
-	public List<DebPackageEntity> findPackageByNameAndAchitecture(String repositoryName, String name, String arch);
-	public List<DebPackageEntity> findPackageByNameVersionAndArchitecture(String repositoryName, String name, String version, String arch);
-	public List<DebPackageEntity> findAllByBuild(SBuild sBuild);
-	public List<DebPackageEntity> findAllByBuildType(SBuildType sBuildtype);
-	public List<DebPackageEntity> findAllByProject(SProject sProject);
-	public List<DebPackageEntity> findAllByProjectId(String projectId);
+	public boolean addPackage(DebPackage entity);
+	public boolean removePackage(DebPackage entity);
+	public List<DebPackage> findPackageByName(String repositoryName, String name);
+	public List<DebPackage> findPackageByNameAndVersion(String repositoryName, String name, String version);
+	public List<DebPackage> findPackageByNameAndAchitecture(String repositoryName, String name, String arch);
+	public List<DebPackage> findPackageByNameVersionAndArchitecture(String repositoryName, String name, String version, String arch);
+	public List<DebPackage> findAllByBuild(SBuild sBuild);
+	public List<DebPackage> findAllByBuildType(SBuildType sBuildtype);
 
 }

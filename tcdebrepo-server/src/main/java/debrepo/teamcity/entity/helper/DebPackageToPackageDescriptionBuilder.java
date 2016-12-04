@@ -3,6 +3,7 @@ package debrepo.teamcity.entity.helper;
 import java.util.Collection;
 import java.util.Map.Entry;
 
+import debrepo.teamcity.DebPackage;
 import debrepo.teamcity.entity.DebPackageEntity;
 
 /**
@@ -36,7 +37,7 @@ import debrepo.teamcity.entity.DebPackageEntity;
 		
 public class DebPackageToPackageDescriptionBuilder {
 	
-	public static String buildPackageDescription(DebPackageEntity debPackageEntity) {
+	public static String buildPackageDescription(DebPackage debPackageEntity) {
 		StringBuilder sb = new StringBuilder();
 		sb.append("Package: ").append(debPackageEntity.getPackageName()).append("\n");
 		for (Entry<String,String> e : debPackageEntity.getParameters().entrySet()) {
@@ -47,9 +48,9 @@ public class DebPackageToPackageDescriptionBuilder {
 		return sb.toString();
 	}
 	
-	public static String buildPackageDescriptionList(Collection<DebPackageEntity> debPackageEntities) {
+	public static String buildPackageDescriptionList(Collection<? extends DebPackage> debPackageEntities) {
 		StringBuilder sb = new StringBuilder();
-		for (DebPackageEntity entity : debPackageEntities) {
+		for (DebPackage entity : debPackageEntities) {
 			sb.append(buildPackageDescription(entity));
 			sb.append("\n\n");
 		}

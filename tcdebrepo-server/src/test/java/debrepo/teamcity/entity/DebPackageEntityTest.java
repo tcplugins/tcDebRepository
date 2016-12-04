@@ -15,23 +15,20 @@
  *******************************************************************************/
 package debrepo.teamcity.entity;
 
-import static org.junit.Assert.*;
-
-import java.util.ArrayList;
-import java.util.List;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotSame;
 
 import org.junit.Test;
 
-import debrepo.teamcity.entity.DebPackageEntity.PackageParameter;
+import debrepo.teamcity.DebPackage;
 
 public class DebPackageEntityTest {
 	
-	List<PackageParameter> params; 
 	DebPackageEntity e1;
 
 	@Test
 	public void testClone() {
-		params = new ArrayList<>();
 		//params.add(new PackageParameter(name, value))
 		e1 = new DebPackageEntity();
 		e1.setArch("i386");
@@ -41,12 +38,12 @@ public class DebPackageEntityTest {
 		e1.setPackageName("somePackage");
 		//e1.populateMetadata(e1.getParameters());
 		//e1.setParameters(parameters);
-		e1.setSBuildId(12345678L);
-		e1.setSBuildTypeId("bt01");
+		e1.setBuildId(12345678L);
+		e1.setBuildTypeId("bt01");
 		e1.setVersion("1.0");
 		e1.buildUri();
 		
-		DebPackageEntity e2 = e1.clone();
+		DebPackage e2 = e1.clone();
 		assertEquals(e1, e2);
 		assertNotSame(e1, e2);
 		System.out.println(e1.hashCode());

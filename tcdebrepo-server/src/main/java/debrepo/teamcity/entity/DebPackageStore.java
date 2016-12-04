@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.UUID;
 
+import debrepo.teamcity.DebPackage;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
@@ -60,7 +61,7 @@ public class DebPackageStore extends TreeMap<DebPackageEntityKey, DebPackageEnti
 	public List<DebPackageEntity> findAllForBuildType(String buildTypeId) {
 		List<DebPackageEntity> debs = new ArrayList<>();
 		for (DebPackageEntity deb: this.values()){
-			if (deb.getSBuildTypeId().equalsIgnoreCase(buildTypeId)){
+			if (deb.getBuildTypeId().equalsIgnoreCase(buildTypeId)){
 				debs.add(deb);
 			}
 		}
@@ -71,15 +72,15 @@ public class DebPackageStore extends TreeMap<DebPackageEntityKey, DebPackageEnti
 	public List<DebPackageEntity> findAllForBuild(long buildId) {
 		List<DebPackageEntity> debs = new ArrayList<>();
 		for (DebPackageEntity deb: this.values()){
-			if (deb.getSBuildId()== buildId){
+			if (deb.getBuildId()== buildId){
 				debs.add(deb);
 			}
 		}
 		return debs;
 	}	
 	
-	public List<DebPackageEntity> findAllForPackageName(String packageName) {
-		List<DebPackageEntity> debs = new ArrayList<>();
+	public List<DebPackage> findAllForPackageName(String packageName) {
+		List<DebPackage> debs = new ArrayList<>();
 		for (DebPackageEntity deb: this.values()){
 			if (deb.getPackageName().equalsIgnoreCase(packageName)){
 				debs.add(deb);
@@ -98,8 +99,8 @@ public class DebPackageStore extends TreeMap<DebPackageEntityKey, DebPackageEnti
 		return debs;
 	}
 
-	public List<DebPackageEntity> findAllForPackageNameAndVersion(String packageName, String version) {
-		List<DebPackageEntity> debs = new ArrayList<>();
+	public List<DebPackage> findAllForPackageNameAndVersion(String packageName, String version) {
+		List<DebPackage> debs = new ArrayList<>();
 		for (DebPackageEntity deb: this.values()){
 			if (deb.getPackageName().equalsIgnoreCase(packageName)
 				&& deb.getVersion().equalsIgnoreCase(version)){
@@ -109,8 +110,8 @@ public class DebPackageStore extends TreeMap<DebPackageEntityKey, DebPackageEnti
 		return debs;
 	}
 	
-	public List<DebPackageEntity> findAllForPackageNameVersionAndArch(String packageName, String version, String arch) {
-		List<DebPackageEntity> debs = new ArrayList<>();
+	public List<DebPackage> findAllForPackageNameVersionAndArch(String packageName, String version, String arch) {
+		List<DebPackage> debs = new ArrayList<>();
 		for (DebPackageEntity deb: this.values()){
 			if (deb.getPackageName().equalsIgnoreCase(packageName)
 					&& deb.getVersion().equalsIgnoreCase(version)
@@ -121,8 +122,8 @@ public class DebPackageStore extends TreeMap<DebPackageEntityKey, DebPackageEnti
 		return debs;
 	}
 
-	public List<DebPackageEntity> findAllForPackageNameAndArch(String packageName, String arch) {
-		List<DebPackageEntity> debs = new ArrayList<>();
+	public List<DebPackage> findAllForPackageNameAndArch(String packageName, String arch) {
+		List<DebPackage> debs = new ArrayList<>();
 		for (DebPackageEntity deb: this.values()){
 			if (deb.getPackageName().equalsIgnoreCase(packageName)
 					&& deb.getArch().equalsIgnoreCase(arch)){
@@ -155,9 +156,9 @@ public class DebPackageStore extends TreeMap<DebPackageEntityKey, DebPackageEnti
 		}
 	}
 
-	public List<DebPackageEntity> findAllByDistComponentArch(String distName, String component, String archName) {
-		List<DebPackageEntity> debs = new ArrayList<>();
-		for (DebPackageEntity deb: this.values()){
+	public List<DebPackage> findAllByDistComponentArch(String distName, String component, String archName) {
+		List<DebPackage> debs = new ArrayList<>();
+		for (DebPackage deb: this.values()){
 			if (deb.getDist().equalsIgnoreCase(distName)
 					&& deb.getComponent().equalsIgnoreCase(component)
 					&& deb.getArch().equalsIgnoreCase(archName)){

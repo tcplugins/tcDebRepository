@@ -18,7 +18,7 @@ package debrepo.teamcity.service;
 import java.util.List;
 import java.util.Set;
 
-import debrepo.teamcity.entity.DebPackageEntity;
+import debrepo.teamcity.DebPackage;
 import debrepo.teamcity.entity.DebRepositoryConfiguration;
 import debrepo.teamcity.entity.DebRepositoryConfigurations;
 import lombok.Value;
@@ -34,11 +34,11 @@ public interface DebRepositoryConfigurationManager {
 	public Set<DebRepositoryConfiguration> findConfigurationsForBuildType(String buildTypeId);
 	/**
 	 * 
-	 * @param debPackageEntity which must be fully populated and variables resolved.
+	 * @param debPackage which must be fully populated and variables resolved.
 	 * @return {@link Set} of {@link DebRepositoryConfiguration} items which have a matching buildTypeId, 
 	 * 			and a filter which matches the regex against the filename, the dist is equal and the component is equal. 
 	 */
-	public Set<DebRepositoryConfiguration> findConfigurationsForDebRepositoryEntity(DebPackageEntity debPackageEntity);
+	public Set<DebRepositoryConfiguration> findConfigurationsForDebRepositoryEntity(DebPackage debPackage);
 	public DebRepositoryActionResult addDebRepository(DebRepositoryConfiguration debRepositoryConfiguration);
 	public DebRepositoryActionResult editDebRepositoryConfiguration(DebRepositoryConfiguration debRepoConfig);
 	public DebRepositoryActionResult removeDebRespository(DebRepositoryConfiguration debRepositoryConfiguration);

@@ -18,6 +18,7 @@ package debrepo.teamcity.service;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,17 +28,22 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import debrepo.teamcity.entity.DebPackageEntity;
+import debrepo.teamcity.service.DebRepositoryManagerImpl;
+import debrepo.teamcity.ebean.server.EbeanServerProvider;
 import debrepo.teamcity.entity.DebPackageStore;
 import debrepo.teamcity.entity.DebRepositoryBuildTypeConfig;
 import debrepo.teamcity.entity.DebRepositoryConfiguration;
 import debrepo.teamcity.entity.DebRepositoryConfigurationJaxImpl;
 import debrepo.teamcity.entity.DebRepositoryConfigurations;
+import debrepo.teamcity.entity.helper.PluginDataResolver;
+import debrepo.teamcity.entity.helper.PluginDataResolverImpl;
 import debrepo.teamcity.entity.helper.XmlPersister;
 import debrepo.teamcity.settings.DebRepositoryConfigurationChangePersister;
 import jetbrains.buildServer.serverSide.ProjectManager;
 import jetbrains.buildServer.serverSide.SBuild;
 import jetbrains.buildServer.serverSide.SBuildType;
 import jetbrains.buildServer.serverSide.SProject;
+import jetbrains.buildServer.serverSide.ServerPaths;
 
 public class DebRepositoryBaseTest {
 
@@ -59,6 +65,11 @@ public class DebRepositoryBaseTest {
 	@Mock protected SBuild build01;
 	@Mock protected SBuild build02;
 	@Mock protected SBuild build03;
+	
+//	@Mock protected ServerPaths serverPaths;
+//	protected PluginDataResolver pluginDataResolver;
+//	
+//	protected EbeanServerProvider ebeanServerProvider;
 	
 	protected List<SProject> projectPath = new ArrayList<>();
 	protected List<SProject> projectPath2 = new ArrayList<>();
@@ -121,9 +132,9 @@ public class DebRepositoryBaseTest {
 		entity.setDist("wheezy");
 		entity.setComponent("main");
 		entity.setFilename("testpackage-i386-1.2.3.4.deb");
-		entity.setSBuildTypeId(BUILD_TYPE_ID_BT01);
-		entity.setSBuildId(build01.getBuildId());
-		entity.setUri("ProjectName/BuildName/" + entity.getSBuildId() + "/" + entity.getFilename());
+		entity.setBuildTypeId(BUILD_TYPE_ID_BT01);
+		entity.setBuildId(build01.getBuildId());
+		entity.setUri("ProjectName/BuildName/" + entity.getBuildId() + "/" + entity.getFilename());
 		
 		entity2 = new DebPackageEntity();
 		entity2.setPackageName("testpackage");
@@ -132,9 +143,9 @@ public class DebRepositoryBaseTest {
 		entity2.setDist("wheezy");
 		entity2.setComponent("main");		
 		entity2.setFilename("testpackage-i386-1.2.3.5.deb");
-		entity2.setSBuildTypeId(BUILD_TYPE_ID_BT02);
-		entity2.setSBuildId(build02.getBuildId());
-		entity2.setUri("ProjectName/BuildName/" + entity2.getSBuildId() + "/" + entity2.getFilename());
+		entity2.setBuildTypeId(BUILD_TYPE_ID_BT02);
+		entity2.setBuildId(build02.getBuildId());
+		entity2.setUri("ProjectName/BuildName/" + entity2.getBuildId() + "/" + entity2.getFilename());
 		
 		entity3 = new DebPackageEntity();
 		entity3.setPackageName("testpackage");
@@ -143,9 +154,9 @@ public class DebRepositoryBaseTest {
 		entity3.setDist("wheezy");
 		entity3.setComponent("main");		
 		entity3.setFilename("testpackage-amd64-1.2.3.5.deb");
-		entity3.setSBuildTypeId(BUILD_TYPE_ID_BT02);
-		entity3.setSBuildId(build02.getBuildId());
-		entity3.setUri("ProjectName/BuildName/" + entity3.getSBuildId() + "/" + entity3.getFilename());
+		entity3.setBuildTypeId(BUILD_TYPE_ID_BT02);
+		entity3.setBuildId(build02.getBuildId());
+		entity3.setUri("ProjectName/BuildName/" + entity3.getBuildId() + "/" + entity3.getFilename());
 		
 		entity4 = new DebPackageEntity();
 		entity4.setPackageName("anotherpackage");
@@ -154,11 +165,18 @@ public class DebRepositoryBaseTest {
 		entity4.setDist("wheezy");
 		entity4.setComponent("main");
 		entity4.setFilename("testpackage-amd64-1.5.deb");
-		entity4.setSBuildTypeId(BUILD_TYPE_ID_BT03);
-		entity4.setSBuildId(build03.getBuildId());
-		entity4.setUri("ProjectName/BuildName/" + entity4.getSBuildId() + "/" + entity4.getFilename());
+		entity4.setBuildTypeId(BUILD_TYPE_ID_BT03);
+		entity4.setBuildId(build03.getBuildId());
+		entity4.setUri("ProjectName/BuildName/" + entity4.getBuildId() + "/" + entity4.getFilename());
 		
-		debRepositoryManager = new DebRepositoryManagerImpl(projectManager, getDebRepositoryXmlPersister(), debRepositoryConfigurationFactory, debRepositoryConfigurationChangePersister);
+//		when(serverPaths.getPluginDataDirectory()).thenReturn(new File("target"));
+//		
+//		pluginDataResolver = new PluginDataResolverImpl(serverPaths);
+//		ebeanServerProvider = new EbeanServerProvider(pluginDataResolver);
+
+		
+		//debRepositoryManager = new DebRepositoryManagerImpl(ebeanServerProvider, debRepositoryConfigurationFactory, debRepositoryConfigurationChangePersister);
+		debRepositoryManager = new DebRepositoryManagerImpl(projectManager, debRepositoryDatabaseXmlPersister, debRepositoryConfigurationFactory, debRepositoryConfigurationChangePersister);
 		debRepositoryConfigManager = (DebRepositoryConfigurationManager) debRepositoryManager;
 		DebRepositoryConfigurationJaxImpl config1 = getDebRepoConfig1();
 		DebRepositoryConfigurations configs = new DebRepositoryConfigurations();

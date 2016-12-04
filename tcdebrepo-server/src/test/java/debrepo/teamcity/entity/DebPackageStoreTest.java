@@ -32,7 +32,7 @@ public class DebPackageStoreTest {
 		entity.setVersion("1.1-ubuntu-6");
 		entity.setArch("amd64");
 		entity.setFilename("package-123.deb");
-		entity.setUri("ProjectName/BuildName/" + entity.getSBuildId() + "/" + entity.getFilename());
+		entity.setUri("ProjectName/BuildName/" + entity.getBuildId() + "/" + entity.getFilename());
 		store.put(key, entity);
 		assertTrue(store.size() == 1);
 	}
@@ -48,7 +48,7 @@ public class DebPackageStoreTest {
 		entity.setVersion("1.1-ubuntu-6");
 		entity.setArch("amd64");
 		entity.setFilename("package-123.deb");
-		entity.setUri("ProjectName/BuildName/" + entity.getSBuildId() + "/" + entity.getFilename());
+		entity.setUri("ProjectName/BuildName/" + entity.getBuildId() + "/" + entity.getFilename());
 		store.put(key, entity);
 		assertTrue(store.size() == 1);
 		
@@ -67,7 +67,7 @@ public class DebPackageStoreTest {
 		entity.setVersion("1.1-ubuntu-6");
 		entity.setArch("amd64");
 		entity.setFilename("package-123.deb");
-		entity.setUri("ProjectName/BuildName/" + entity.getSBuildId() + "/" + entity.getFilename());
+		entity.setUri("ProjectName/BuildName/" + entity.getBuildId() + "/" + entity.getFilename());
 		store.put(key, entity);
 		assertTrue(store.size() == 1);
 		
@@ -86,7 +86,7 @@ public class DebPackageStoreTest {
 		entity.setVersion("1.1-ubuntu-6");
 		entity.setArch("amd64");
 		entity.setFilename("package-123.deb");
-		entity.setUri("ProjectName/BuildName/" + entity.getSBuildId() + "/" + entity.getFilename());
+		entity.setUri("ProjectName/BuildName/" + entity.getBuildId() + "/" + entity.getFilename());
 		store.put(key, entity);
 		assertTrue(store.size() == 1);
 		

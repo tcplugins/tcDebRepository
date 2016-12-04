@@ -19,6 +19,7 @@ package debrepo.teamcity.service;
 import java.util.ArrayList;
 import java.util.List;
 
+import debrepo.teamcity.DebPackage;
 import debrepo.teamcity.Loggers;
 import debrepo.teamcity.entity.DebPackageEntity;
 import debrepo.teamcity.entity.DebPackageStore;
@@ -43,18 +44,19 @@ public class MapBackedDebRepositoryDatabase implements DebRepositoryDatabase {
 	}
 
 	@Override
-	public boolean addPackage(DebPackageEntity entity) {
+	public boolean addPackage(DebPackage entity) {
 		boolean added = false;
 		for (DebRepositoryConfiguration config : this.myDebRepositoryConfigurationManager.findConfigurationsForDebRepositoryEntity(entity)) {
-			this.myDebRepositoryManager.addBuildPackage(config, entity);
+			this.myDebRepositoryManager.addBuildPackage(config, DebPackageEntity.copy(entity));
 			added = true;
 		}
 		return added;
 	}
 
 	@Override
-	public boolean removePackage(DebPackageEntity entity) {
-		SBuildType sBuildType = myProjectManager.findBuildTypeById(entity.getSBuildTypeId());
+	public boolean removePackage(DebPackage debPackage) {
+		DebPackageEntity entity = DebPackageEntity.copy(debPackage);
+		SBuildType sBuildType = myProjectManager.findBuildTypeById(entity.getBuildTypeId());
 		
 		List<DebPackageStore> stores;
 		try {
@@ -73,7 +75,7 @@ public class MapBackedDebRepositoryDatabase implements DebRepositoryDatabase {
 	}
 
 	@Override
-	public List<DebPackageEntity> findPackageByName(String repoName, String packageName) {
+	public List<DebPackage> findPackageByName(String repoName, String packageName) {
 		try {
 			return this.myDebRepositoryManager.getPackageStore(repoName).findAllForPackageName(packageName);
 		} catch (NonExistantRepositoryException e) {
@@ -83,7 +85,7 @@ public class MapBackedDebRepositoryDatabase implements DebRepositoryDatabase {
 	}
 
 	@Override
-	public List<DebPackageEntity> findPackageByNameAndVersion(String repoName, String packageName, String version) {
+	public List<DebPackage> findPackageByNameAndVersion(String repoName, String packageName, String version) {
 		try {
 			return this.myDebRepositoryManager.getPackageStore(repoName).findAllForPackageNameAndVersion(packageName, version);
 		} catch (NonExistantRepositoryException e) {
@@ -93,7 +95,7 @@ public class MapBackedDebRepositoryDatabase implements DebRepositoryDatabase {
 	}
 
 	@Override
-	public List<DebPackageEntity> findPackageByNameAndAchitecture(String repoName, String packageName, String arch) {
+	public List<DebPackage> findPackageByNameAndAchitecture(String repoName, String packageName, String arch) {
 		try {
 			return this.myDebRepositoryManager.getPackageStore(repoName).findAllForPackageNameAndArch(packageName, arch);
 		} catch (NonExistantRepositoryException e) {
@@ -103,7 +105,7 @@ public class MapBackedDebRepositoryDatabase implements DebRepositoryDatabase {
 	}
 
 	@Override
-	public List<DebPackageEntity> findPackageByNameVersionAndArchitecture(String repoName, String packageName, String version, String arch) {
+	public List<DebPackage> findPackageByNameVersionAndArchitecture(String repoName, String packageName, String version, String arch) {
 		try {
 			return this.myDebRepositoryManager.getPackageStore(repoName).findAllForPackageNameVersionAndArch(packageName, version, arch);
 		} catch (NonExistantRepositoryException e) {
@@ -115,14 +117,14 @@ public class MapBackedDebRepositoryDatabase implements DebRepositoryDatabase {
 	
 
 	@Override
-	public List<DebPackageEntity> findAllByBuild(SBuild sBuild) {
+	public List<DebPackage> findAllByBuild(SBuild sBuild) {
 		return findAllByBuildType(sBuild.getBuildType());
 	}
 
 	@Override
-	public List<DebPackageEntity> findAllByBuildType(SBuildType sBuildType) {
+	public List<DebPackage> findAllByBuildType(SBuildType sBuildType) {
 		List<DebPackageStore> stores = null;
-		List<DebPackageEntity> entities = new ArrayList<>();
+		List<DebPackage> entities = new ArrayList<>();
 		try {
 			stores = this.myDebRepositoryManager.getPackageStoresForBuildType(sBuildType.getBuildTypeId());
 		} catch (NonExistantRepositoryException e) {
@@ -134,20 +136,4 @@ public class MapBackedDebRepositoryDatabase implements DebRepositoryDatabase {
 		}
 		return entities;
 	}
-
-	@Override
-	public List<DebPackageEntity> findAllByProject(SProject sProject) {
-		return findAllByProjectId(sProject.getProjectId());
-	}
-
-	@Override
-	public List<DebPackageEntity> findAllByProjectId(String projectId) {
-		try {
-			return this.myDebRepositoryManager.getPackageStoreForProject(projectId).findAll();
-		} catch (NonExistantRepositoryException | NullPointerException e) {
-			Loggers.SERVER.warn("MapBackedDebRepositoryDatabase: No repo found for project: " + projectId);
-			return new ArrayList<>();
-		}
-	}
-
 }

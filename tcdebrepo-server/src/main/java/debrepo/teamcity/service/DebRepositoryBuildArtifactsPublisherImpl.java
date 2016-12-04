@@ -20,10 +20,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import debrepo.teamcity.DebPackage;
 import debrepo.teamcity.Loggers;
 import debrepo.teamcity.archive.DebFileReader;
 import debrepo.teamcity.archive.DebFileReaderFactory;
-import debrepo.teamcity.entity.DebPackageEntity;
 import debrepo.teamcity.entity.DebRepositoryBuildTypeConfig;
 import debrepo.teamcity.entity.DebRepositoryBuildTypeConfig.Filter;
 import debrepo.teamcity.entity.DebRepositoryConfiguration;
@@ -61,7 +61,7 @@ public class DebRepositoryBuildArtifactsPublisherImpl implements DebRepositoryBu
 	public void addArtifactsToRepositories(SBuild build, BuildArtifacts buildArtifacts) {
 		Loggers.SERVER.debug("DebRepositoryBuildArtifactsPublisherImpl :: Processing build: " + build.getBuildTypeName());
 		if (build.isArtifactsExists()) {
-			List<DebPackageEntity> entities = new ArrayList<>();
+			List<DebPackage> entities = new ArrayList<>();
 			
 			BuildArtifactsProcessor  processor = new MyBuildArtifactsProcessor(build, entities);
 			buildArtifacts.iterateArtifacts(processor);
@@ -77,9 +77,9 @@ public class DebRepositoryBuildArtifactsPublisherImpl implements DebRepositoryBu
 				for (DebRepositoryBuildTypeConfig bt : config.getBuildTypes()) {
 					if (build.getBuildType().getBuildTypeId().equals(bt.getBuildTypeId())){
 						for (Filter filter : bt.getDebFilters()) {
-							for (DebPackageEntity entity : entities) {
+							for (DebPackage entity : entities) {
 								if (filter.matches(entity.getFilename())) {
-									DebPackageEntity newEntity = populateEntity(entity, myDebFileReaderFactory.createFileReader(build));
+									DebPackage newEntity = populateEntity(entity, myDebFileReaderFactory.createFileReader(build));
 									/* TODO: Support for dist and component being variables.
 									if (ReferencesResolverUtil.containsReference(filter.getComponent())) {
 										String component = filter.getComponent();
@@ -110,8 +110,8 @@ public class DebRepositoryBuildArtifactsPublisherImpl implements DebRepositoryBu
 		//while ()
 	}*/
 	
-	private DebPackageEntity populateEntity(DebPackageEntity entity, DebFileReader debFileReader) {
-		DebPackageEntity e = entity.clone();
+	private DebPackage populateEntity(DebPackage entity, DebFileReader debFileReader) {
+		DebPackage e = DebPackageFactory.copy(entity);
 		if (!e.isPopulated()) {
 			try {
 				e.populateMetadata(debFileReader.getMetaDataFromPackage(entity.getFilename()));
@@ -126,10 +126,10 @@ public class DebRepositoryBuildArtifactsPublisherImpl implements DebRepositoryBu
 	
 	public static class MyBuildArtifactsProcessor implements BuildArtifacts.BuildArtifactsProcessor {
 		
-		private List<DebPackageEntity> myEntities;
+		private List<DebPackage> myEntities;
 		private SBuild myBuild;
 
-		public MyBuildArtifactsProcessor(SBuild build, List<DebPackageEntity> entities) {
+		public MyBuildArtifactsProcessor(SBuild build, List<DebPackage> entities) {
 			this.myBuild = build;
 			this.myEntities = entities;
 		}
@@ -138,7 +138,7 @@ public class DebRepositoryBuildArtifactsPublisherImpl implements DebRepositoryBu
 		public Continuation processBuildArtifact(BuildArtifact artifact) {
 			Loggers.SERVER.debug("DebRepositoryBuildArtifactsPublisherImpl :: Processing artifact: " 
 						+ artifact.getRelativePath() + " " + artifact.getName());
-			this.myEntities.add(DebPackageEntity.buildFromArtifact(this.myBuild, artifact.getRelativePath()));
+			this.myEntities.add(DebPackageFactory.buildFromArtifact(this.myBuild, artifact.getRelativePath()));
 			return Continuation.CONTINUE;
 		}
 		
