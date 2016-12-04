@@ -97,18 +97,8 @@ public class DebRepositoryBuildArtifactsPublisherImpl implements DebRepositoryBu
 					}
 				}
 			}
-			// for each filter, add a package.
-			//ReferencesResolverUtil.
-			//build.getP
-			//this.myDepRepositoryManager.addBuildPackages(build.getBuildTypeId(), entities, myDebFileReaderFactory.createFileReader(build));
-			
 		}
 	}
-	
-	/*
-	private String resolveParameter(Filter filter, ParametersProvider parametersProvider) {
-		//while ()
-	}*/
 	
 	private DebPackage populateEntity(DebPackage entity, DebFileReader debFileReader) {
 		DebPackage e = DebPackageFactory.copy(entity);

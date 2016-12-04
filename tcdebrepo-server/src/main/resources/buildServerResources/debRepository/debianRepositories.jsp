@@ -72,7 +72,7 @@
 	                                    </td>
 	                                </tr>
 	                                <tr><td style="width:33%;">Package Listings: ${repo.debRepositoryStatistics.totalPackageCount}</td></tr>
-	                                <tr><td style="width:33%;">Package Listings: ${repo.debRepositoryStatistics.totalPackageCount}</td></tr>
+	                                <tr><td style="width:33%;">Artifact Filters: ${repo.debRepositoryStatistics.totalFilterCount}</td></tr>
 	                        </c:forEach>
 	                    </table>
 	                </c:when>

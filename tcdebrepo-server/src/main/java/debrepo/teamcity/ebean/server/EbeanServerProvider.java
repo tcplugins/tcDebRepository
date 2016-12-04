@@ -1,16 +1,27 @@
+/*******************************************************************************
+ *
+ *  Copyright 2016 Net Wolf UK
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *  
+ *  
+ *******************************************************************************/
 package debrepo.teamcity.ebean.server;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
-import java.util.Properties;
 
 import org.avaje.datasource.DataSourceConfig;
-import org.avaje.datasource.DataSourceFactory;
-import org.avaje.datasource.DataSourcePool;
-import org.avaje.datasource.Factory;
-import org.avaje.datasource.pool.ConnectionPool;
-import org.springframework.core.io.support.PropertiesLoaderUtils;
 
 import com.avaje.ebean.EbeanServer;
 import com.avaje.ebean.EbeanServerFactory;
@@ -18,7 +29,6 @@ import com.avaje.ebean.config.ServerConfig;
 
 import debrepo.teamcity.Loggers;
 import debrepo.teamcity.entity.helper.PluginDataResolver;
-import jetbrains.buildServer.serverSide.ServerPaths;
 import jetbrains.buildServer.util.FuncThrow;
 import jetbrains.buildServer.util.Util;
 
@@ -91,10 +101,6 @@ public class EbeanServerProvider {
 
 			Loggers.SERVER.debug(config.getDataSourceConfig().getUsername());
 
-			// load test-ebean.properties if present for running tests
-			// typically using H2 in memory database
-			// config.loadTestProperties();
-
 			// set as default and register so that Model can be
 			// used if desired for save() and update() etc
 			config.setDefaultServer(true);
@@ -106,81 +112,6 @@ public class EbeanServerProvider {
 			return EbeanServerFactory.create(config);
 		}
 		return null;
-	}
-
-	public EbeanServer createEbeanServerInstance2(File pluginDataDirectory) {
-
-		if (pluginDataDirectory.exists() && pluginDataDirectory.isDirectory() && pluginDataDirectory.canWrite()) {
-			File myDataDir = new File(pluginDataDirectory + File.separator + "tcDebRepository");
-			if (!myDataDir.exists()) {
-				if (myDataDir.mkdir()){
-					Loggers.SERVER.info("tcDebRepository EbeanServerProvider : Created directory " + myDataDir.getAbsolutePath());
-				} else {
-				    Loggers.SERVER.error("tcDebRepository EbeanServerProvider : Failed to create directory " + myDataDir.getAbsolutePath());
-				}
-			}
-
-			if (myDataDir.exists() && myDataDir.isDirectory() && myDataDir.canWrite()) {
-				Properties props = null;
-				try {
-					final ClassLoader[] classLoaders = {EbeanServerProvider.class.getClassLoader(), ClassLoader.getSystemClassLoader()}; 
-					for (ClassLoader cl : classLoaders){
-						props = PropertiesLoaderUtils.loadAllProperties("ebean.properties", cl);
-					}
-				} catch (IOException e) {
-					Loggers.SERVER.error("EbeanServerProvider :: Failed to load ebean.properties");
-					Loggers.SERVER.debug(e);
-				}
-				
-				Loggers.SERVER.debug("tcDebRepository:: ebean Properties are: " + props.toString());
-				
-				ServerConfig config = new ServerConfig();
-				config.setName("db");
-				config.loadFromProperties();
-				config.addPackage("debrepo.teamcity.ebean");
-
-				DataSourceConfig dsConfig = config.getDataSourceConfig();
-				
-				dsConfig.setUrl(
-						"jdbc:h2:file:" + myDataDir.getAbsolutePath() + File.separator + "tcDebRepositoryDB;DB_CLOSE_ON_EXIT=FALSE");
-
-				
-//				DataSourcePool pool = new ConnectionPool("db", dsConfig);
-//				
-//				config.setDataSource(pool);
-				config.setDataSourceConfig(dsConfig);
-				Loggers.SERVER.debug("tcDebRepository:: ebean dsConfig are: " + dsConfig);
-
-				Loggers.SERVER.debug(dsConfig.getUsername());
-				Loggers.SERVER.debug(config.getDataSourceConfig().getUsername());
-
-				// load test-ebean.properties if present for running tests
-				// typically using H2 in memory database
-				// config.loadTestProperties();
-
-				// set as default and register so that Model can be
-				// used if desired for save() and update() etc
-				config.setDefaultServer(true);
-				config.setRegister(true);
-
-				return EbeanServerFactory.create(config);
-			}
-		}
-		return null;
-	}
-	
-	private URL findPropertiesFileUrlInVariousClassloaders(String propertiesFile) {
-		final ClassLoader[] classLoaders = {EbeanServerProvider.class.getClassLoader(), ClassLoader.getSystemClassLoader()}; 
-		URL url = null;
-		for (ClassLoader cl : classLoaders){
-			if (cl != null){
-				url = cl.getResource(propertiesFile);
-		        if (url != null){
-		        	break;
-		        }
-			}
-		}
-		return url;
 	}
 
 	public EbeanServer getEbeanServer() {

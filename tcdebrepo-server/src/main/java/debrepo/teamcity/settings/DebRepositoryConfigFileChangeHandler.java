@@ -21,7 +21,6 @@ import java.io.FileNotFoundException;
 import javax.xml.bind.JAXBException;
 
 import debrepo.teamcity.entity.DebRepositoryConfigurations;
-import debrepo.teamcity.entity.helper.JaxHelper;
 import debrepo.teamcity.entity.helper.PluginDataResolver;
 import debrepo.teamcity.service.DebRepositoryConfigurationManager;
 import debrepo.teamcity.service.DebRepositoryManager;

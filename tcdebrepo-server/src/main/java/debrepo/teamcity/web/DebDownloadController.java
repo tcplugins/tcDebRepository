@@ -22,7 +22,6 @@ import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -41,8 +40,6 @@ import org.springframework.web.servlet.ModelAndView;
 import debrepo.teamcity.DebPackage;
 import debrepo.teamcity.Loggers;
 import debrepo.teamcity.entity.DebPackageNotFoundInStoreException;
-import debrepo.teamcity.entity.DebPackageStore;
-import debrepo.teamcity.entity.DebRepositoryStatistics;
 import debrepo.teamcity.entity.helper.DebPackageToPackageDescriptionBuilder;
 import debrepo.teamcity.service.DebRepositoryManager;
 import debrepo.teamcity.service.NonExistantRepositoryException;
@@ -507,10 +504,6 @@ public class DebDownloadController extends BaseController {
 			if (os != null) { os.close(); }
 		}
 		return null;
-	}
-	
-	private ModelAndView serveRepoInfo(DebPackageStore store, DebRepositoryStatistics stats) {
-		return simpleView ("FIXME: Serving Packages for repo " + store.getUuid() + "<br>" + stats);
 	}
 	
 	@Data @Builder

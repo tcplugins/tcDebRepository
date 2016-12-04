@@ -24,5 +24,6 @@ public class DebRepositoryStatistics {
 
 	Integer totalPackageCount;
 	String repositoryUrl;
+	Integer totalFilterCount;
 	
 }

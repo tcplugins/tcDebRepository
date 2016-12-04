@@ -18,11 +18,8 @@ package debrepo.teamcity.archive;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Scanner;
@@ -50,7 +47,6 @@ public class DebFileReader {
 	}
 	
 	public Map<String,String> getMetaDataFromPackage(String filename) throws IOException {
-		//DebFileReader reader = new DebFileReader(new File("src/test/resources/build-essential_11.6ubuntu6_amd64.deb"));
 		File debFile = new File(this.myArtifactsBaseDirectory + File.separator + filename);
 		File controlTarGz = this.getControlTarGzFromDeb(debFile);
 		String controlFileContents = this.getControlFromControlTarGz(controlTarGz);
@@ -66,9 +62,6 @@ public class DebFileReader {
 		File controlTarGzFile = null;
 
 		while((entry = stream.getNextEntry()) != null) {
-		    // access each archive entry individually using the stream
-		    // or extract it using entry.extract(destination)
-		    // or fetch meta-data using entry.getName(), entry.isDirectory(), ...
 			if ("control.tar.gz".equals(entry.getName())){
 				controlTarGzFile = entry.extract(new File(this.myTempDirectory));
 			}

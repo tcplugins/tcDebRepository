@@ -57,7 +57,7 @@
                                     </c:if>
                                 </tr>
                                 <tr><td>Package Listings: ${repo.debRepositoryStatistics.totalPackageCount}</td></tr>
-                                <tr><td>Package Listings: ${repo.debRepositoryStatistics.totalPackageCount}</td></tr>
+                                <tr><td>Artifact Filters: ${repo.debRepositoryStatistics.totalFilterCount}</td></tr>
                             </c:forEach>
                         </c:forEach>
                     </table>

@@ -19,10 +19,8 @@ package debrepo.teamcity.service;
 import java.util.List;
 
 import debrepo.teamcity.DebPackage;
-import debrepo.teamcity.entity.DebPackageEntity;
 import jetbrains.buildServer.serverSide.SBuild;
 import jetbrains.buildServer.serverSide.SBuildType;
-import jetbrains.buildServer.serverSide.SProject;
 
 public interface DebRepositoryDatabase {
 	

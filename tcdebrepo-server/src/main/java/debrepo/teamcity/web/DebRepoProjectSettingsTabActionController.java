@@ -54,14 +54,6 @@ import jetbrains.buildServer.web.openapi.WebControllerManager;
 public class DebRepoProjectSettingsTabActionController extends BaseAjaxActionController implements ControllerAction {
     private static final String DEBREPO_UUID = "debrepo.uuid";
     private static final String DEBREPO_NAME = "debrepo.name";
-    private static final String SONAR_URL = "sonar.host.url";
-    private static final String SONAR_LOGIN = "sonar.login";
-    private static final String SONAR_PASSWORD = "sonar.password";
-    private static final String SONAR_PASSWORD_PRESERVE = "sonar.password_preserve";
-    private static final String SONAR_JDBC_URL = "sonar.jdbc.url";
-    private static final String SONAR_JDBC_USERNAME = "sonar.jdbc.username";
-    private static final String SONAR_JDBC_PASSWORD = "sonar.jdbc.password";
-    private static final String SONAR_JDBC_PASSWORD_PRESERVE = "sonar.jdbc.password_preserve";
 
     private static final String ADD_DEBREPO_ACTION = "addDebRepo";
     private static final String REMOVE_DEBREPO_ACTION = "removeDebRepo";

@@ -33,6 +33,7 @@ import debrepo.teamcity.entity.DebPackageEntity;
 import debrepo.teamcity.entity.DebPackageEntityKey;
 import debrepo.teamcity.entity.DebPackageNotFoundInStoreException;
 import debrepo.teamcity.entity.DebPackageStore;
+import debrepo.teamcity.entity.DebRepositoryBuildTypeConfig;
 import debrepo.teamcity.entity.DebRepositoryConfiguration;
 import debrepo.teamcity.entity.DebRepositoryStatistics;
 import debrepo.teamcity.entity.helper.XmlPersister;
@@ -125,7 +126,12 @@ public class DebRepositoryManagerImpl extends  DebRepositoryConfigurationManager
 	
 	@Override
 	public DebRepositoryStatistics getRepositoryStatistics(String uuid, String repoURL) {
-		return new DebRepositoryStatistics(repositories.get(UUID.fromString(uuid)).size(), repoURL);
+		DebRepositoryConfiguration config = getDebRepositoryConfiguration(uuid);
+		int filterCount = 0;
+		for (DebRepositoryBuildTypeConfig btConfig : config.getBuildTypes()) {
+			filterCount = filterCount + btConfig.getDebFilters().size();
+		}
+		return new DebRepositoryStatistics(repositories.get(UUID.fromString(uuid)).size(), repoURL, filterCount);
 	}
 	
 	@Override

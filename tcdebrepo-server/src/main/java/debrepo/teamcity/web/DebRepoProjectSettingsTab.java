@@ -25,7 +25,6 @@ import javax.servlet.http.HttpServletRequest;
 import org.jetbrains.annotations.NotNull;
 
 import debrepo.teamcity.entity.DebRepositoryConfiguration;
-import debrepo.teamcity.entity.DebRepositoryConfigurationJaxImpl;
 import debrepo.teamcity.entity.DebRepositoryStatistics;
 import debrepo.teamcity.service.DebRepositoryConfigurationManager;
 import debrepo.teamcity.service.DebRepositoryManager;
@@ -97,14 +96,16 @@ public class DebRepoProjectSettingsTab extends EditProjectTab {
             }
             final List<DebRepositoryConfigAndStatsWrapper> infoPack = new ArrayList<>();
             for (DebRepositoryConfiguration config :this.myDebRepositoryConfigManager.getConfigurationsForProject(project.getProjectId())) {
-            	infoPack.add(new DebRepositoryConfigAndStatsWrapper(config, 
-            										   myDebRepositoryManager.getRepositoryStatistics(
-            												   						config, 
-            												   						StringUtils.getDebRepoUrl(
-            												   										myServer.getRootUrl(), 
-            												   										config.getRepoName())
-            												   						)
-            										   )
+            	infoPack.add(new DebRepositoryConfigAndStatsWrapper(
+        							config, 
+        							myDebRepositoryManager.getRepositoryStatistics(
+        									config, 
+        									StringUtils.getDebRepoUrl(
+        											myServer.getRootUrl(), 
+        											config.getRepoName()
+        											)
+        									)
+        							)
             			);
             }
             if (!infoPack.isEmpty()) {

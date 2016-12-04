@@ -15,7 +15,6 @@
  *******************************************************************************/
 package debrepo.teamcity.entity;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -30,7 +29,6 @@ import javax.xml.bind.annotation.XmlType;
 
 import org.jetbrains.annotations.NotNull;
 
-import debrepo.teamcity.DebPackage;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 

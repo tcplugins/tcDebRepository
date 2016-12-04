@@ -24,13 +24,10 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlType;
 
 import org.jetbrains.annotations.NotNull;
 
 import debrepo.teamcity.DebPackage;
-import jetbrains.buildServer.serverSide.SBuild;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 
 /* Use the XmlAttributes on the fields rather than the getters

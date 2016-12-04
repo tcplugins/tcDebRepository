@@ -1,3 +1,21 @@
+/*******************************************************************************
+ *
+ *  Copyright 2016 Net Wolf UK
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *  
+ *  
+ *******************************************************************************/
 package debrepo.teamcity.ebean.server;
 
 import java.util.List;
@@ -12,6 +30,7 @@ import debrepo.teamcity.ebean.query.QDebPackageModel;
 import debrepo.teamcity.ebean.query.QDebRepositoryModel;
 import debrepo.teamcity.entity.DebPackageNotFoundInStoreException;
 import debrepo.teamcity.entity.DebPackageStore;
+import debrepo.teamcity.entity.DebRepositoryBuildTypeConfig;
 import debrepo.teamcity.entity.DebRepositoryConfiguration;
 import debrepo.teamcity.entity.DebRepositoryStatistics;
 import debrepo.teamcity.service.DebRepositoryConfigurationFactory;
@@ -73,7 +92,12 @@ public class DebRepositoryManagerImpl extends DebRepositoryConfigurationManagerI
 	@Override
 	public DebRepositoryStatistics getRepositoryStatistics(String uuid, String repoUrl) {
 		int count = new QDebPackageModel().repository.uuid.eq(uuid).findCount();
-		return new DebRepositoryStatistics(count, repoUrl);
+		DebRepositoryConfiguration config = getDebRepositoryConfiguration(uuid);
+		int filterCount = 0;
+		for (DebRepositoryBuildTypeConfig btConfig : config.getBuildTypes()) {
+			filterCount = filterCount + btConfig.getDebFilters().size();
+		}
+		return new DebRepositoryStatistics(count, repoUrl, filterCount);
 	}
 
 	@Override

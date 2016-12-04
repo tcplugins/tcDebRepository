@@ -27,7 +27,6 @@ import debrepo.teamcity.entity.DebRepositoryConfiguration;
 import jetbrains.buildServer.serverSide.ProjectManager;
 import jetbrains.buildServer.serverSide.SBuild;
 import jetbrains.buildServer.serverSide.SBuildType;
-import jetbrains.buildServer.serverSide.SProject;
 
 public class MapBackedDebRepositoryDatabase implements DebRepositoryDatabase {
 	
@@ -70,7 +69,6 @@ public class MapBackedDebRepositoryDatabase implements DebRepositoryDatabase {
 			store.remove(entity.buildKey());
 			this.myDebRepositoryManager.persist(store.getUuid());
 		}
-		//FIXME: Should return something more appropriate.
 		return true;  
 	}
 

@@ -26,7 +26,6 @@ import debrepo.teamcity.entity.DebPackageEntity;
 import debrepo.teamcity.entity.DebPackageStore;
 import debrepo.teamcity.entity.DebPackageStoreEntity;
 import debrepo.teamcity.entity.DebRepositoryConfiguration;
-import debrepo.teamcity.entity.DebRepositoryConfigurationJaxImpl;
 
 public class DebRepositoryDatabaseXmlPersisterImpl implements XmlPersister<DebPackageStore, DebRepositoryConfiguration> {
 	
