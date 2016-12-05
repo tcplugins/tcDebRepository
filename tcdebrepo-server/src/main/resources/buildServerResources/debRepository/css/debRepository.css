@@ -115,3 +115,15 @@ tr.filterHeading {
 	background-color: red;
 	background-image: linear-gradient(to bottom, #e06667, #e50000);
 }
+
+table#debRepoHeader {
+	margin-top:1em;
+}
+
+table#debRepoHeader th {
+	text-alight:right;
+}
+
+table#debRepoHeader, table#debRepoHeader tr, table#debRepoHeader th, table#debRepoHeader td {
+	border: none;
+}

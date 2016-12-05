@@ -1,5 +1,5 @@
 <%@ include file="/include.jsp" %>
-<%@ taglib prefix="myt" uri="/plugins/tcdebrepo/debRepository/tag-lib/mytaglib.tld" %>
+<%@ taglib prefix="myt" uri="/plugins/tcDebRepository/debRepository/tag-lib/mytaglib.tld" %>
 
 <c:set var="filtersNum" value="${fn:length(debRepoBean.filtersAndBuildTypes)}"/>
 <bs:refreshable containerId="repoBuildTypesContainer" pageUrl="${pageUrl}">

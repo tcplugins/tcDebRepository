@@ -33,6 +33,7 @@ public class DebRepoConfigurationEditPageActionController extends BaseAjaxAction
 	public static final String ACTION_TYPE = "action";
     public static final String DEBREPO_UUID = "debrepo.uuid";
     public static final String DEBREPO_NAME = "debrepo.name";
+    public static final String DEBREPO_PROJECT_ID = "debrepo.project.id";
     public static final String DEBREPO_FILTER_ID = "debrepo.filter.id";
     public static final String DEBREPO_FILTER_REGEX = "debrepo.filter.regex";
     public static final String DEBREPO_FILTER_DIST = "debrepo.filter.dist";

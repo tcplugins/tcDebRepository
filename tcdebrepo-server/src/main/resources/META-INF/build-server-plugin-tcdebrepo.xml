@@ -35,6 +35,10 @@
        <bean id="deleteRepositoryAction"
      	class="debrepo.teamcity.web.action.DeleteRepositoryAction" 
      	/>
+
+       <bean id="editRepositoryAction"
+     	class="debrepo.teamcity.web.action.EditRepositoryAction" 
+     	/>
      	
        <bean id="addArtifactFilterAction"
      	class="debrepo.teamcity.web.action.AddArtifactFilterAction" 

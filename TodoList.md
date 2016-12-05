@@ -2,14 +2,15 @@
 
 In order of urgency
 
+ - [ ] Remove artifacts when build cleanup up
  - [x] Add pool browsing
- - [ ] Tidy up editRepository.jsp heading
- - [ ] Add rename and project edit dialog to edit screen and validate repo name to be URL friendly
- - [ ] Unpack deb file in an emphemeral dir to avoid conflicts, and then cleanup.
+ - [x] Tidy up editRepository.jsp heading
+ - [x] Add rename and project edit dialog to edit screen and validate repo name to be URL friendly
+ - [x] Unpack deb file in an emphemeral dir to avoid conflicts, and then cleanup.
  - [x] Test with packages that are not in the root of the artifact list.
- - [ ] Add filter count to statistics
+ - [x] Add filter count to statistics
  - [x] Add license file to github
- - [ ] Migrate to DB.
+ - [ ] Migrate to DB. - Deferred until after the competition (plan to implement as part of v1.1)
  - [ ] Test on windows.
  - [ ] Test on TC 8, TC 9 and TC 10.0.3
  - [ ] Handle case were editing a repository that has been deleted returns empty response (and error popup).

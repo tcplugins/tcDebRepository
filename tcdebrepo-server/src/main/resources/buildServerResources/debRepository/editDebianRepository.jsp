@@ -42,7 +42,7 @@
 		    <authz:authorize allPermissions="EDIT_PROJECT" projectId="${debRepoBean.project.projectId}">
 		      <jsp:body>
 		        <l:li>
-			      <a href="#" title="Edit Respository Name and Project affilliation" onclick="return DebRepoPlugin.showDialog('${projectExternalId}');">Edit repository...</a>
+			      <a href="#" title="Edit Respository Name and Project affilliation" onclick="return DebRepoPlugin.editDebRepo('${repoConfig.uuid}'); return false">Edit repository...</a>
 		        </l:li>
 		        <l:li>
 			      <a href="#" title="Delete Repository Configuration and Index" onclick="DebRepoPlugin.removeDebRepo('${repoConfig.uuid}'); return false">Delete repository...</a>
@@ -67,9 +67,12 @@
   </jsp:attribute>
 
   <jsp:attribute name="body_include">
-  	<h2>Debian Repository : ${repoConfig.repoName}</h2>
+    <bs:refreshable containerId="repoRepoInfoContainer" pageUrl="${pageUrl}">
+  	  <h2>Debian Repository : ${repoConfig.repoName}</h2>
 
-      <table class="settings parameterTable">
+	<bs:messages key="repoInfoUpdateResult"/>
+	
+      <table class="settings parameterTable" id="debRepoHeader">
 <!-- <tr><td colspan=2><p>The repository name forms part of the URL for accessing this repository. Names MUST be unique across a TeamCity 
                     instance and must only contain URL compatible characters.</p> 
                 <p>Renaming a repository will require all Debian servers 
@@ -77,15 +80,70 @@
         </tr>  -->
         
         <tr>
-          <th>Name:</th> <td>${debRepoBean.name}</td><td><p>The repository name forms part of the URL for accessing this repository. Names MUST be unique across a TeamCity 
-                    instance and must only contain URL compatible characters.</p></td></tr>
-          </td>
+          <th style="width:15%;">Name:</th><td style="width:35%;">${debRepoBean.name}</td>
+          <th style="width:15%;">Builds Types:</th><td style="width:35%; border:none;">${fn:length(repoConfig.buildTypes)}</td>
         </tr>
         <tr>
-          <th>Project:</th> <td>${debRepoBean.project.fullName}</td><td><p>The project this repository belongs to. Users with the Project Administrator Role for this project can edit this repository configuration.</p></td></tr>
-          </td>
+          <th style="width:15%;">Project:</th> <td style="width:35%;"><c:out value="${debRepoBean.project.fullName}"/></td>
+          <th style="width:15%;">Artifact Filters:</th><td style="width:35%; border:none;">${repoStats.totalFilterCount}</td>
+        </tr>
+        <tr>
+          <th style="width:15%;">URL:</th><td style="width:35%;"><a href="<c:out value="${repoStats.repositoryUrl}"/>"><c:out value="${repoStats.repositoryUrl}"/></a></td>
+          <th style="width:15%;">Package Listings:</th><td style="width:35%;">${repoStats.totalPackageCount}</td>
         </tr>
       </table>
+      
+          <bs:dialog dialogId="editRepoDialog"
+               dialogClass="editRepoDialog"
+               title="Edit Debian Repository"
+               closeCommand="DebRepoPlugin.EditRepoDialog.close()">
+        <forms:multipartForm id="editRepoForm"
+                             action="/admin/debianRepositoryAction.html"
+                             targetIframe="hidden-iframe"
+                             onsubmit="return DebRepoPlugin.EditRepoDialog.doPost();">
+			<div id="ajaxRepoEditResult"></div>
+            <table class="runnerFormTable">
+                 <tr>
+                    <th>Repository Name<l:star/></th>
+                    <td>
+                    	<div><input type="text" id="debrepo.name" name="debrepo.name" value="${debRepoBean.name}"/></div>
+                    	The Repository name forms part of the URL used to access it. Renaming a repository will change its URL and all Debian servers which use this repository will need their /etc/apt/sources.list file updated.<br>
+                        Names MUST be unique across a TeamCity instance and must only contain A-Za-z0-9_- characters.
+                        
+                    </td>
+                 </tr>
+                 <tr>    
+                 	<th>Project<l:star/></th>                
+                    <td>
+                        <div>
+                        	<select id="debrepo.project.id" name="debrepo.project.id">
+                        	<c:forEach items="${sortedProjects}" var="project">
+                        	            <c:choose>
+                							<c:when test="${project.projectId == debRepoBean.project.projectId}">
+                        						<option selected value="${project.projectId}"><c:out value="${project.fullName}"/></option>
+                        					</c:when>
+                        					<c:otherwise>
+                        						<option value="${project.projectId}"><c:out value="${project.fullName}"/></option>
+                        					</c:otherwise>
+                        				</c:choose>
+                        	</c:forEach>
+                        	</select>
+                        </div>
+                        The project this repository belongs to. Users with the Project Administrator Role for this project can edit this repository configuration. 
+                        When adding/editing Artifact Filters, only builds from this project or sub-projects are available to choose from.</p>
+                    </td>
+                </tr>
+            </table>
+            <input type="hidden" id="debrepo.uuid" name="debrepo.uuid" value="${repoConfig.uuid}"/>
+            <input type="hidden" name="action" id="DebRepoaction" value="editRepo"/>
+            <div class="popupSaveButtonsBlock">
+                <forms:submit id="editRepoDialogSubmit" label="Edit Repository"/>
+                <forms:cancel onclick="DebRepoPlugin.EditRepoDialog.close()"/>
+            </div>
+        </forms:multipartForm>
+    </bs:dialog>
+      
+    </bs:refreshable>
 
 	<br>
  <div class="filterTableContainer">	
@@ -181,7 +239,7 @@
 
     <bs:dialog dialogId="repoDeleteFilterDialog"
                dialogClass="repoDeleteFilterDialog"
-               title="Delete Artifact Filter"
+               title="Confirm Artifact Filter deletion"
                closeCommand="DebRepoFilterPlugin.RepoDeleteFilterDialog.close()">
         <forms:multipartForm id="repoDeleteFilterForm"
                              action="/admin/debianRepositoryAction.html"
@@ -189,7 +247,6 @@
                              onsubmit="return DebRepoFilterPlugin.RepoDeleteFilterDialog.doPost();">
 
             <table class="runnerFormTable">
-                <tr><td><h3>Confirm Artifact Filter deletion</h3></td></tr>
                 <tr><td>Deleting an Artifact Filter does not remove previously added artifacts from the repository.
                         <div id="ajaxDeleteResult"></div>
                 </td></tr>
@@ -207,7 +264,7 @@
     
     <bs:dialog dialogId="deleteRepoDialog"
                dialogClass="deleteRepoDialog"
-               title="Delete Debian Repository"
+               title="Confirm Debian Repository deletion"
                closeCommand="DebRepoPlugin.DeleteRepoDialog.close()">
         <forms:multipartForm id="deleteRepoForm"
                              action="/admin/debianRepositoryAction.html"
@@ -215,7 +272,6 @@
                              onsubmit="return DebRepoPlugin.DeleteRepoDialog.doPost();">
 
             <table class="runnerFormTable">
-                <tr><td><h3>Confirm Debian Repository deletion</h3></td></tr>
                 <tr><td>Deleting a Debian Repository removes all repository configuration and  artifacts from the repository listing.<br>
                 		It does not delete the build artifacts from disk.
                         <div id="ajaxRepoDeleteResult"></div>
@@ -229,9 +285,6 @@
             </div>
         </forms:multipartForm>
     </bs:dialog>
-
-
-
-
+    
   </jsp:attribute>
 </bs:page>

@@ -4,13 +4,13 @@
 
 #### Release
 A text file with meta-data about the repository, and - if relevant - may also contain a list of all the 
-Release and Package.gz files and their checksums from any subdirectories.
+Release and Package.gz files and their checksums from any sub-directories.
 Examples:
   http://ppa.launchpad.net/graphics-drivers/ppa/ubuntu/dists/zesty/Release
   http://ppa.launchpad.net/graphics-drivers/ppa/ubuntu/dists/zesty/main/binary-amd64/Release
 
 #### Release.gpg
-The a text file containing the hash of the Release file. 
+A text file containing the hash of the Release file. 
 Produced by GPG signing the Release file.
 Example:
   http://ppa.launchpad.net/graphics-drivers/ppa/ubuntu/dists/zesty/Release.gpg

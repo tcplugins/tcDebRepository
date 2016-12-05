@@ -24,6 +24,7 @@ import java.util.UUID;
 public interface DebRepositoryConfiguration extends Comparable<DebRepositoryConfiguration> {
 	
 	public abstract String getProjectId();
+	public abstract void setProjectId(String projectId);
 	public abstract UUID getUuid();
 	public abstract String getRepoName();
 	public abstract void setRepoName(String repoName);

@@ -21,6 +21,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.attribute.FileAttribute;
 import java.util.Map;
 
 import org.apache.commons.compress.archivers.ar.ArArchiveEntry;
@@ -71,9 +75,10 @@ public class ArStreamerTest {
 	
 	@Test
 	public void getControlFileAsStringTest() throws IOException {
+		Path ephemeralTempDir = Files.createTempDirectory(Paths.get("target"), "deb-temp-", new FileAttribute<?>[] {});
 		File debFile = new File("src/test/resources/build-essential_11.6ubuntu6_amd64.deb");
 		DebFileReader reader = new DebFileReader(new File("src/test/resources"), "target");
-		File controlTarGz = reader.getControlTarGzFromDeb(debFile);
+		File controlTarGz = reader.getControlTarGzFromDeb(debFile, ephemeralTempDir.toFile());
 		String controlFileContents = reader.getControlFromControlTarGz(controlTarGz);
 		System.out.println(controlFileContents);
 		Map<String,String> params = reader.getDebItemsFromControl(debFile, controlFileContents);

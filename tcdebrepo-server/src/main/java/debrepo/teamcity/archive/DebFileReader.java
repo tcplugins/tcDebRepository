@@ -20,6 +20,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.attribute.FileAttribute;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Scanner;
@@ -37,6 +41,11 @@ import org.rauschig.jarchivelib.IOUtils;
 
 import debrepo.teamcity.Loggers;
 
+/**
+ *	DebFileReader: extract metadata from a Debian package file.
+ *
+ *	Create a new instance and call getMetaDataFromPackage
+ */
 public class DebFileReader {
 	File myArtifactsBaseDirectory;
 	String myTempDirectory;
@@ -47,13 +56,17 @@ public class DebFileReader {
 	}
 	
 	public Map<String,String> getMetaDataFromPackage(String filename) throws IOException {
+		Path ephemeralTempDir = Files.createTempDirectory(Paths.get(this.myTempDirectory), "deb-temp-", new FileAttribute<?>[] {});
 		File debFile = new File(this.myArtifactsBaseDirectory + File.separator + filename);
-		File controlTarGz = this.getControlTarGzFromDeb(debFile);
+		File controlTarGz = this.getControlTarGzFromDeb(debFile, ephemeralTempDir.toFile());
 		String controlFileContents = this.getControlFromControlTarGz(controlTarGz);
-		return this.getDebItemsFromControl(debFile,controlFileContents);
+		Map<String,String> debItems = this.getDebItemsFromControl(debFile,controlFileContents);
+		controlTarGz.delete();
+		ephemeralTempDir.toFile().delete();
+		return debItems;
 	}
 	
-	protected File getControlTarGzFromDeb(File debFile) throws IOException {
+	protected File getControlTarGzFromDeb(File debFile, File ephemeralTempDir) throws IOException {
 		
 		Archiver archiver = ArchiverFactory.createArchiver(ArchiveFormat.AR);
 		ArchiveStream stream = archiver.stream(debFile);
@@ -63,7 +76,7 @@ public class DebFileReader {
 
 		while((entry = stream.getNextEntry()) != null) {
 			if ("control.tar.gz".equals(entry.getName())){
-				controlTarGzFile = entry.extract(new File(this.myTempDirectory));
+				controlTarGzFile = entry.extract(ephemeralTempDir);
 			}
 		}
 		stream.close();

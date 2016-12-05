@@ -87,10 +87,118 @@ DebRepoPlugin = {
     					}
     				}
     				if (shouldClose) {
-    					window.location = window['base_uri'] + '/admin/debianRepositories.html'
-    					$("repoBuildTypesContainer").refresh();
     					dialog.close();
+    					window.location = window['base_uri'] + '/admin/debianRepositories.html'
+    					//$("repoBuildTypesContainer").refresh();
     				}
+    			}
+    		});
+    		
+    		return false;
+    	}
+    })),
+    editDebRepo: function(uuid) {
+    	DebRepoPlugin.EditRepoDialog.showDialog("Edit Debian Repository", 'editDebRepo', uuid);
+    },
+    EditRepoDialog: OO.extend(BS.AbstractWebForm, OO.extend(BS.AbstractModalDialog, {
+    	getContainer: function () {
+    		return $('editRepoDialog');
+    	},
+    	
+    	formElement: function () {
+    		return $('editRepoForm');
+    	},
+    	
+    	showDialog: function (title, action, uuid) {
+    		$j("#editRepoForm input[id='DebRepoaction']").val(action);
+    		$j("#editRepoDialog .dialogTitle").html(title);
+    		this.cleanFields(uuid);
+    		this.cleanErrors();
+    		this.showCentered();
+    	},
+    	
+    	cleanFields: function (uuid) {
+    		$j("#editRepoForm input[id='debrepo.uuid']").val(uuid);
+    		$j("#editRepoForm input[id='debrepo.uuid']").val(uuid);
+    		
+    		this.cleanErrors();
+    	},
+    	
+    	cleanErrors: function () {
+    		$j("#editRepoForm .error").remove();
+    	},
+    	
+    	error: function($element, message) {
+    		var next = $element.next();
+    		if (next != null && next.prop("class") != null && next.prop("class").indexOf('error') > 0) {
+    			next.text(message);
+    		} else {
+    			$element.after("<p class='error'>" + message + "</p>");
+    		}
+    	},
+    	
+    	ajaxError: function(message) {
+    		var next = $j("#ajaxRepoEditResult").next();
+    		if (next != null && next.prop("class") != null && next.prop("class").indexOf('error') > 0) {
+    			next.text(message);
+    		} else {
+    			$j("#ajaxRepoEditResult").after("<p class='error'>" + message + "</p>");
+    		}
+    	},
+    	
+    	doValidate: function() {
+    		var errorFound = false;
+    		return !errorFound;
+    	},
+    	
+    	doPost: function() {
+    		this.cleanErrors();
+    		
+    		if (!this.doValidate()) {
+    			return false;
+    		}
+    		
+    		var parameters = {
+    				action: $j("#editRepoForm #DebRepoaction").val(),
+    				"debrepo.uuid": $j("#editRepoForm input[id='debrepo.uuid']").val(),
+    				"debrepo.name": $j("#editRepoForm input[id='debrepo.name']").val(),
+    				"debrepo.project.id": $j("#editRepoForm select[id='debrepo.project.id']").val()
+    		};
+    		
+    		var dialog = this;
+    		
+    		BS.ajaxRequest(window['base_uri'] + '/admin/debianRepositoryAction.html', {
+    			parameters: parameters,
+    			onComplete: function(transport) {
+    				var shouldClose = true;
+    				var shouldRedirect = false;
+    				if (transport != null && transport.responseXML != null) {
+    					var response = transport.responseXML.getElementsByTagName("response");
+    					if (response != null && response.length > 0) {
+    						var responseTag = response[0];
+    						var error = responseTag.getAttribute("error");
+    						if (error != null) {
+    							shouldClose = false;
+    							dialog.ajaxError(error);
+    						} else if (responseTag.getAttribute("status") == "OK") {
+    							shouldClose = true;
+    							if (responseTag.getAttribute("redirect") == "true") {
+    								shouldRedirect = true;
+    							}
+    						} else if (responseTag.firstChild == null) {
+    							shouldClose = false;
+    							alert("Error: empty response");
+    						}
+    					}
+    				}
+    				if (shouldRedirect) {
+    					dialog.close();
+    					window.location = window['base_uri'] + '/admin/editDebianRepository.html?repo=' + $j("#editRepoForm input[id='debrepo.name']").val()
+    				} else if (shouldClose) {
+    					dialog.close();
+    					$("repoRepoInfoContainer").refresh();
+    				}
+
     			}
     		});
     		
@@ -220,6 +328,7 @@ DebRepoFilterPlugin = {
                     if (shouldClose) {
                         $("repoBuildTypesContainer").refresh();
                         dialog.close();
+                        $("repoRepoInfoContainer").refresh();
                     }
                 }
             });
@@ -319,6 +428,7 @@ DebRepoFilterPlugin = {
     				if (shouldClose) {
     					$("repoBuildTypesContainer").refresh();
     					dialog.close();
+    					$("repoRepoInfoContainer").refresh();
     				}
     			}
     		});
