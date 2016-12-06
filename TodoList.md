@@ -2,7 +2,7 @@
 
 In order of urgency
 
- - [x] Remove artifacts when build cleanup up
+ - [x] Remove artifacts when build cleanup runs
  - [x] Add pool browsing
  - [x] Tidy up editRepository.jsp heading
  - [x] Add rename and project edit dialog to edit screen and validate repo name to be URL friendly
