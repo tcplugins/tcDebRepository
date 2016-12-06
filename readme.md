@@ -97,3 +97,13 @@ The tcDebRepository plugin has been tested on TeamCity 8.1.5, 9.1.7, 10.0.2 on O
  Ubuntu | zesty  | Packages fail to install. Probably due to unsigned repository. To be resolved in tcDebRepository v1.1
  
 
+### Test tcDebRepository
+There is a test project that builds a bunch of very simple DEB files
+ * Add the following build to TeamCity: https://github.com/tcplugins/tcDummyDeb.git
+ * Configure TeamCity to save the artifacts in `target/`
+
+	eg,   target/ => dist
+	
+ * Create a Debian Repository in TeamCity
+ * Add some Artifact Filters to your repository
+ * Run your build and watch the deb files appear in /app/debrepo/_RepoName_/dists/ 
