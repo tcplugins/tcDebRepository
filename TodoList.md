@@ -2,7 +2,7 @@
 
 In order of urgency
 
- - [ ] Remove artifacts when build cleanup up
+ - [x] Remove artifacts when build cleanup up
  - [x] Add pool browsing
  - [x] Tidy up editRepository.jsp heading
  - [x] Add rename and project edit dialog to edit screen and validate repo name to be URL friendly
@@ -10,9 +10,10 @@ In order of urgency
  - [x] Test with packages that are not in the root of the artifact list.
  - [x] Add filter count to statistics
  - [x] Add license file to github
+ - [ ] Remove delete and edit actions from ProjectSettingsTabActionController and associated Javascript. 
  - [ ] Migrate to DB. - Deferred until after the competition (plan to implement as part of v1.1)
  - [ ] Test on windows.
- - [ ] Test on TC 8, TC 9 and TC 10.0.3
+ - [<] Test on TC 8, TC 9 and TC 10.0.3 - TC8 does not support ActionFactory, TC 9 tested and works, TC10.0.2 tested and works. 
  - [ ] Handle case were editing a repository that has been deleted returns empty response (and error popup).
  - [ ] Refactor Dialog classes into single class in javascript.
  - [ ] Add artifact chooser (like build editing screen has)

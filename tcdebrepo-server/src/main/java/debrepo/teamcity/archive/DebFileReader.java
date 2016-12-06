@@ -66,6 +66,10 @@ public class DebFileReader {
 		return debItems;
 	}
 	
+	public boolean fileExists(String filename) {
+		return new File(this.myArtifactsBaseDirectory + File.separator + filename).exists();
+	}
+	
 	protected File getControlTarGzFromDeb(File debFile, File ephemeralTempDir) throws IOException {
 		
 		Archiver archiver = ArchiverFactory.createArchiver(ArchiveFormat.AR);

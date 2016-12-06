@@ -17,6 +17,10 @@ package debrepo.teamcity;
 
 import com.intellij.openapi.diagnostic.Logger;
 
+/**
+ *  An easy way to access the TeamCity loggers. 
+ *  
+ */
 public final class Loggers {
 	public static final Logger SERVER 		= Logger.getInstance("jetbrains.buildServer.SERVER");
 	public static final Logger ACTIVITIES  	= Logger.getInstance("jetbrains.buildServer.ACTIVITIES");

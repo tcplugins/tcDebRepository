@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -236,6 +237,29 @@ public class DebRepositoryManagerImpl extends  DebRepositoryConfigurationManager
 	public void removeRepository(UUID uuid) {
 		repositories.put(uuid, null);
 		repositories.remove(uuid);
+	}
+	
+	@Override
+	public void addBuildPackages(DebRepositoryConfiguration debRepositoryConfiguration, List<DebPackage> newPackages) throws NonExistantRepositoryException {
+		DebPackageStore store = getPackageStore(debRepositoryConfiguration.getRepoName());
+		for (DebPackage debPackage : newPackages) {
+			DebPackageEntity debPackageEntity = DebPackageEntity.copy(debPackage);
+			store.put(debPackageEntity.buildKey(), debPackageEntity);
+		}
+		persist(store.getUuid());
+	}
+
+	@Override
+	public void removeBuildPackages(DebPackageRemovalBean packageRemovalBean) {
+		try {
+			DebPackageStore store = getPackageStore(packageRemovalBean.getDebRepositoryConfiguration().getRepoName());
+			boolean updated = store.removePackagesForBuild(packageRemovalBean.getBuildId(), packageRemovalBean.getPackagesToKeep());
+			if (updated) {
+				persist(store.getUuid());
+			}
+		} catch (NonExistantRepositoryException e) {
+			// If the repo does not exist, don't worry about removing stuff.
+		}
 	}
 	
 }

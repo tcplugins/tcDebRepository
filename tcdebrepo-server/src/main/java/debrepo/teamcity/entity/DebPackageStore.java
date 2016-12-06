@@ -18,10 +18,13 @@ package debrepo.teamcity.entity;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.UUID;
 
 import debrepo.teamcity.DebPackage;
+import debrepo.teamcity.Loggers;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
@@ -34,11 +37,11 @@ public class DebPackageStore extends TreeMap<DebPackageEntityKey, DebPackageEnti
 	@Getter @Setter
 	private UUID uuid;
 	
-	private Map<String, DebPackageEntityKey> fileNameMap = new TreeMap<>();
+	private Map<String, DebPackageEntityKey> uriMap = new TreeMap<>();
 	
 	public DebPackageEntity findByUri(String uri) throws DebPackageNotFoundInStoreException {
-		if (fileNameMap.containsKey(uri)){
-			return get(fileNameMap.get(uri));
+		if (uriMap.containsKey(uri)){
+			return get(uriMap.get(uri));
 		}
 		throw new DebPackageNotFoundInStoreException("File Not Found:: Uri:" + uri);
 	}
@@ -46,7 +49,7 @@ public class DebPackageStore extends TreeMap<DebPackageEntityKey, DebPackageEnti
 	@Override
 	public DebPackageEntity put(DebPackageEntityKey key, DebPackageEntity value) {
 		super.put(key, value);
-		fileNameMap.put(value.getUri(), key);
+		uriMap.put(value.getUri(), key);
 		return value;
 	}
 
@@ -141,6 +144,54 @@ public class DebPackageStore extends TreeMap<DebPackageEntityKey, DebPackageEnti
 		return debs;
 	}
 
+	public List<DebPackage> findAllByDistComponentArch(String distName, String component, String archName) {
+		List<DebPackage> debs = new ArrayList<>();
+		for (DebPackage deb: this.values()){
+			if (deb.getDist().equalsIgnoreCase(distName)
+					&& deb.getComponent().equalsIgnoreCase(component)
+					&& deb.getArch().equalsIgnoreCase(archName)){
+				debs.add(deb);
+			}
+		}
+		return debs;
+	}
+	
+	public boolean removePackagesForBuild(Long buildId, List<DebPackage> packgesToKeep) {
+		final Set<String> filenames = extractFileNames(packgesToKeep);
+		boolean storeUpdated = false;
+		List<DebPackageEntity> packagesForBuild = findAllForBuild(buildId);
+		if (packagesForBuild.isEmpty()) {
+			if (Loggers.SERVER.isDebugEnabled()) {
+				Loggers.SERVER.debug("DebPackageStore#removePackagesForBuild :: No packages found in store for build " + buildId.toString() + ". No packages will be removed from store " + this.uuid.toString());
+			}
+			return storeUpdated;
+		}
+		for (DebPackage debPackage : findAllForBuild(buildId)) {
+			if (filenames.contains(debPackage.getFilename())) {
+				if (Loggers.SERVER.isDebugEnabled()) {
+					Loggers.SERVER.debug("DebPackageStore#removePackagesForBuild :: Not removing " + debPackage.getFilename() + " because it's in the keep list." + debPackage.toString());
+				}
+				continue;
+			}
+			if (Loggers.SERVER.isDebugEnabled()) {
+				Loggers.SERVER.debug("DebPackageStore#removePackagesForBuild :: Removing " + debPackage.getFilename() + " because it's NOT in the keep list." + debPackage.toString());
+			}
+			DebPackageEntity e = DebPackageEntity.copy(debPackage);
+			remove(e.buildKey());
+			uriMap.remove(e.getUri());
+			storeUpdated = true;
+		}
+		return storeUpdated;		
+	}
+	
+	private Set<String> extractFileNames(List<DebPackage> packages) {
+		final Set<String> filenames = new TreeSet<>(); 
+		for (DebPackage debPackage : packages) {
+			filenames.add(debPackage.getFilename());
+		}
+		return filenames;
+	}
+	
 	@AllArgsConstructor @Data
 	private static class DebPackageEntityArchUriKey implements Comparable<DebPackageEntityArchUriKey>{
 		String arch;
@@ -154,17 +205,5 @@ public class DebPackageStore extends TreeMap<DebPackageEntityKey, DebPackageEnti
 				return this.getArch().compareToIgnoreCase(o.getArch());
 			}
 		}
-	}
-
-	public List<DebPackage> findAllByDistComponentArch(String distName, String component, String archName) {
-		List<DebPackage> debs = new ArrayList<>();
-		for (DebPackage deb: this.values()){
-			if (deb.getDist().equalsIgnoreCase(distName)
-					&& deb.getComponent().equalsIgnoreCase(component)
-					&& deb.getArch().equalsIgnoreCase(archName)){
-				debs.add(deb);
-			}
-		}
-		return debs;
 	}
 }

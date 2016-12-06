@@ -44,7 +44,7 @@ public class DebRepoServerEventListener extends BuildServerAdapter {
 	
 	@Override
 	public void buildArtifactsChanged(SBuild build) {
-		// TODO Auto-generated method stub
+		this.myPublisher.removeArtifactsFromRepositories(build, build.getArtifacts(BuildArtifactsViewMode.VIEW_DEFAULT));
 		
 	}
 	

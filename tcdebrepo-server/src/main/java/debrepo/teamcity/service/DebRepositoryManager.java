@@ -16,6 +16,7 @@
 package debrepo.teamcity.service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -24,6 +25,7 @@ import debrepo.teamcity.entity.DebPackageNotFoundInStoreException;
 import debrepo.teamcity.entity.DebPackageStore;
 import debrepo.teamcity.entity.DebRepositoryConfiguration;
 import debrepo.teamcity.entity.DebRepositoryStatistics;
+import lombok.Value;
 
 public interface DebRepositoryManager {
 
@@ -45,4 +47,16 @@ public interface DebRepositoryManager {
 	public boolean isExistingRepository(String repoName);
 	public boolean isExistingRepository(UUID uuid);
 	public void removeRepository(UUID uuid);
+	
+	void addBuildPackages(DebRepositoryConfiguration debRepositoryConfiguration, List<DebPackage> newPackages) throws NonExistantRepositoryException;
+	public void removeBuildPackages(DebPackageRemovalBean packageRemovalBean);
+	
+	@Value
+	public static class DebPackageRemovalBean {
+		private DebRepositoryConfiguration debRepositoryConfiguration;
+		private String buildTypeId;
+		private Long buildId;
+		private List<DebPackage> packagesToKeep;
+	}
+
 }

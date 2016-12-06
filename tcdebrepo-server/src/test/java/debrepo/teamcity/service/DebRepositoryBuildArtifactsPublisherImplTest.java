@@ -92,13 +92,13 @@ public class DebRepositoryBuildArtifactsPublisherImplTest {
 	}
 
 	@Test
-	public void testAddArtifactsToRepositories() {
+	public void testAddArtifactsToRepositories() throws NonExistantRepositoryException {
 		
 		DebRepositoryBuildArtifactsPublisherImpl publisher = new DebRepositoryBuildArtifactsPublisherImpl(debRepositoryManager, debRepositoryConfigManager, debFileReaderFactory);
 		buildArtifacts = new MyBuildArtifacts();
 		publisher.addArtifactsToRepositories(build, buildArtifacts);
 		
-		verify(debRepositoryManager, times(4)).addBuildPackage(eq(config), any(DebPackageEntity.class));
+		verify(debRepositoryManager, times(1)).addBuildPackages(eq(config), any(List.class));
 	}
 	
 	static class MyBuildArtifacts implements BuildArtifacts {

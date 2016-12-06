@@ -18,7 +18,9 @@ package debrepo.teamcity.service;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 
 import debrepo.teamcity.DebPackage;
 import debrepo.teamcity.Loggers;
@@ -27,6 +29,7 @@ import debrepo.teamcity.archive.DebFileReaderFactory;
 import debrepo.teamcity.entity.DebRepositoryBuildTypeConfig;
 import debrepo.teamcity.entity.DebRepositoryBuildTypeConfig.Filter;
 import debrepo.teamcity.entity.DebRepositoryConfiguration;
+import debrepo.teamcity.service.DebRepositoryManager.DebPackageRemovalBean;
 import jetbrains.buildServer.parameters.ParametersProvider;
 import jetbrains.buildServer.parameters.impl.ReferenceResolver;
 import jetbrains.buildServer.serverSide.SBuild;
@@ -53,8 +56,18 @@ public class DebRepositoryBuildArtifactsPublisherImpl implements DebRepositoryBu
 
 	@Override
 	public void removeArtifactsFromRepositories(SBuild build, BuildArtifacts buildArtifacts) {
-		// TODO Auto-generated method stub
+		// Get a list of configs for this build.
+		Set<DebRepositoryConfiguration> configs = this.myDepRepositoryConfigManager.findConfigurationsForBuildType(build.getBuildTypeId());
+		Loggers.SERVER.info("DebRepositoryBuildArtifactsPublisherImpl#removeArtifactsFromRepositories :: found " + configs.size() + " repos interested in " + build.getFullName());
+		List<DebPackage> entities = new ArrayList<>();
 		
+		BuildArtifactsProcessor  processor = new MyBuildArtifactsProcessor(build, entities);
+		buildArtifacts.iterateArtifacts(processor);
+		
+		Loggers.SERVER.info("DebRepositoryBuildArtifactsPublisherImpl#removeArtifactsFromRepositories :: found " + entities.size() + " artifacts in " + build.getFullName() + " # " + String.valueOf(build.getBuildId()));
+		for (DebRepositoryConfiguration config : configs) {
+			myDepRepositoryManager.removeBuildPackages(new DebPackageRemovalBean(config, build.getBuildTypeId(), build.getBuildId(), entities));
+		}
 	}
 
 	@Override
@@ -74,11 +87,12 @@ public class DebRepositoryBuildArtifactsPublisherImpl implements DebRepositoryBu
 			Set<DebRepositoryConfiguration> configs = this.myDepRepositoryConfigManager.findConfigurationsForBuildType(build.getBuildTypeId());
 			// iterate of the list of configs and check the filters match.
 			for (DebRepositoryConfiguration config : configs) {
+				List<DebPackage> packagesToAdd = new ArrayList<>();
 				for (DebRepositoryBuildTypeConfig bt : config.getBuildTypes()) {
 					if (build.getBuildType().getBuildTypeId().equals(bt.getBuildTypeId())){
 						for (Filter filter : bt.getDebFilters()) {
 							for (DebPackage entity : entities) {
-								if (filter.matches(entity.getFilename())) {
+								if (!"".equals(entity.getFilename().trim()) && filter.matches(entity.getFilename())) {
 									DebPackage newEntity = populateEntity(entity, myDebFileReaderFactory.createFileReader(build));
 									/* TODO: Support for dist and component being variables.
 									if (ReferencesResolverUtil.containsReference(filter.getComponent())) {
@@ -90,10 +104,18 @@ public class DebRepositoryBuildArtifactsPublisherImpl implements DebRepositoryBu
 										newEntity.setDist(filter.getDist());
 									/*}*/
 									newEntity.buildUri();	
-									this.myDepRepositoryManager.addBuildPackage(config, newEntity);
+									packagesToAdd.add(newEntity);
 								}
 							}
 						}
+					}
+				}
+				// If we have some matches, pass them all to the manager and add/persist them.
+				if (! packagesToAdd.isEmpty()) {
+					try {
+						this.myDepRepositoryManager.addBuildPackages(config, packagesToAdd);
+					} catch (NonExistantRepositoryException e) {
+						Loggers.SERVER.warn("DebRepositoryBuildArtifactsPublisherImpl#addArtifactsToRepositories :: Failed to add " + packagesToAdd.size() + " packages to non-existant repository " + config.getRepoName() + " (" + config.getUuid().toString() + ")");
 					}
 				}
 			}

@@ -224,5 +224,21 @@ public class DebRepositoryManagerImpl extends DebRepositoryConfigurationManagerI
 		new QDebPackageModel().repository.uuid.eq(uuid.toString()).delete();
 		new QDebRepositoryModel().uuid.eq(uuid.toString()).delete();
 	}
+
+	@Override
+	public void addBuildPackages(DebRepositoryConfiguration debRepositoryConfiguration, List<DebPackage> newPackages)
+			throws NonExistantRepositoryException {
+		for (DebPackage debPackage : newPackages) {
+			addBuildPackage(debRepositoryConfiguration, debPackage);
+		}
+		
+	}
+
+	@Override
+	public void removeBuildPackages(DebPackageRemovalBean packageRemovalBean) {
+		// TODO Auto-generated method stub
+		
+	}
+
 	
 }

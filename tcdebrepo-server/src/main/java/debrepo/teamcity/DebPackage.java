@@ -20,6 +20,11 @@ package debrepo.teamcity;
 
 import java.util.Map;
 
+/**
+ *   DebPackage represents a Debian Package
+ *   The existing DebPckageEntity (JAXB) and the new eBean model 
+ *   both implement this.    
+ */
 public interface DebPackage {
 
 	public String getPackageName();
