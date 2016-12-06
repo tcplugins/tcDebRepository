@@ -16,7 +16,7 @@ This line is made up of the following space delimited tokens:
 	deb URL dist component
 
 - deb : Tells APT to use this configuration for binary DEB package files. deb-src is also used for downloading source code packages, although tcDebRepository does not currently support deb-src 
-- URL : The base URL of the repository. APT expects a specific URL structure of which this is the root. For more details see <tcdebrepo-server/RepositoryNotes.md>.
+- URL : The base URL of the repository. APT expects a specific URL structure of which this is the root. For more details see [RepositoryNotes](https://github.com/tcplugins/tcDebRepository/blob/master/tcdebrepo-server/RespositoryNotes.md).
 - dist : The Debian distribution name. In the example above, `jessie` is the Debian distribution name.
 - component : The component(s) that this repository serves. Typical values for component are: `main, stable, unstable, testing, experimental`.
 
@@ -80,18 +80,18 @@ The tcDebRepository plugin has been tested on TeamCity 8.1.5, 9.1.7, 10.0.2 on O
  ---------------- | ------------ | ------
  10.0.2 | 1.8.0_65-b17 | All services and UI working correctly
  9.1.7  | 1.7.0_65-b17 | All services and UI working correctly
- 8.1.5  | 1.7.0_65-b17 | All services working correctly. Repositories need to be manually edited* - .BuildServer/config/deb-repositories.xml
+ 8.1.5  | 1.7.0_65-b17 | All services working correctly. Repositories need to be manually edited* by editing `.BuildServer/config/deb-repositories.xml` on the server
  
- I do intend to resolve UI issues on TC8 in future.
+ *I do intend to resolve UI issues on TC8 in future.
  
 #### Debian Versions
  Distro | Version | Result
  ------ | ------- | ------
- Debian | wheezy | Packages install correctly when pass in `--force-yes` option
- Debian | jessie | Packages install correctly when pass in `--force-yes` option
- Ubuntu | precise | Packages install correctly when pass in `--force-yes` option
- Ubuntu | wily | Packages install correctly when pass in `--force-yes` option
- Ubuntu | xenial | Packages fail to install. Probably due to unsigned repository
- Ubuntu | zesty  | Packages fail to install. Probably due to unsigned repository
+ Debian | wheezy | Packages install correctly when passing in `--force-yes` option
+ Debian | jessie | Packages install correctly when passing in `--force-yes` option
+ Ubuntu | precise | Packages install correctly when passing in `--force-yes` option
+ Ubuntu | wily | Packages install correctly when passing in `--force-yes` option
+ Ubuntu | xenial | Packages fail to install. Probably due to unsigned repository. To be resolved in tcDebRepository v1.1
+ Ubuntu | zesty  | Packages fail to install. Probably due to unsigned repository. To be resolved in tcDebRepository v1.1
  
 
