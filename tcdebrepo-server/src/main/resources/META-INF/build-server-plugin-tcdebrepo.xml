@@ -8,12 +8,12 @@
      	class="debrepo.teamcity.web.DebDownloadController" 
      	/>
 
+       <bean id="debRepoBuildTypeTab"
+     	class="debrepo.teamcity.web.DebRepoBuildTypeTab" 
+     	/>
+     	
        <bean id="debRepoProjectSettingsTab"
      	class="debrepo.teamcity.web.DebRepoProjectSettingsTab" 
-     	/>
-
-       <bean id="debRepoProjectSettingsTabActionController"
-     	class="debrepo.teamcity.web.DebRepoProjectSettingsTabActionController" 
      	/>
 
        <bean id="debRepoConfigurationEditPageController"
@@ -26,6 +26,10 @@
      	
        <bean id="debRepoListingPageController"
      	class="debrepo.teamcity.web.DebRepoListingPageController" 
+     	/>
+
+       <bean id="addRepositoryAction"
+     	class="debrepo.teamcity.web.action.AddRepositoryAction" 
      	/>
 
        <bean id="deleteRepositoryAction"

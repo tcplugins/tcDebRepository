@@ -1,34 +1,15 @@
 
 DebRepoPlugin = {
-    removeDebRepo: function(projectId, repoUuid) {
-        if (!confirm("The repository will be permanently deleted. Proceed?")) {
-            return;
-        }
-        BS.ajaxRequest(window['base_uri'] + '/admin/tcDebRepository/manageDebianRepositories.html', {
-            parameters: Object.toQueryString({
-                action: 'removeDebRepo',
-                projectId: projectId,
-                'debrepo.uuid': repoUuid
-            }),
-            onComplete: function(transport) {
-                $("DebRepos").refresh();
-            }
-        });
+   addDebRepo: function(projectId) {
+    	DebRepoPlugin.AddRepoDialog.showDialog("Add Debian Repository", 'addDebRepo', {uuid: '', name: '', projectId: projectId});
     },
-    editDebRepo: function(data) {
-    	DebRepoPlugin.RepoConfigurationDialog.showDialog("Edit Debian Repository", 'editDebRepo', data);
-        $j(".runnerFormTable input[id='debrepo.uuid']").prop("disabled", true);
-    },
-    addDebRepo: function(projectId) {
-    	DebRepoPlugin.RepoConfigurationDialog.showDialog("Add Debian Repository", 'addDebRepo', {uuid: '', name: '', projectId: projectId});
-    },
-    RepoConfigurationDialog: OO.extend(BS.AbstractWebForm, OO.extend(BS.AbstractModalDialog, {
+    AddRepoDialog: OO.extend(BS.AbstractWebForm, OO.extend(BS.AbstractModalDialog, {
         getContainer: function () {
-            return $('repoConfigDialog');
+            return $('addRepoDialog');
         },
 
         formElement: function () {
-            return $('repoConfigForm');
+            return $('addRepoForm');
         },
 
         showDialog: function (title, action, data) {
@@ -40,15 +21,14 @@ DebRepoPlugin = {
         },
 
         cleanFields: function (data) {
-            $j("input[id='debrepo.uuid']").val(data.uuid);
             $j(".runnerFormTable input[id='debrepo.name']").val(data.name);
-            $j("#repoConfigForm input[id='projectId']").val(data.projectId);
+            $j("#addRepoForm input[id='projectId']").val(data.projectId);
 
             this.cleanErrors();
         },
 
         cleanErrors: function () {
-            $j("#repoConfigForm .error").remove();
+            $j("#addRepoForm .error").remove();
         },
 
         error: function($element, message) {
@@ -90,40 +70,46 @@ DebRepoPlugin = {
 
             var parameters = {
                 "debrepo.name": $j(".runnerFormTable input[id='debrepo.name']").val(),
-                "projectId": $j("#repoConfigForm #projectId").val(),
-                action: $j("#repoConfigForm #DebRepoaction").val(),
-                "debrepo.uuid": $j("#repoConfigForm input[id='debrepo.uuid']").val()
+                "debrepo.project.id": $j("#addRepoForm #projectId").val(),
+                action: $j("#addRepoForm #DebRepoaction").val()
             };
 
              var dialog = this;
 
-            BS.ajaxRequest(window['base_uri'] + '/admin/tcDebRepository/manageDebianRepositories.html', {
-                parameters: parameters,
-                onComplete: function(transport) {
-                    var shouldClose = true;
-                    if (transport != null && transport.responseXML != null) {
-                        var response = transport.responseXML.getElementsByTagName("response");
-                        if (response != null && response.length > 0) {
-                            var responseTag = response[0];
-                            var error = responseTag.getAttribute("error");
-                            if (error != null) {
-                                shouldClose = false;
-                                dialog.ajaxError(error);
-                            } else if (responseTag.getAttribute("status") == "OK") {
-                                shouldClose = true;
-                            } else if (responseTag.firstChild == null) {
-                                shouldClose = false;
-                                alert("Error: empty response");
-                            }
-                        }
-                    }
-                    if (shouldClose) {
-                        $("DebRepos").refresh();
-                        dialog.close();
-                    }
-                }
-            });
+     		 BS.ajaxRequest(window['base_uri'] + '/admin/debianRepositoryAction.html', {
+    			parameters: parameters,
+    			onComplete: function(transport) {
+    				var shouldClose = true;
+    				var shouldRedirect = false;
+    				if (transport != null && transport.responseXML != null) {
+    					var response = transport.responseXML.getElementsByTagName("response");
+    					if (response != null && response.length > 0) {
+    						var responseTag = response[0];
+    						var error = responseTag.getAttribute("error");
+    						if (error != null) {
+    							shouldClose = false;
+    							dialog.ajaxError(error);
+    						} else if (responseTag.getAttribute("status") == "OK") {
+    							shouldClose = true;
+    							if (responseTag.getAttribute("redirect") == "true") {
+    								shouldRedirect = true;
+    							}
+    						} else if (responseTag.firstChild == null) {
+    							shouldClose = false;
+    							alert("Error: empty response");
+    						}
+    					}
+    				}
+    				if (shouldRedirect) {
+    					dialog.close();
+    					window.location = window['base_uri'] + '/admin/editDebianRepository.html?repo=' + $j("#addRepoForm input[id='debrepo.name']").val()
+    				} else if (shouldClose) {
+    					dialog.close();
+    					$("DebRepos").refresh();
+    				}
 
+    			}
+    		});
             return false;
         }
     }))

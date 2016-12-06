@@ -37,7 +37,7 @@ The tcDebRepository plugin adds a new tab to the Edit Project screen entitled "D
 
 A list of Repositories are shown for the current project, and parent projects. A repository is aligned to a project, because that determines who has permission to edit the repository configuration (PROJECT_EDIT permission), and which builds are available to be added to a repository.  
 
-New repositories can be created from this screen by clicking the *Add Repository* button. A link to edit any existing repositories is also available (if the user has permission). 
+New repositories can be created from this screen by clicking the *Add new Repository* button. A link to edit any existing repositories is also available (if the user has permission). 
 
 
 ### Editing Artifact Filters in a Debian Repository
@@ -57,6 +57,8 @@ A repository can be deleted by clicking the *Delete repository...* link in the A
 
 There are links on the Edit Repository pages, and the Debian Repositories page (in the breadcrumb of the Edit page) to browse a repository.  
  ![Screenshot of Repository browser](docs/images/tcdebrepository_browse.png "The Debian File Repository is browsable and publicly available") 
+ 
+ **Note:** Debian Repositories are publically available. There is no authentication required to browse a repository or access its packages.
 
 ### Configuring a Debian server to use tcDebRepository
 The `/etc/apt/sources.list` file needs to be modified on your Debian computer to include the APT line entry of the Debian Repository located on the TeamCity server. Alternatively, a new file created in `/etc/apt/sources.list.d/` named something like `teamcity.list` containing  the APT line.

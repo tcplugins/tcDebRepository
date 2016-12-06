@@ -16,11 +16,13 @@
 package debrepo.teamcity.mock;
 
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.File;
 
+import org.mockito.Mockito;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -32,6 +34,7 @@ import jetbrains.buildServer.serverSide.ServerPaths;
 import jetbrains.buildServer.serverSide.auth.SecurityContext;
 import jetbrains.buildServer.serverSide.impl.ConfigActionFactoryImpl;
 import jetbrains.buildServer.serverSide.settings.ProjectSettingsManager;
+import jetbrains.buildServer.web.openapi.PageExtension;
 import jetbrains.buildServer.web.openapi.PagePlace;
 import jetbrains.buildServer.web.openapi.PagePlaces;
 import jetbrains.buildServer.web.openapi.PlaceId;
@@ -90,12 +93,14 @@ public class TestMocks {
 	PagePlaces pagePlaces() {
 		PagePlaces pagePlaces = mock(PagePlaces.class);
 		when(pagePlaces.getPlaceById(PlaceId.EDIT_PROJECT_PAGE_TAB)).thenReturn(pagePlace());
+		when(pagePlaces.getPlaceById(PlaceId.BUILD_CONF_TAB)).thenReturn(pagePlace());
 		return pagePlaces;
 	}
 	
 	@Bean 
 	PagePlace pagePlace() {
-		return mock(PagePlace.class);
+		PagePlace pagePlace = mock(PagePlace.class);
+		return pagePlace;
 	}
 	
 	@Bean 

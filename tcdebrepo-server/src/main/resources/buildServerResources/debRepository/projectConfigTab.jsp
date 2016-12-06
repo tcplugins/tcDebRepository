@@ -1,11 +1,7 @@
-<%@ page import="jetbrains.buildServer.serverSide.crypt.RSACipher" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <%@ taglib prefix="afn" uri="/WEB-INF/functions/authz" %>
 <%@ include file="/include-internal.jsp" %>
-<%--@elvariable id="availableServersMap" type="java.util.Map<jetbrains.buildServer.serverSide.SProject, java.util.List<jetbrains.buildserver.sonarplugin.sqrunner.manager.SQSInfo>"--%>
-<%--@elvariable id="projectId" type="java.lang.String"--%>
-<%--@elvariable id="userHasPermissionManagement" type="java.lang.Boolean"--%>
 
 <div class="manageRepos">
     <h2 class="noBorder">Debian Package Repositories</h2>
@@ -71,14 +67,14 @@
         </div>
     </bs:refreshable>
 
-    <bs:dialog dialogId="repoConfigDialog"
-               dialogClass="repoConfigDialog"
-               title="Edit Debian Repository"
-               closeCommand="DebRepoPlugin.RepoConfigurationDialog.close()">
-        <forms:multipartForm id="repoConfigForm"
-                             action="/admin/tcDebRepository/manageDebianRepositories.html"
+    <bs:dialog dialogId="addRepoDialog"
+               dialogClass="addConfigDialog"
+               title="Add Debian Repository"
+               closeCommand="DebRepoPlugin.AddRepoDialog.close()">
+        <forms:multipartForm id="addRepoForm"
+                             action="/admin/debianRepositoryAction.html"
                              targetIframe="hidden-iframe"
-                             onsubmit="return DebRepoPlugin.RepoConfigurationDialog.doPost();">
+                             onsubmit="return DebRepoPlugin.AddRepoDialog.doPost();">
 
             <table class="runnerFormTable">
                 <tr>
@@ -93,8 +89,8 @@
             <input type="hidden" name="action" id="DebRepoaction" value="addDebRepo"/>
             <input type="hidden" name="projectId" id="projectId" value="${projectId}"/>
             <div class="popupSaveButtonsBlock">
-                <forms:submit id="repoConfigurationDialogSubmit" label="Save"/>
-                <forms:cancel onclick="DebRepoPlugin.RepoConfigurationDialog.close()"/>
+                <forms:submit id="addRepoDialogSubmit" label="Add Repository"/>
+                <forms:cancel onclick="DebRepoPlugin.AddRepoDialog.close()"/>
             </div>
         </forms:multipartForm>
     </bs:dialog>

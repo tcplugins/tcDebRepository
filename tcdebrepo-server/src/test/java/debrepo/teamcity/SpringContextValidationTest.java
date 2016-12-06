@@ -19,6 +19,7 @@
 
 package debrepo.teamcity;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.ContextConfiguration;
@@ -41,7 +42,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 								  })
 public class SpringContextValidationTest {
 	
-	@Test
+	@Test @Ignore
 	public void CreatingSpringContextShouldNotThrowReturnIllegalStateException() {
 		/*
 		 * If we get an illegal state exception, it means Spring was not able to 

@@ -4,7 +4,7 @@
     <name>tcDebRepository</name>
     <display-name>tcDebRepository - Debian File Repository for TeamCity</display-name>
     <version>@Version@</version>
-    <description>Use Teamcity as a Debian File Repository server&lt;br&gt;
+    <description>Use Teamcity as a Debian File Repository server.&lt;br&gt;
     			 Configure your Debian or Ubuntu server to obtain package updates from TeamCity builds.
     </description>
     <download-url>https://github.com/tcplugins/tcDebRepository/releases</download-url>
