@@ -30,6 +30,7 @@ import jetbrains.buildServer.serverSide.ServerPaths;
 
 public class PluginDataResolverImplTest {
 	
+	private static final String BUILDSERVER_PATH = ".BuildServer" + File.separator;
 	@Mock ServerPaths serverPaths;
 	File f;
 	
@@ -40,22 +41,22 @@ public class PluginDataResolverImplTest {
 	
 	@Test
 	public void testGetPluginDatabaseDirectory() throws IOException {
-		f = new File(".BuildServer/pluginData");
+		f = new File(BUILDSERVER_PATH + "pluginData");
 		when(serverPaths.getPluginDataDirectory()).thenReturn(f);
 		when(serverPaths.getConfigDir()).thenReturn(f.getAbsolutePath());
 		PluginDataResolverImpl resolver = new PluginDataResolverImpl(serverPaths);
 		System.out.println(resolver.getPluginDatabaseDirectory());
-		assertEquals(f.getAbsolutePath() + "/tcDebRepository/database", resolver.getPluginDatabaseDirectory());
+		assertEquals(f.getAbsolutePath() + File.separator + "tcDebRepository" + File.separator + "database", resolver.getPluginDatabaseDirectory());
 	}
 
 	@Test
 	public void testGetPluginConfigurationFile() throws IOException {
-		f = new File(".BuildServer/config");
+		f = new File(BUILDSERVER_PATH +  "config");
 		when(serverPaths.getPluginDataDirectory()).thenReturn(f);
 		when(serverPaths.getConfigDir()).thenReturn(f.getAbsolutePath());
 		PluginDataResolverImpl resolver = new PluginDataResolverImpl(serverPaths);
 		System.out.println(resolver.getPluginConfigurationFile());
-		assertEquals(f.getAbsolutePath() + "/deb-repositories.xml", resolver.getPluginConfigurationFile());
+		assertEquals(f.getAbsolutePath() + File.separator + "deb-repositories.xml", resolver.getPluginConfigurationFile());
 	}
 
 }
