@@ -16,25 +16,20 @@
 package debrepo.teamcity.mock;
 
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.File;
 
-import org.mockito.Mockito;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import jetbrains.buildServer.controllers.AuthorizationInterceptor;
-import jetbrains.buildServer.serverSide.ConfigActionFactory;
 import jetbrains.buildServer.serverSide.ProjectManager;
 import jetbrains.buildServer.serverSide.SBuildServer;
 import jetbrains.buildServer.serverSide.ServerPaths;
 import jetbrains.buildServer.serverSide.auth.SecurityContext;
-import jetbrains.buildServer.serverSide.impl.ConfigActionFactoryImpl;
 import jetbrains.buildServer.serverSide.settings.ProjectSettingsManager;
-import jetbrains.buildServer.web.openapi.PageExtension;
 import jetbrains.buildServer.web.openapi.PagePlace;
 import jetbrains.buildServer.web.openapi.PagePlaces;
 import jetbrains.buildServer.web.openapi.PlaceId;
@@ -103,8 +98,4 @@ public class TestMocks {
 		return pagePlace;
 	}
 	
-	@Bean 
-	ConfigActionFactory configActionFactory() {
-		return new ConfigActionFactoryImpl(securityContext());
-	}
 }
