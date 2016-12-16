@@ -39,7 +39,7 @@ public class DebRepositoryManagerImplTest extends DebRepositoryBaseTest {
 		
 		pluginDataResolver = new PluginDataResolverImpl(serverPaths);
 		ebeanServerProvider = new EbeanServerProvider(pluginDataResolver);
-		debRepositoryManager = new DebRepositoryManagerImpl(ebeanServerProvider, debRepositoryConfigurationFactory, debRepositoryConfigurationChangePersister);
+		debRepositoryManager = new DebRepositoryManagerImpl(ebeanServerProvider.getEbeanServer(), debRepositoryConfigurationFactory, debRepositoryConfigurationChangePersister);
 		debRepositoryConfigManager = (DebRepositoryConfigurationManager) debRepositoryManager;
 		
 		DebRepositoryConfiguration c = getDebRepoConfig1();
@@ -71,7 +71,8 @@ public class DebRepositoryManagerImplTest extends DebRepositoryBaseTest {
 		debRepositoryManager.addBuildPackage(c, entity3);
 		debRepositoryManager.addBuildPackage(c, entity4);
 		
-		assertTrue(debRepositoryManager.getRepositoryStatistics(c, "blah").getTotalPackageCount() == 24);
+		System.out.println(debRepositoryManager.getRepositoryStatistics(c, "myUrl").getTotalPackageCount());
+		assertTrue(debRepositoryManager.getRepositoryStatistics(c, "myUrl").getTotalPackageCount() == 24);
 	}
 
 	@Test @Ignore
@@ -114,7 +115,7 @@ public class DebRepositoryManagerImplTest extends DebRepositoryBaseTest {
 		fail("Not yet implemented");
 	}
 
-	@Test @Ignore
+	@Test
 	public void testGetUniquePackagesByComponentAndPackageName() throws NonExistantRepositoryException {
 
 		List<? extends DebPackage> packages = debRepositoryManager.getUniquePackagesByComponentAndPackageName("blahBlah01", "main", "testpackage");

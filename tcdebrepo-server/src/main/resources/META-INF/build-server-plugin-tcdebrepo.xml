@@ -64,6 +64,7 @@
      	     Uncomment the following commented out classes to use it
      		 (and make sure the ebean backed one below is commented out). -->
 		<!-- Begin map backed XML DB impl  -->
+		<!--
 		
     	<bean id="debRepositoryManager"
      	class="debrepo.teamcity.service.DebRepositoryManagerImpl"
@@ -86,7 +87,8 @@
      	     <constructor-arg ref="debRepositoryManager">
     		</constructor-arg>     		
         </bean>
-       
+        
+        -->
      	<!-- End map backed XML DB impl -->
      	
      	
@@ -96,17 +98,19 @@
      	     (and make sure the XML backed ones above are commented out). -->
      	      
 		<!-- Begin ebean backed DB impl  -->
-		<!--
+		
 		       
        <bean id="ebeanServerProvider"
      	class="debrepo.teamcity.ebean.server.EbeanServerProvider" 
-     	/>
+     	init-method="init" 
+       /> 
 		
        <bean id="debRepositoryManager"
-     	class="debrepo.teamcity.ebean.server.DebRepositoryManagerImpl"
-     	/>
+     	class="debrepo.teamcity.ebean.server.DebRepositoryManagerImpl">
+     		<constructor-arg ref="ebeanServerProvider"/>
+     	</bean>
      	
-     	-->
+     	
      	<!-- End ebean backed DB impl -->
      	
      	
@@ -125,7 +129,7 @@
 
        <bean id="debRepositoryConfigFileChangeHandler"
      		class="debrepo.teamcity.settings.DebRepositoryConfigFileChangeHandler" 
-     		init-method="register" >
+     		init-method="register" lazy-init="true">
      	     <constructor-arg ref="debRepositoryManager">
     		</constructor-arg>     		
      	     <constructor-arg ref="jaxConfigHelper">
