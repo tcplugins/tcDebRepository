@@ -23,6 +23,8 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.UUID;
 
+import com.avaje.ebean.EbeanServer;
+
 import debrepo.teamcity.DebPackage;
 import debrepo.teamcity.ebean.DebPackageModel;
 import debrepo.teamcity.ebean.DebRepositoryModel;
@@ -43,7 +45,7 @@ import debrepo.teamcity.settings.DebRepositoryConfigurationChangePersister;
 public class DebRepositoryManagerImpl extends DebRepositoryConfigurationManagerImpl implements DebRepositoryManager, DebRepositoryConfigurationManager {
 
 	public DebRepositoryManagerImpl(
-			EbeanServerProvider ebeanServerProvider,
+			EbeanServer ebeanServer,
 			DebRepositoryConfigurationFactory debRepositoryConfigurationFactory,
 			DebRepositoryConfigurationChangePersister debRepositoryConfigurationChangePersister) {
 		super(debRepositoryConfigurationFactory, debRepositoryConfigurationChangePersister);
@@ -60,7 +62,7 @@ public class DebRepositoryManagerImpl extends DebRepositoryConfigurationManagerI
 	
 	@Override
 	public DebPackageStore initialisePackageStore(DebRepositoryConfiguration conf) {
-		DebRepositoryModel repo = new QDebRepositoryModel().uuid.eq(conf.getUuid().toString()).findUnique();
+		DebRepositoryModel repo = DebRepositoryModel.find.where().eq("uuid", conf.getUuid().toString()).findUnique();
 		if (repo == null) {
 			repo = new DebRepositoryModel();
 		}
@@ -91,7 +93,7 @@ public class DebRepositoryManagerImpl extends DebRepositoryConfigurationManagerI
 
 	@Override
 	public DebRepositoryStatistics getRepositoryStatistics(String uuid, String repoUrl) {
-		int count = new QDebPackageModel().repository.uuid.eq(uuid).findCount();
+		int count = DebPackageModel.find.where().eq("repository.uuid", uuid).findCount();
 		DebRepositoryConfiguration config = getDebRepositoryConfiguration(uuid);
 		int filterCount = 0;
 		for (DebRepositoryBuildTypeConfig btConfig : config.getBuildTypes()) {
@@ -109,7 +111,7 @@ public class DebRepositoryManagerImpl extends DebRepositoryConfigurationManagerI
 	public void addBuildPackage(DebRepositoryConfiguration config, DebPackage newEntity) {
 		//initialisePackageStore(config);
 		DebPackageModel m = DebPackageModel.copy(newEntity);
-		DebRepositoryModel repo = new QDebRepositoryModel().uuid.eq(config.getUuid().toString()).findUnique();
+		DebRepositoryModel repo = DebRepositoryModel.find.where().eq("uuid", config.getUuid().toString()).findUnique();
 		
 		m.setRepository(repo);
 		m.save();
@@ -120,11 +122,17 @@ public class DebRepositoryManagerImpl extends DebRepositoryConfigurationManagerI
 		if (! isExistingRepository(repoName)){
 			throw new NonExistantRepositoryException();
 		}
-		List<String> archs = new QDebPackageModel().select("arch")
+//		List<String> archs = new QDebPackageModel().select("arch")
+//				.setDistinct(false)
+//				.repository.name.eq(repoName)
+//				.dist.eq(distName)
+//				.component.eq(component)
+//				.findSingleAttributeList();
+		List<String> archs = DebPackageModel.find.select("arch")
 				  .setDistinct(false)
-				  .repository.name.eq(repoName)
-				  .dist.eq(distName)
-				  .component.eq(component)
+				  .where().eq("repository.name", repoName)
+				  .and().eq("dist", distName)
+				  .and().eq("component", component)
 				  .findSingleAttributeList();
 		return new TreeSet<String>(archs);
 	}
@@ -134,10 +142,15 @@ public class DebRepositoryManagerImpl extends DebRepositoryConfigurationManagerI
 		if (! isExistingRepository(repoName)){
 			throw new NonExistantRepositoryException();
 		}
-		List<String> components = new QDebPackageModel().select("component")
+//		List<String> components = new QDebPackageModel().select("component")
+//				.setDistinct(false)
+//				.repository.name.eq(repoName)
+//				.dist.eq(distName)
+//				.findSingleAttributeList();
+		List<String> components = DebPackageModel.find.select("component")
 				  .setDistinct(false)
-				  .repository.name.eq(repoName)
-				  .dist.eq(distName)
+				  .where().eq("repository.name", repoName)
+				  .and().eq("dist", distName)
 				  .findSingleAttributeList();
 		return new TreeSet<String>(components);
 	}
@@ -147,9 +160,13 @@ public class DebRepositoryManagerImpl extends DebRepositoryConfigurationManagerI
 		if (! isExistingRepository(repoName)){
 			throw new NonExistantRepositoryException();
 		}
-		List<String> dists = new QDebPackageModel().select("dist")
+//		List<String> dists = new QDebPackageModel().select("dist")
+//				.setDistinct(false)
+//				.repository.name.eq(repoName)
+//				.findSingleAttributeList();
+		List<String> dists = DebPackageModel.find.select("dist")
 				  .setDistinct(false)
-				  .repository.name.eq(repoName)
+				  .where().eq("repository.name", repoName)
 				  .findSingleAttributeList();
 		return new TreeSet<String>(dists);
 	}
@@ -159,10 +176,14 @@ public class DebRepositoryManagerImpl extends DebRepositoryConfigurationManagerI
 		if (! isExistingRepository(repoName)){
 			throw new NonExistantRepositoryException();
 		}
-		List<String> components = new QDebPackageModel().select("component")
-				  .setDistinct(false)
-				  .repository.name.eq(repoName)
-				  .findSingleAttributeList();
+//		List<String> components = new QDebPackageModel().select("component")
+//				  .setDistinct(false)
+//				  .repository.name.eq(repoName)
+//				  .findSingleAttributeList();
+		List<String> components = DebPackageModel.find.select("component")
+				.setDistinct(false)
+				.where().eq("repository.name", repoName)
+				.findSingleAttributeList();
 		return new TreeSet<String>(components);
 	}
 
@@ -173,11 +194,18 @@ public class DebRepositoryManagerImpl extends DebRepositoryConfigurationManagerI
 			throw new NonExistantRepositoryException();
 		}		
 
-		List<String> packages = new QDebPackageModel().select("packageName")
-				 					  .setDistinct(false)
-				 					  .repository.name.eq(repoName)
-				 					  .component.eq(component)
-				 					  .findSingleAttributeList();
+//		List<String> packages = new QDebPackageModel().select("packageName")
+//				 					  .setDistinct(false)
+//				 					  .repository.name.eq(repoName)
+//				 					  .component.eq(component)
+//				 					  .findSingleAttributeList();
+		
+		List<String> packages = DebPackageModel.find.select("packageName")
+				.setDistinct(false)
+				.where().eq("repository.name", repoName)
+				.and().eq("component", component)
+				.findSingleAttributeList();
+		
 		return new TreeSet<String>(packages);
 
 	}
@@ -188,17 +216,23 @@ public class DebRepositoryManagerImpl extends DebRepositoryConfigurationManagerI
 		if (! isExistingRepository(repoName)){
 			throw new NonExistantRepositoryException();
 		}
-		return new QDebPackageModel().select("filename, uri")
-									 .setDistinct(true)
-									 .repository.name.eq(repoName)
-									 .component.eq(component)
-									 .packageName.eq(packageName)
-									 .findList(); 
+//		return new QDebPackageModel().select("filename, uri")
+//									 .setDistinct(true)
+//									 .repository.name.eq(repoName)
+//									 .component.eq(component)
+//									 .packageName.eq(packageName)
+//									 .findList(); 
+		return DebPackageModel.find.select("filename, uri")
+				.setDistinct(true)
+				.where().eq("repository.name",repoName)
+				.and().eq("component", component)
+				.and().eq("packageName", packageName)
+				.findList(); 
 	}
 
 	@Override
 	public List<? extends DebPackage> findAllByDistComponentArch(String repoName, String distName, String component, String archName) throws NonExistantRepositoryException {
-		return new QDebPackageModel().repository.name.eq(repoName).dist.eq(distName).component.eq(component).findList(); 
+		return DebPackageModel.find.where().eq("repository.name", repoName).and().eq("dist", distName).and().eq("component", component).findList(); 
 	}
 	
 
@@ -213,25 +247,26 @@ public class DebRepositoryManagerImpl extends DebRepositoryConfigurationManagerI
 	@Override
 	public DebPackage findByUri(String repoName, String uri)
 			throws NonExistantRepositoryException, DebPackageNotFoundInStoreException {
-		return new QDebPackageModel().repository.name.eq(repoName).filename.iequalTo(uri).findUnique();
+		return DebPackageModel.find.where().eq("repository.name", repoName).and().ieq("filename", uri).findUnique();
 	}
 
 	@Override
 	public boolean isExistingRepository(String repoName) {
-		return new QDebRepositoryModel().name.eq(repoName).findCount()  > 0;
+		return DebRepositoryModel.find.where().eq("name",repoName).findCount()  > 0;
 	}
 
 	@Override
 	public boolean isExistingRepository(UUID uuid) {
 		//return new QDebRepositoryModel().findCount() > 0;
-		return new QDebRepositoryModel().uuid.eq(uuid.toString()).findCount() > 0;
+		//return new QDebRepositoryModel().uuid.eq(uuid.toString()).findCount() > 0;
+		return DebRepositoryModel.find.where().eq("uuid", uuid.toString()).findCount() > 0;
 	}
 
 
 	@Override
 	public void removeRepository(UUID uuid) {
-		new QDebPackageModel().repository.uuid.eq(uuid.toString()).delete();
-		new QDebRepositoryModel().uuid.eq(uuid.toString()).delete();
+		DebPackageModel.find.where().eq("repository.uuid", uuid.toString()).delete();
+		DebRepositoryModel.find.where().eq("uuid", uuid.toString()).delete();
 	}
 
 	@Override

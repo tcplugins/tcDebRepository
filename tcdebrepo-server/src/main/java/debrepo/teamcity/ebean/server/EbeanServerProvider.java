@@ -22,6 +22,7 @@ import java.io.File;
 import java.io.IOException;
 
 import org.avaje.datasource.DataSourceConfig;
+import org.springframework.beans.factory.FactoryBean;
 
 import com.avaje.ebean.EbeanServer;
 import com.avaje.ebean.EbeanServerFactory;
@@ -32,16 +33,18 @@ import debrepo.teamcity.entity.helper.PluginDataResolver;
 import jetbrains.buildServer.util.FuncThrow;
 import jetbrains.buildServer.util.Util;
 
-public class EbeanServerProvider {
+public class EbeanServerProvider implements FactoryBean<EbeanServer> {
 
 	EbeanServer myEbeanServer = null;
+	private ClassLoader myTeamCityClassLoader;
+	private PluginDataResolver myPluginDataResolver;
 	
 	/**
 	 * EbeanServerProvider constructor for unit tests that does not need TeamCity running.
 	 * 
 	 * @param pluginDataResolver Used to find the directory to store the H2 files in.
 	 */
-	public EbeanServerProvider(PluginDataResolver pluginDataResolver) {
+	protected EbeanServerProvider(PluginDataResolver pluginDataResolver) {
 		Loggers.SERVER.info("EbeanServerProvider :: Getting EBeanServer via testing method.");
 		this.myEbeanServer = createEbeanServerInstance(pluginDataResolver);
 	}
@@ -53,14 +56,20 @@ public class EbeanServerProvider {
 	 */
 	public EbeanServerProvider(PluginDataResolver pluginDataResolver, ClassLoader teamCityClassLoader) {
 		Loggers.SERVER.info("EbeanServerProvider :: Getting EBeanServer via TeamCity classpath method.");
+		this.myTeamCityClassLoader = teamCityClassLoader;
+		this.myPluginDataResolver = pluginDataResolver;
+	}
+	
+	public void init() {
+		Loggers.SERVER.info("EbeanServerProvider :: Initialising EBeanServer via TeamCity classpath method.");
 		try {
-			this.myEbeanServer = Util.doUnderContextClassLoader(teamCityClassLoader,
-					new EbeanServerProviderInstantiationFunction(pluginDataResolver)
+			this.myEbeanServer = Util.doUnderContextClassLoader(myTeamCityClassLoader,
+					new EbeanServerProviderInstantiationFunction(myPluginDataResolver)
 					);
 		} catch (Exception e) {
 			Loggers.SERVER.error("EbeanServerProvider :: Could not create eBean instance!");
 			Loggers.SERVER.debug(e);
-		}
+		}	
 	}
 	
 	public class EbeanServerProviderInstantiationFunction implements FuncThrow<EbeanServer, Exception> {
@@ -116,5 +125,20 @@ public class EbeanServerProvider {
 
 	public EbeanServer getEbeanServer() {
 		return myEbeanServer;
+	}
+
+	@Override
+	public EbeanServer getObject() throws Exception {
+		return this.myEbeanServer;
+	}
+
+	@Override
+	public Class<?> getObjectType() {
+		return EbeanServer.class;
+	}
+
+	@Override
+	public boolean isSingleton() {
+		return true;
 	}
 }
