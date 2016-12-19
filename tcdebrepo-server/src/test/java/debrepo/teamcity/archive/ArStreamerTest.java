@@ -89,6 +89,54 @@ public class ArStreamerTest {
 		}
 	}
 	
+	@Test
+	public void getControlFileAsStringFromAllTest() throws IOException {
+		Path ephemeralTempDir = Files.createTempDirectory(Paths.get("target"), "deb-temp-", new FileAttribute<?>[] {});
+		File debFile = new File("src/test/resources/packages_for_testing/debhelper_9.20120909_all.deb");
+		DebFileReader reader = new DebFileReader(new File("src/test/resources/packages_for_testing"), "target");
+		File controlTarGz = reader.getControlTarGzFromDeb(debFile, ephemeralTempDir.toFile());
+		String controlFileContents = reader.getControlFromControlTarGz(controlTarGz);
+		System.out.println(controlFileContents);
+		Map<String,String> params = reader.getDebItemsFromControl(debFile, controlFileContents);
+		
+		assertTrue(params.size() > 0);
+		for (String key: params.keySet()){
+			System.out.println("##" + key + "##:??" + params.get(key) + "??");
+		}
+	}
+	
+	@Test
+	public void getControlFileAsStringFromAllTest2() throws IOException {
+		Path ephemeralTempDir = Files.createTempDirectory(Paths.get("target"), "deb-temp-", new FileAttribute<?>[] {});
+		File debFile = new File("src/test/resources/packages_for_testing/autoconf_2.69-8_all.deb");
+		DebFileReader reader = new DebFileReader(new File("src/test/resources/packages_for_testing"), "target");
+		File controlTarGz = reader.getControlTarGzFromDeb(debFile, ephemeralTempDir.toFile());
+		String controlFileContents = reader.getControlFromControlTarGz(controlTarGz);
+		System.out.println(controlFileContents);
+		Map<String,String> params = reader.getDebItemsFromControl(debFile, controlFileContents);
+		
+		assertTrue(params.size() > 0);
+		for (String key: params.keySet()){
+			System.out.println("##" + key + "##:??" + params.get(key) + "??");
+		}
+	}
+	
+	@Test
+	public void getControlFileAsStringTest2() throws IOException {
+		Path ephemeralTempDir = Files.createTempDirectory(Paths.get("target"), "deb-temp-", new FileAttribute<?>[] {});
+		File debFile = new File("src/test/resources/packages_for_testing/e3_2.71-1_amd64.deb");
+		DebFileReader reader = new DebFileReader(new File("src/test/resources/packages_for_testing"), "target");
+		File controlTarGz = reader.getControlTarGzFromDeb(debFile, ephemeralTempDir.toFile());
+		String controlFileContents = reader.getControlFromControlTarGz(controlTarGz);
+		System.out.println(controlFileContents);
+		Map<String,String> params = reader.getDebItemsFromControl(debFile, controlFileContents);
+		
+		assertTrue(params.size() > 0);
+		for (String key: params.keySet()){
+			System.out.println("##" + key + "##:??" + params.get(key) + "??");
+		}
+	}
+	
 	
 	public String getControlStringFromArFile(File arFile) throws IOException {
 		Archiver archiverAr = ArchiverFactory.createArchiver(ArchiveFormat.AR);
