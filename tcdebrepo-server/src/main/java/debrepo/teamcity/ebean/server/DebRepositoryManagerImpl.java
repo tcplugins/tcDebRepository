@@ -200,6 +200,15 @@ public class DebRepositoryManagerImpl extends DebRepositoryConfigurationManagerI
 	public List<? extends DebPackage> findAllByDistComponentArch(String repoName, String distName, String component, String archName) throws NonExistantRepositoryException {
 		return new QDebPackageModel().repository.name.eq(repoName).dist.eq(distName).component.eq(component).findList(); 
 	}
+	
+
+	@Override
+	public List<? extends DebPackage> findAllByDistComponentArchIncludingAll(String repoName, String distName,
+			String component, String archName) throws NonExistantRepositoryException {
+		// TODO Auto-generated method stub
+		// FIXME
+		return null;
+	}
 
 	@Override
 	public DebPackage findByUri(String repoName, String uri)
@@ -239,6 +248,5 @@ public class DebRepositoryManagerImpl extends DebRepositoryConfigurationManagerI
 		// TODO Auto-generated method stub
 		
 	}
-
 	
 }

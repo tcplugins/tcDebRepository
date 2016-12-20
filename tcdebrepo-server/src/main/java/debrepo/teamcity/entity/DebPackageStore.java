@@ -144,12 +144,17 @@ public class DebPackageStore extends TreeMap<DebPackageEntityKey, DebPackageEnti
 		return debs;
 	}
 
-	public List<DebPackage> findAllByDistComponentArch(String distName, String component, String archName) {
+	public List<DebPackage> findAllByDistComponentArch(String distName, String component, String archName, boolean includeAll) {
 		List<DebPackage> debs = new ArrayList<>();
 		for (DebPackage deb: this.values()){
 			if (deb.getDist().equalsIgnoreCase(distName)
 					&& deb.getComponent().equalsIgnoreCase(component)
 					&& deb.getArch().equalsIgnoreCase(archName)){
+				debs.add(deb);
+			} else if (includeAll && 
+					deb.getDist().equalsIgnoreCase(distName)
+					&& deb.getComponent().equalsIgnoreCase(component)
+					&& deb.getArch().equalsIgnoreCase("all")){
 				debs.add(deb);
 			}
 		}
@@ -206,4 +211,5 @@ public class DebPackageStore extends TreeMap<DebPackageEntityKey, DebPackageEnti
 			}
 		}
 	}
+
 }

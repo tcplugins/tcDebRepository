@@ -16,6 +16,8 @@
 package debrepo.teamcity.entity;
 
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -40,8 +42,12 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor // Empty constructor for JAXB.
 
 @XmlRootElement()
-@XmlType(propOrder = { "repoName", "projectId", "uuid", "buildTypes" })
+@XmlType(propOrder = { "repoName", "projectId", "uuid", "buildTypes", "architecturesRepresentedByAll" })
 public class DebRepositoryConfigurationJaxImpl implements DebRepositoryConfiguration {
+	
+	private static final String[] defaultArchitecturesForAll = { "arm64", "amd64", "armel", "amd64", "armhf", 
+																 "i386", "mips", "mipsel", "powerpc", "ppc64el", "s390x" };
+	
 	
 	@NotNull @XmlAttribute(name="uuid")
 	private UUID uuid;
@@ -55,10 +61,16 @@ public class DebRepositoryConfigurationJaxImpl implements DebRepositoryConfigura
 	@XmlElement(name="build-type") @XmlElementWrapper(name="build-types")
 	private List<DebRepositoryBuildTypeConfig> buildTypes = new CopyOnWriteArrayList<>();
 	
+	@XmlElement(name="arch") @XmlElementWrapper(name="architectures-represented-by-all")
+	private Set<String> architecturesRepresentedByAll = new TreeSet<>();
+	
 	public DebRepositoryConfigurationJaxImpl(String projectId, String repoName) {
 		this.projectId = projectId;
 		this.repoName = repoName;
 		this.uuid = UUID.randomUUID();
+		for (String arch : defaultArchitecturesForAll) {
+			architecturesRepresentedByAll.add(arch);
+		}
 	}
 
 	public boolean addBuildType(DebRepositoryBuildTypeConfig buildType) {

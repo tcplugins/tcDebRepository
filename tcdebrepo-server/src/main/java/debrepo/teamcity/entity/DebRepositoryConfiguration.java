@@ -19,6 +19,7 @@
 package debrepo.teamcity.entity;
 
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 public interface DebRepositoryConfiguration extends Comparable<DebRepositoryConfiguration> {
@@ -31,5 +32,6 @@ public interface DebRepositoryConfiguration extends Comparable<DebRepositoryConf
 	public abstract boolean containsBuildType(String buildTypeid);
 	public abstract List<DebRepositoryBuildTypeConfig> getBuildTypes();
 	public abstract boolean addBuildType(DebRepositoryBuildTypeConfig buildTypeConfig);
+	public abstract Set<String> getArchitecturesRepresentedByAll();
 
 }

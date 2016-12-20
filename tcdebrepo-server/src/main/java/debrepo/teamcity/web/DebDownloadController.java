@@ -129,7 +129,7 @@ public class DebDownloadController extends BaseController {
 			String component= matcher.group(3);
 			String archName = matcher.group(4);
 			try {
-				return servePackagesGzFile(request, response, myDebRepositoryManager.findAllByDistComponentArch(repoName, distName, component, archName));
+				return servePackagesGzFile(request, response, myDebRepositoryManager.findAllByDistComponentArchIncludingAll(repoName, distName, component, archName));
 			} catch (NonExistantRepositoryException ex){
 				response.sendError(HttpServletResponse.SC_NOT_FOUND);
 				Loggers.SERVER.info("DebDownloadController:: Returning 404 : Not Found: No Deb Repository exists with the name: " + request.getPathInfo());
@@ -144,7 +144,7 @@ public class DebDownloadController extends BaseController {
 			String component= matcher.group(3);
 			String archName = matcher.group(4);
 			try {
-				return servePackagesFile(request, response, myDebRepositoryManager.findAllByDistComponentArch(repoName, distName, component, archName));
+				return servePackagesFile(request, response, myDebRepositoryManager.findAllByDistComponentArchIncludingAll(repoName, distName, component, archName));
 			} catch (NonExistantRepositoryException ex){
 				response.sendError(HttpServletResponse.SC_NOT_FOUND);
 				Loggers.SERVER.info("DebDownloadController:: Returning 404 : Not Found: No Deb Repository exists with the name: " + request.getPathInfo());
@@ -160,7 +160,7 @@ public class DebDownloadController extends BaseController {
 			String component= matcher.group(3);
 			String archName = matcher.group(4);
 			try {
-				if (myDebRepositoryManager.findAllByDistComponentArch(repoName, distName, component, archName).size() > 0) {
+				if (myDebRepositoryManager.findAllByDistComponentArchIncludingAll(repoName, distName, component, archName).size() > 0) {
 					List<LinkItem> breadcrumbItems = new ArrayList<>();
 					breadcrumbItems.add(LinkItem.builder().text("<b>Index of</b> ").type(LINK_TYPE_REP_DIR_SLASH).url("").build());
 					breadcrumbItems.add(LinkItem.builder().text("/").type(LINK_TYPE_REP_DIR_SLASH).url("").build());

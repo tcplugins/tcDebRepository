@@ -42,6 +42,7 @@ public interface DebRepositoryManager {
 	public Set<String> findUniqueComponent(String repoName) throws NonExistantRepositoryException;
 	public Set<String> findUniquePackageNameByComponent(String repoName, String component) throws NonExistantRepositoryException;
 	public List<? extends DebPackage> findAllByDistComponentArch(String repoName, String distName, String component, String archName) throws NonExistantRepositoryException;
+	public List<? extends DebPackage> findAllByDistComponentArchIncludingAll(String repoName, String distName, String component, String archName) throws NonExistantRepositoryException;
 	public List<? extends DebPackage> getUniquePackagesByComponentAndPackageName(String repoName, String component, String packageName) throws NonExistantRepositoryException;
 	public DebPackage findByUri(String repoName, String uri) throws NonExistantRepositoryException, DebPackageNotFoundInStoreException;
 	public boolean isExistingRepository(String repoName);
@@ -58,5 +59,6 @@ public interface DebRepositoryManager {
 		private Long buildId;
 		private List<DebPackage> packagesToKeep;
 	}
+
 
 }

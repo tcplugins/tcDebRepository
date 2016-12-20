@@ -149,6 +149,9 @@ public class DebRepositoryManagerImpl extends  DebRepositoryConfigurationManager
 		for (DebPackageEntityKey e : store.keySet()) {
 			if (distName.equals(e.getDist()) && component.equals(e.getComponent())) {
 				architectures.add(e.getArch());
+				if ("all".equalsIgnoreCase(e.getArch())){
+					architectures.addAll(getDebRepositoryConfigurationByName(repoName).getArchitecturesRepresentedByAll());
+				}
 			}
 		}
 		return architectures;
@@ -210,7 +213,12 @@ public class DebRepositoryManagerImpl extends  DebRepositoryConfigurationManager
 
 	@Override
 	public List<DebPackage> findAllByDistComponentArch(String repoName, String distName, String component, String archName) throws NonExistantRepositoryException {
-		return getPackageStore(repoName).findAllByDistComponentArch(distName, component, archName);
+		return getPackageStore(repoName).findAllByDistComponentArch(distName, component, archName, false);
+	}
+	
+	@Override
+	public List<DebPackage> findAllByDistComponentArchIncludingAll(String repoName, String distName, String component, String archName) throws NonExistantRepositoryException {
+		return getPackageStore(repoName).findAllByDistComponentArch(distName, component, archName, true);
 	}
 
 	@Override
