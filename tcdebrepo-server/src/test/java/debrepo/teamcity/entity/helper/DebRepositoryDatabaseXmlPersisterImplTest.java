@@ -30,7 +30,6 @@ import org.mockito.Mock;
 import debrepo.teamcity.entity.DebPackageStore;
 import debrepo.teamcity.entity.DebPackageStoreEntity;
 import debrepo.teamcity.entity.DebRepositoryConfiguration;
-import debrepo.teamcity.entity.DebRepositoryConfigurationJaxImpl;
 import debrepo.teamcity.service.DebRepositoryBaseTest;
 import debrepo.teamcity.service.MapBackedDebRepositoryDatabase;
 import debrepo.teamcity.service.NonExistantRepositoryException;

@@ -25,10 +25,14 @@ import jetbrains.buildServer.serverSide.artifacts.BuildArtifactsViewMode;
 public class DebRepoServerEventListener extends BuildServerAdapter {
 	
 	private final DebRepositoryBuildArtifactsPublisher myPublisher;
+	private final DebRepositoryBuildArtifactsCleaner myCleaner;
 	private final SBuildServer myBuildServer;
 	
-	public DebRepoServerEventListener(DebRepositoryBuildArtifactsPublisher publisher, SBuildServer sBuildServer) {
+	public DebRepoServerEventListener(DebRepositoryBuildArtifactsPublisher publisher, 
+									  DebRepositoryBuildArtifactsCleaner cleaner,
+									  SBuildServer sBuildServer) {
 		this.myPublisher = publisher;
+		this.myCleaner = cleaner;
 		this.myBuildServer = sBuildServer;
 	}
 
@@ -40,6 +44,11 @@ public class DebRepoServerEventListener extends BuildServerAdapter {
 	@Override
 	public void serverShutdown() {
 		// TODO Auto-generated method stub
+	}
+	
+	@Override
+	public void cleanupFinished() {
+		//myCleaner.removeDetachedArtifactsFromRepositories();
 	}
 	
 	@Override

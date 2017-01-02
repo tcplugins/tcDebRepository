@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<deb-repositories>
+    <deb-repository-configuration repository-name="TestRepoName01" project-id="project01" uuid="239ec9f8-5de7-4d35-9bce-cd745c40afbd">
+        <build-types>
+            <build-type build-type-id="bt01">
+                <build-artifact-filters>
+                    <filter regex=".+\.deb" dist="wheezy" component="main" id="c8dc3dcf-2230-470e-8a68-83a3d3449949"/>
+                    <filter regex="/prod/somthing.*\.deb" dist="wheezy" component="main" id="dc186a45-0979-483a-8994-5155b2edd9fd"/>
+                </build-artifact-filters>
+            </build-type>
+            <build-type build-type-id="bt02">
+                <build-artifact-filters>
+                    <filter regex=".*\.deb" dist="wheezy" component="main" id="c787034c-5ed0-4113-abc3-6bb82f4d0785"/>
+                </build-artifact-filters>
+            </build-type>
+        </build-types>
+        <architectures-represented-by-all>
+            <arch>amd64</arch>
+            <arch>arm64</arch>
+            <arch>armel</arch>
+            <arch>armhf</arch>
+            <arch>i386</arch>
+            <arch>mips</arch>
+            <arch>mipsel</arch>
+            <arch>powerpc</arch>
+            <arch>ppc64el</arch>
+            <arch>s390x</arch>
+        </architectures-represented-by-all>
+    </deb-repository-configuration>
+</deb-repositories>

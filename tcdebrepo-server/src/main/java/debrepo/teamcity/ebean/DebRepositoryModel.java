@@ -20,6 +20,7 @@ package debrepo.teamcity.ebean;
 
 import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -55,7 +56,7 @@ public class DebRepositoryModel extends Model {
 	
 	String projectId;
 	
-	@OneToMany(mappedBy = "repository")
+	@OneToMany(mappedBy = "repository", cascade=CascadeType.REMOVE)
 	List<DebPackageModel> debpackages;
 	
 }

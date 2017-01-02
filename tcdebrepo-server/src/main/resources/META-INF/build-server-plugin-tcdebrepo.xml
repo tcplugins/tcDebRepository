@@ -31,6 +31,10 @@
        <bean id="debRepoListingPageController"
      	class="debrepo.teamcity.web.DebRepoListingPageController" 
      	/>
+     	
+       <bean id="debRepositoryAdminPage"
+     	class="debrepo.teamcity.web.DebRepositoryAdminPage" 
+     	/>
 
        <bean id="addRepositoryAction"
      	class="debrepo.teamcity.web.action.AddRepositoryAction" 
@@ -129,7 +133,7 @@
 
        <bean id="debRepositoryConfigFileChangeHandler"
      		class="debrepo.teamcity.settings.DebRepositoryConfigFileChangeHandler" 
-     		init-method="register" lazy-init="true">
+     		init-method="register"> <!-- lazy-init="true">  -->
      	     <constructor-arg ref="debRepositoryManager">
     		</constructor-arg>     		
      	     <constructor-arg ref="jaxConfigHelper">
@@ -138,6 +142,12 @@
        
        <bean id="debRepositoryBuildArtifactsPublisher"
      		class="debrepo.teamcity.service.DebRepositoryBuildArtifactsPublisherImpl">
+     	     <constructor-arg ref="debRepositoryManager">
+    		</constructor-arg>     		
+       </bean>
+       
+       <bean id="debRepositoryBuildArtifactsCleaner"
+     		class="debrepo.teamcity.service.DebRepositoryBuildArtifactsCleanerImpl">
      	     <constructor-arg ref="debRepositoryManager">
     		</constructor-arg>     		
        </bean>

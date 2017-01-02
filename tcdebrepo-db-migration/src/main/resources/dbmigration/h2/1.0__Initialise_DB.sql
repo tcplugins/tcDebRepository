@@ -1,3 +1,4 @@
+-- apply changes
 create table o_debpackage (
   id                            bigint auto_increment not null,
   repository_id                 bigint,
