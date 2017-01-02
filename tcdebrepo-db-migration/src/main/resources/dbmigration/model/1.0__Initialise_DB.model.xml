@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<migration xmlns="http://ebean-orm.github.io/xml/ns/dbmigration">
+    <changeSet type="apply">
+        <createTable name="o_debpackage" identityType="identity" pkName="pk_o_debpackage">
+            <column name="id" type="bigint" primaryKey="true"/>
+            <column name="repository_id" type="bigint" references="o_repository.id" foreignKeyName="fk_o_debpackage_repository_id" foreignKeyIndex="ix_o_debpackage_repository_id"/>
+            <column name="package_name" type="varchar"/>
+            <column name="version" type="varchar"/>
+            <column name="arch" type="varchar"/>
+            <column name="dist" type="varchar"/>
+            <column name="component" type="varchar"/>
+            <column name="build_id" type="bigint"/>
+            <column name="build_type_id" type="varchar"/>
+            <column name="filename" type="varchar"/>
+            <column name="uri" type="varchar"/>
+        </createTable>
+        <createTable name="o_debpackage_parameter" identityType="identity" pkName="pk_o_debpackage_parameter">
+            <column name="id" type="bigint" primaryKey="true"/>
+            <column name="deb_package_id" type="bigint" references="o_debpackage.id" foreignKeyName="fk_o_debpackage_parameter_deb_package_id" foreignKeyIndex="ix_o_debpackage_parameter_deb_package_id"/>
+            <column name="name" type="varchar"/>
+            <column name="value" type="varchar"/>
+        </createTable>
+        <createTable name="o_repository" identityType="identity" pkName="pk_o_repository">
+            <column name="id" type="bigint" primaryKey="true"/>
+            <column name="name" type="varchar"/>
+            <column name="uuid" type="varchar"/>
+            <column name="project_id" type="varchar"/>
+        </createTable>
+    </changeSet>
+</migration>

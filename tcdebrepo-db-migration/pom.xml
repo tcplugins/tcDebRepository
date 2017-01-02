@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<artifactId>tcdebrepo</artifactId>
+		<groupId>netwolfuk.teamcity.plugins.tcdebrepo</groupId>
+		<version>1.0-SNAPSHOT</version>
+	</parent>
+	<artifactId>tcdebrepo-db-migration</artifactId>
+	<packaging>jar</packaging>
+
+	<properties>
+		<ebean-maven-plugin.args>debug=2</ebean-maven-plugin.args>
+		<ebean-version>8.8.1</ebean-version>
+		<ebean-query-bean-version>8.1.4</ebean-query-bean-version>
+		<ebean-maven-plugin-version>8.2.1</ebean-maven-plugin-version>
+	</properties>
+	
+	  <build>
+	    <plugins>
+	      <plugin>
+	        <groupId>org.apache.maven.plugins</groupId>
+	        <artifactId>maven-jar-plugin</artifactId>
+	        <version>3.0.0</version>
+	        <configuration>
+	          <includes>
+	            <include>dbmigration/**</include>
+	          </includes>
+	        </configuration>
+	      </plugin>
+	    </plugins>
+	  </build>
+	
+	<dependencies>
+
+		<dependency>
+			<groupId>netwolfuk.teamcity.plugins.tcdebrepo</groupId>
+			<artifactId>tcdebrepo-server</artifactId>
+			<version>1.0-SNAPSHOT</version>
+		</dependency>	
+	
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.9</version>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.avaje.ebean</groupId>
+			<artifactId>ebean</artifactId>
+			<version>${ebean-version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.avaje.ebean</groupId>
+			<artifactId>ebean-querybean</artifactId>
+			<version>8.4.1</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.avaje.ebean</groupId>
+			<artifactId>querybean-generator</artifactId>
+			<version>8.1.4</version>
+			<scope>provided</scope>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.avaje/avaje-datasource -->
+		<dependency>
+			<groupId>org.avaje</groupId>
+			<artifactId>avaje-datasource</artifactId>
+			<version>1.1.4</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/com.h2database/h2 -->
+		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
+			<version>1.4.193</version>
+		</dependency>
+
+		<dependency>
+		    <groupId>org.slf4j</groupId>
+		    <artifactId>slf4j-api</artifactId>
+		    <version>1.7.21</version>
+		</dependency>
+		
+		<dependency>
+		    <groupId>org.slf4j</groupId>
+		    <artifactId>slf4j-log4j12</artifactId>
+		    <version>1.7.21</version>
+		</dependency>
+
+
+	</dependencies>
+</project>

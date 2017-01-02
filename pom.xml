@@ -79,6 +79,7 @@
   </build>
   <modules>
     <module>tcdebrepo-server</module>
+    <module>tcdebrepo-db-migration</module>
     <module>tcdebrepo-build</module>
   </modules>
 </project>

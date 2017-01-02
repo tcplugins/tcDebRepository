@@ -18,6 +18,7 @@
  *******************************************************************************/
 package debrepo.teamcity.ebean.server;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -26,10 +27,9 @@ import java.util.UUID;
 import com.avaje.ebean.EbeanServer;
 
 import debrepo.teamcity.DebPackage;
+import debrepo.teamcity.Loggers;
 import debrepo.teamcity.ebean.DebPackageModel;
 import debrepo.teamcity.ebean.DebRepositoryModel;
-import debrepo.teamcity.ebean.query.QDebPackageModel;
-import debrepo.teamcity.ebean.query.QDebRepositoryModel;
 import debrepo.teamcity.entity.DebPackageNotFoundInStoreException;
 import debrepo.teamcity.entity.DebPackageStore;
 import debrepo.teamcity.entity.DebRepositoryBuildTypeConfig;
@@ -65,6 +65,7 @@ public class DebRepositoryManagerImpl extends DebRepositoryConfigurationManagerI
 		DebRepositoryModel repo = DebRepositoryModel.find.where().eq("uuid", conf.getUuid().toString()).findUnique();
 		if (repo == null) {
 			repo = new DebRepositoryModel();
+			Loggers.SERVER.info("DebRepositoryManagerImpl:initialisePackageStore :: Repository '" + conf.getRepoName() + " not found in DB. Initliasing...");
 		}
 		repo.setName(conf.getRepoName());
 		repo.setUuid(conf.getUuid().toString());
@@ -130,10 +131,14 @@ public class DebRepositoryManagerImpl extends DebRepositoryConfigurationManagerI
 //				.findSingleAttributeList();
 		List<String> archs = DebPackageModel.find.select("arch")
 				  .setDistinct(false)
-				  .where().eq("repository.name", repoName)
-				  .and().eq("dist", distName)
-				  .and().eq("component", component)
+				  .where()
+				  .eq("repository.name", repoName)
+				  .eq("dist", distName)
+				  .eq("component", component)
 				  .findSingleAttributeList();
+		if (archs.contains("all")) {
+			archs.addAll(getDebRepositoryConfigurationByName(repoName).getArchitecturesRepresentedByAll());
+		}
 		return new TreeSet<String>(archs);
 	}
 
@@ -170,6 +175,21 @@ public class DebRepositoryManagerImpl extends DebRepositoryConfigurationManagerI
 				  .findSingleAttributeList();
 		return new TreeSet<String>(dists);
 	}
+	
+	@Override
+	public Set<String> findUniqueFilenames(String repoName) throws NonExistantRepositoryException {
+		List<String> files = DebPackageModel.find.select("filename")
+				  .setDistinct(false)
+				  .where().eq("repository.name", repoName)
+				  .findSingleAttributeList();
+		return new TreeSet<String>(files);
+	}
+	
+	@Override
+	public List<? extends DebPackage>  findAllByFilenames(String repoName, Collection<String> filenames) {
+		return DebPackageModel.find.where().in("filename", filenames).findList();
+	}
+
 
 	@Override
 	public Set<String> findUniqueComponent(String repoName) throws NonExistantRepositoryException {
@@ -222,32 +242,37 @@ public class DebRepositoryManagerImpl extends DebRepositoryConfigurationManagerI
 //									 .component.eq(component)
 //									 .packageName.eq(packageName)
 //									 .findList(); 
-		return DebPackageModel.find.select("filename, uri")
+		return DebPackageModel.find.select("filename, uri, packageName, version, arch")
 				.setDistinct(true)
 				.where().eq("repository.name",repoName)
-				.and().eq("component", component)
-				.and().eq("packageName", packageName)
+				.eq("component", component)
+				.eq("packageName", packageName)
 				.findList(); 
 	}
 
 	@Override
 	public List<? extends DebPackage> findAllByDistComponentArch(String repoName, String distName, String component, String archName) throws NonExistantRepositoryException {
-		return DebPackageModel.find.where().eq("repository.name", repoName).and().eq("dist", distName).and().eq("component", component).findList(); 
+		return DebPackageModel.find.where().eq("repository.name", repoName).eq("dist", distName).eq("component", component).eq("arch", archName).findList(); 
 	}
 	
 
 	@Override
 	public List<? extends DebPackage> findAllByDistComponentArchIncludingAll(String repoName, String distName,
 			String component, String archName) throws NonExistantRepositoryException {
-		// TODO Auto-generated method stub
-		// FIXME
-		return null;
+		return DebPackageModel.find.where().or()
+											   .and().eq("repository.name", repoName).eq("dist", distName).eq("component", component).eq("arch", archName).endAnd()
+											   .and().eq("repository.name", repoName).eq("dist", distName).ieq("component", component).ieq("arch", "all").endAnd()
+											   .findList();
 	}
 
 	@Override
 	public DebPackage findByUri(String repoName, String uri)
 			throws NonExistantRepositoryException, DebPackageNotFoundInStoreException {
-		return DebPackageModel.find.where().eq("repository.name", repoName).and().ieq("filename", uri).findUnique();
+		try {
+			return DebPackageModel.find.where().eq("repository.name", repoName).eq("uri", uri).findList().get(0);
+		} catch (IndexOutOfBoundsException e) {
+			throw new DebPackageNotFoundInStoreException(uri);
+		}
 	}
 
 	@Override
@@ -265,8 +290,12 @@ public class DebRepositoryManagerImpl extends DebRepositoryConfigurationManagerI
 
 	@Override
 	public void removeRepository(UUID uuid) {
-		DebPackageModel.find.where().eq("repository.uuid", uuid.toString()).delete();
-		DebRepositoryModel.find.where().eq("uuid", uuid.toString()).delete();
+		
+		//DebPackageModel.db().createUpdate(DebPackageModel.class, "delete from orderDetail").execute();
+		
+		//DebPackageModel.find.where().eq("repository.uuid", uuid.toString()).delete();
+		DebRepositoryModel repo = DebRepositoryModel.find.where().eq("uuid", uuid.toString()).findUnique();
+		repo.delete();
 	}
 
 	@Override
@@ -280,8 +309,30 @@ public class DebRepositoryManagerImpl extends DebRepositoryConfigurationManagerI
 
 	@Override
 	public void removeBuildPackages(DebPackageRemovalBean packageRemovalBean) {
-		// TODO Auto-generated method stub
 		
+		List<DebPackageModel> packagesForDeletion = DebPackageModel.find.where()
+									.eq("repository.uuid", packageRemovalBean.getDebRepositoryConfiguration().getUuid().toString())
+									.eq("buildTypeId", packageRemovalBean.getBuildTypeId())
+									.eq("buildId", packageRemovalBean.getBuildId())
+								    .notIn("filename", extractFileNames(packageRemovalBean.getPackagesToKeep()))
+								    .findList();
+		DebPackageModel.db().beginTransaction();
+		try {
+			for (DebPackageModel m : packagesForDeletion) {
+				m.delete();
+			}
+			DebPackageModel.db().commitTransaction();
+		} finally {
+			DebPackageModel.db().endTransaction();
+		}
+	}
+	
+	private Set<String> extractFileNames(List<DebPackage> packages) {
+		final Set<String> filenames = new TreeSet<>(); 
+		for (DebPackage debPackage : packages) {
+			filenames.add(debPackage.getFilename());
+		}
+		return filenames;
 	}
 	
 }

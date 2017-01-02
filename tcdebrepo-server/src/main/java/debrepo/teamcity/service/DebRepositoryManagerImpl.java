@@ -17,6 +17,7 @@ package debrepo.teamcity.service;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -177,6 +178,29 @@ public class DebRepositoryManagerImpl extends  DebRepositoryConfigurationManager
 		}
 		return dists;
 	}
+	
+	@Override
+	public Set<String> findUniqueFilenames(String repoName) throws NonExistantRepositoryException {
+		DebPackageStore store = getPackageStore(repoName);
+		Set<String> filenames = new TreeSet<>();
+		for (DebPackageEntity e : store.values()) {
+			filenames.add(e.getFilename());
+		}
+		return filenames;
+	}
+	
+	@Override
+	public List<? extends DebPackage>  findAllByFilenames(String repoName, Collection<String> filenames) throws NonExistantRepositoryException {
+		DebPackageStore store = getPackageStore(repoName);
+		List<DebPackageEntity> entities = new ArrayList<>();
+		for (DebPackageEntity e : store.values()) {
+			if (filenames.contains(e.getFilename())) {
+				entities.add(DebPackageEntity.copy(e));
+			}
+		}
+		return entities;
+	}
+
 	
 	@Override
 	public Set<String> findUniqueComponent(String repoName) throws NonExistantRepositoryException {

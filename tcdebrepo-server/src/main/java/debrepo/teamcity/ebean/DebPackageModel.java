@@ -16,14 +16,19 @@
 
 package debrepo.teamcity.ebean;
 
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.TreeMap;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import com.avaje.ebean.Model;
@@ -70,7 +75,23 @@ public class DebPackageModel extends Model implements DebPackage {
 
 	private String uri;
 
-	private Map<String, String> parameters = new TreeMap<>();
+	@OneToMany(mappedBy = "debPackage", fetch=FetchType.EAGER, cascade=CascadeType.ALL)
+	private List<DebPackageParameterModel> packageParameters;
+	
+	public Map<String,String> getParameters() {
+		Map<String, String> map = new TreeMap<>();
+		for (DebPackageParameterModel m : packageParameters) {
+			map.put(m.getName(), m.getValue());
+		}
+		return map;
+	}
+	
+	public void setParameters(Map<String,String> parametersMap) {
+		packageParameters.clear();
+		for (Entry<String,String> e : parametersMap.entrySet()) {
+			packageParameters.add(new DebPackageParameterModel(null, this, e.getKey(), e.getValue()));
+		}
+	}
 	
 	public static DebPackageModel copy(DebPackage deb) {
 		DebPackageModel e = new DebPackageModel();
@@ -79,7 +100,7 @@ public class DebPackageModel extends Model implements DebPackage {
 		e.setDist(deb.getDist());
 		e.setFilename(deb.getFilename());
 		e.setPackageName(deb.getPackageName());
-		e.parameters.putAll(deb.getParameters());
+		e.setParameters(deb.getParameters());
 		e.setBuildId(deb.getBuildId());
 		e.setBuildTypeId(deb.getBuildTypeId());
 		e.setUri(deb.getUri());
@@ -94,8 +115,8 @@ public class DebPackageModel extends Model implements DebPackage {
 
 	@Override
 	public void populateMetadata(Map<String, String> metaData) {
-		this.parameters.clear();
-		this.parameters.putAll(metaData);
+		this.packageParameters.clear();
+		this.setParameters(metaData);
 		
 		if (metaData.containsKey("Package")) {
 			this.setPackageName(metaData.get("Package"));
@@ -114,13 +135,34 @@ public class DebPackageModel extends Model implements DebPackage {
 	public void buildUri() {
 		if ("".equals(this.component) || "".equals(this.packageName) || this.filename == null || "".equals(this.filename)) {
 			this.uri = "";
-			if (this.parameters.containsKey("Filename")) {
-				this.parameters.remove("Filename");
+			if (this.getParameters().containsKey("Filename")) {
+				this.removeParameter("Filename");
 			}
 		} else {
 			this.setUri("pool/" + this.getComponent() + "/" + this.getPackageName() + "/" + filename.replace("\\", "/"));
-			this.parameters.put("Filename", this.getUri());
+			this.replaceParameter("Filename", this.getUri());
 		}
+	}
+
+	private void replaceParameter(String key, String newValue) {
+		for (DebPackageParameterModel p : getPackageParameters()) {
+			if (key.equals(p.getName())) {
+				p.setValue(newValue);
+			}
+		}
+	}
+
+	private void removeParameter(String key) {
+		DebPackageParameterModel itemToRemove = null;
+		for (DebPackageParameterModel p : getPackageParameters()) {
+			if (key.equals(p.getName())) {
+				itemToRemove = p;
+			}
+		}
+		if (itemToRemove != null) {
+			getPackageParameters().remove(itemToRemove);
+		}
+		
 	}
 
 }

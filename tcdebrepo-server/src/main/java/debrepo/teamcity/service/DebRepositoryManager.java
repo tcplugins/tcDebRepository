@@ -15,6 +15,7 @@
  *******************************************************************************/
 package debrepo.teamcity.service;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -35,13 +36,45 @@ public interface DebRepositoryManager {
 	public DebRepositoryStatistics getRepositoryStatistics(String uuid, String repoUrl);
 	public DebRepositoryStatistics getRepositoryStatistics(DebRepositoryConfiguration projectConfig, String repoUrl);
 	public void addBuildPackage(DebRepositoryConfiguration config, DebPackage newEntity);
+	
+	/**
+	 * Returns all the architectures found in the repository for a dist/component combination.
+	 * Note: If a package in the repo has an arch of "all", then all archs represented by all will be returned.  
+	 * See {@link DebRepositoryConfiguration} for where that list of configured
+	 * 
+	 * @param repoName The name of the repository to search in.
+	 * @param distName The dist to filter on.
+	 * @param component The component to filter on.
+	 * @return A Set<String> of unique architecture values found in the repository when searching for a specific dist and component.
+	 *         If a package of arch "all" exists in the repository and matches the filters, then a list of all the architectures
+	 *         represented by "all" will be returned.
+	 * @throws NonExistantRepositoryException if the repoName searched for does not exist.
+	 */
 	public Set<String> findUniqueArchByDistAndComponent(String repoName, String distName, String component) throws NonExistantRepositoryException;
+	
+	/**
+	 * Returns all the components found in the repository for the specified dist.
+	 * @param repoName The name of the repository to search in.
+	 * @param distName The dist to filter on.
+	 * @return A Set<String> of unique component values found in the repository when searching for the specific dist.
+	 * @throws NonExistantRepositoryException if the repoName searched for does not exist.
+	 */
 	public Set<String> findUniqueComponentByDist(String repoName, String distName) throws NonExistantRepositoryException;
 	public Set<String> findUniqueDist(String repoName) throws NonExistantRepositoryException;
 	public Set<String> findUniqueComponent(String repoName) throws NonExistantRepositoryException;
 	public Set<String> findUniquePackageNameByComponent(String repoName, String component) throws NonExistantRepositoryException;
+	public Set<String> findUniqueFilenames(String repoName) throws NonExistantRepositoryException;
 	public List<? extends DebPackage> findAllByDistComponentArch(String repoName, String distName, String component, String archName) throws NonExistantRepositoryException;
 	public List<? extends DebPackage> findAllByDistComponentArchIncludingAll(String repoName, String distName, String component, String archName) throws NonExistantRepositoryException;
+	
+	/**
+	 * Returns a unique list of the DebPackage items (files) in the repository for the specified component and package name. The filename is used as the unique key.
+	 * @param repoName The name of the repository to search in.
+	 * @param component The component to filter on.
+	 * @param packageName The package name to filter on.
+	 * @return A List<? extends DebPackage> of unique packages found in the repository when searching for the specific component and package name.
+	 * @throws NonExistantRepositoryException
+	 */
 	public List<? extends DebPackage> getUniquePackagesByComponentAndPackageName(String repoName, String component, String packageName) throws NonExistantRepositoryException;
 	public DebPackage findByUri(String repoName, String uri) throws NonExistantRepositoryException, DebPackageNotFoundInStoreException;
 	public boolean isExistingRepository(String repoName);
@@ -59,6 +92,8 @@ public interface DebRepositoryManager {
 		private Long buildId;
 		private List<DebPackage> packagesToKeep;
 	}
+
+	public List<? extends DebPackage>  findAllByFilenames(String repoName, Collection<String> filenames) throws NonExistantRepositoryException;
 
 
 

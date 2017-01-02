@@ -20,6 +20,11 @@
            <artifactId>tcdebrepo-server</artifactId>
            <version>1.0.2</version>
       </dependency>
+      <dependency>
+           <groupId>netwolfuk.teamcity.plugins.tcdebrepo</groupId>
+           <artifactId>tcdebrepo-db-migration</artifactId>
+           <version>1.0-SNAPSHOT</version>
+      </dependency>
   </dependencies>
   <build>
     <plugins>
