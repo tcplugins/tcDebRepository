@@ -23,6 +23,6 @@ In order of urgency
  - [ ] Refactor Dialog classes into single class in javascript.
  - [ ] Add artifact chooser (like build editing screen has)
  - [ ] Add regex test to filter edit dialog.
- - [ ] Packages file should be nice list rather than just text file.
+ - [x] Won't fix - Packages file is used by certain debian versions - Packages file should be nice list rather than just text file.
  - [ ] List content counts on "directories" while browsing repo. 
  - [ ] List content size/modified date if a file while browsing repo.
