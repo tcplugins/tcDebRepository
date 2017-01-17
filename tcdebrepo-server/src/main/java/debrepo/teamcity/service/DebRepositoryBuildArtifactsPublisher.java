@@ -21,6 +21,6 @@ import jetbrains.buildServer.serverSide.artifacts.BuildArtifacts;
 public interface DebRepositoryBuildArtifactsPublisher {
 	
 	public abstract void addArtifactsToRepositories(SBuild build, BuildArtifacts buildArtifacts);
-	public abstract void removeArtifactsFromRepositories(SBuild build, BuildArtifacts buildArtifacts);
+	public abstract void removeArtifactsFromRepositories(SBuild build, BuildArtifacts buildArtifactsToKeep);
 
 }

@@ -59,14 +59,14 @@ public class DebRepositoryBuildArtifactsPublisherImpl implements DebRepositoryBu
 		// Get a list of configs for this build.
 		Set<DebRepositoryConfiguration> configs = this.myDepRepositoryConfigManager.findConfigurationsForBuildType(build.getBuildTypeId());
 		Loggers.SERVER.info("DebRepositoryBuildArtifactsPublisherImpl#removeArtifactsFromRepositories :: found " + configs.size() + " repos interested in " + build.getFullName());
-		List<DebPackage> entities = new ArrayList<>();
+		List<DebPackage> entitiesToKeep = new ArrayList<>();
 		
-		BuildArtifactsProcessor  processor = new MyBuildArtifactsProcessor(build, entities);
+		BuildArtifactsProcessor  processor = new MyBuildArtifactsProcessor(build, entitiesToKeep);
 		buildArtifacts.iterateArtifacts(processor);
 		
-		Loggers.SERVER.info("DebRepositoryBuildArtifactsPublisherImpl#removeArtifactsFromRepositories :: found " + entities.size() + " artifacts in " + build.getFullName() + " # " + String.valueOf(build.getBuildId()));
+		Loggers.SERVER.info("DebRepositoryBuildArtifactsPublisherImpl#removeArtifactsFromRepositories :: found " + entitiesToKeep.size() + " artifacts in " + build.getFullName() + " # " + String.valueOf(build.getBuildId()));
 		for (DebRepositoryConfiguration config : configs) {
-			myDepRepositoryManager.removeBuildPackages(new DebPackageRemovalBean(config, build.getBuildTypeId(), build.getBuildId(), entities));
+			myDepRepositoryManager.removeBuildPackages(new DebPackageRemovalBean(config, build.getBuildTypeId(), build.getBuildId(), entitiesToKeep));
 		}
 	}
 
