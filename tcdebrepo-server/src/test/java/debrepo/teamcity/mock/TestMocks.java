@@ -46,7 +46,11 @@ public class TestMocks {
 	
 	@Bean
 	WebControllerManager webControllerManager() {
-		return mock(WebControllerManager.class);
+		WebControllerManager webControllerManager = mock(WebControllerManager.class);
+		when(webControllerManager.getPlaceById(PlaceId.EDIT_PROJECT_PAGE_TAB)).thenReturn(pagePlace());
+		when(webControllerManager.getPlaceById(PlaceId.BUILD_CONF_TAB)).thenReturn(pagePlace());
+		when(webControllerManager.getPlaceById(PlaceId.ADMIN_SERVER_CONFIGURATION_TAB)).thenReturn(pagePlace());
+		return webControllerManager;
 	}
 	
 	@Bean
@@ -56,6 +60,7 @@ public class TestMocks {
 	
 	@Bean
 	ProjectManager projectManager() {
+		//when(webControllerManager().getPlaceById(PlaceId.BUILD_CONF_TAB)).thenReturn(pagePlace());
 		return mock(ProjectManager.class);
 	}
 	
@@ -86,10 +91,7 @@ public class TestMocks {
 	
 	@Bean 
 	PagePlaces pagePlaces() {
-		PagePlaces pagePlaces = mock(PagePlaces.class);
-		when(pagePlaces.getPlaceById(PlaceId.EDIT_PROJECT_PAGE_TAB)).thenReturn(pagePlace());
-		when(pagePlaces.getPlaceById(PlaceId.BUILD_CONF_TAB)).thenReturn(pagePlace());
-		return pagePlaces;
+		return webControllerManager();
 	}
 	
 	@Bean 
