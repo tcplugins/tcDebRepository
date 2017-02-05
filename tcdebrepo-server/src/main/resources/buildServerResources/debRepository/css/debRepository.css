@@ -127,3 +127,12 @@ table#debRepoHeader th {
 table#debRepoHeader, table#debRepoHeader tr, table#debRepoHeader th, table#debRepoHeader td {
 	border: none;
 }
+
+ul.editArchitectures {
+    list-style-type: none;
+    -webkit-columns: 3;
+    -moz-columns: 3;
+    columns: 3;
+    margin-top: 0px;
+    padding-left: 0px;
+}

@@ -15,6 +15,8 @@
  *******************************************************************************/
 package debrepo.teamcity.entity;
 
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -32,6 +34,7 @@ import javax.xml.bind.annotation.XmlType;
 import org.jetbrains.annotations.NotNull;
 
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 /* Use the XmlAttributes on the fields rather than the getters
@@ -48,6 +51,7 @@ public class DebRepositoryConfigurationJaxImpl implements DebRepositoryConfigura
 	private static final String[] defaultArchitecturesForAll = { "arm64", "amd64", "armel", "amd64", "armhf", 
 																 "i386", "mips", "mipsel", "powerpc", "ppc64el", "s390x" };
 	
+	private static final Set<String> defaultArchitecturesForAllSet = new TreeSet<>();
 	
 	@NotNull @XmlAttribute(name="uuid")
 	private UUID uuid;
@@ -89,6 +93,14 @@ public class DebRepositoryConfigurationJaxImpl implements DebRepositoryConfigura
 	@Override
 	public int compareTo(DebRepositoryConfiguration o) {
 		return this.getUuid().compareTo(o.getUuid());
+	}
+
+	@Override
+	public Set<String> getDefaultArchitecturesRepresentedByAll() {
+		if (defaultArchitecturesForAllSet.isEmpty()) {
+			Collections.addAll(defaultArchitecturesForAllSet, defaultArchitecturesForAll);
+		}
+		return defaultArchitecturesForAllSet;
 	}
 	
 }
