@@ -33,5 +33,7 @@ public interface DebRepositoryConfiguration extends Comparable<DebRepositoryConf
 	public abstract List<DebRepositoryBuildTypeConfig> getBuildTypes();
 	public abstract boolean addBuildType(DebRepositoryBuildTypeConfig buildTypeConfig);
 	public abstract Set<String> getArchitecturesRepresentedByAll();
+	public abstract void setArchitecturesRepresentedByAll(Set<String> archs);
+	public abstract Set<String> getDefaultArchitecturesRepresentedByAll();
 
 }

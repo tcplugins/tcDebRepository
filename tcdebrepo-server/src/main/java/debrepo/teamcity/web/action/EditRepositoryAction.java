@@ -21,6 +21,10 @@ package debrepo.teamcity.web.action;
 import static debrepo.teamcity.web.DebRepoConfigurationEditPageActionController.*;
 import static debrepo.teamcity.web.DebRepoConfigurationEditPageActionController.DEBREPO_UUID;
 
+import java.util.Enumeration;
+import java.util.Set;
+import java.util.TreeSet;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -60,6 +64,7 @@ public class EditRepositoryAction extends ArtifactFilterAction implements Contro
 		String repoUuid;
 		String repoName;
 		String projectId;
+		Set<String> archs = new TreeSet<>();
 		try {
 			repoUuid = getParameterAsStringOrNull(request, DEBREPO_UUID, "request is missing repo uuid");
 			repoName = getParameterAsStringOrNull(request, DEBREPO_NAME, "Please enter a Repository Name");
@@ -68,6 +73,15 @@ public class EditRepositoryAction extends ArtifactFilterAction implements Contro
 			ajaxResponse.setAttribute("error", e.getMessage());
 			return;
 		}
+		
+		Enumeration<String> attrs =  request.getParameterNames();
+		while(attrs.hasMoreElements()) {
+			String paramName = attrs.nextElement();
+			if (paramName.startsWith("debrepo.arch.") && request.getParameter(paramName) != null){
+				archs.add(request.getParameter(paramName).toString());
+			}
+		}
+		
 		
 		RepositoryNameValidationResult validationResult = new RepositoryNameValidator().nameIsURlSafe(repoName);
 		if (validationResult.isError()){
@@ -87,6 +101,11 @@ public class EditRepositoryAction extends ArtifactFilterAction implements Contro
 			}
 			if (!debConfig.getProjectId().equals(projectId)) {
 				debConfig.setProjectId(projectId);
+				change = true;
+			}
+			
+			if (!archs.equals(debConfig.getArchitecturesRepresentedByAll())) {
+				debConfig.setArchitecturesRepresentedByAll(archs);
 				change = true;
 			}
 			

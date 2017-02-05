@@ -22,7 +22,9 @@ package debrepo.teamcity.web;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -54,8 +56,25 @@ public class EditDebRepositoryBean {
 	@Getter @Setter 
 	private Map<String, List<FilterAndBuildType>> filtersAndBuildTypes = new TreeMap<>();
 	
+	@Getter @Setter 
+	private Set<String> allArchitectures;
+	
 	@Getter
 	private final CameFromSupport cameFromSupport = new CameFromSupport();
+
+	@Getter
+	private Set<String> defaultAllArchitectures;
+	
+	public String getAllArchsAsCSL() {
+		if (allArchitectures.size() == 0) {
+			return "None";
+		}
+		StringBuilder sb = new StringBuilder();
+		for (String s : allArchitectures) {
+			sb.append(", ").append(s);
+		}
+		return sb.toString().substring(2);
+	}
 
 	public EditDebRepositoryBean() {
 		name = "";
@@ -76,6 +95,12 @@ public class EditDebRepositoryBean {
 		Filter filter;
 	}
 	
+	@Value
+	public static class Architecture {
+		String arch;
+		boolean isEnabled;
+	}
+	
 	public static EditDebRepositoryBean build(@NotNull ProjectManager projectManager, @NotNull final DebRepositoryConfiguration repoConfig, @NotNull SProject sproject) {
 		EditDebRepositoryBean bean = new EditDebRepositoryBean(repoConfig, sproject);
 		for (DebRepositoryBuildTypeConfig btConfig : repoConfig.getBuildTypes()) {
@@ -88,7 +113,17 @@ public class EditDebRepositoryBean {
 				bean.filtersAndBuildTypes.put(sBuildType.getFullName(), filterAndBuildTypes);
 			}
 		}
+		bean.defaultAllArchitectures = repoConfig.getDefaultArchitecturesRepresentedByAll();
+		bean.allArchitectures = repoConfig.getArchitecturesRepresentedByAll();
 		return bean;
+	}
+	
+	public List<Architecture> getAllArchitectureList() {
+		List<Architecture> archs = new ArrayList<>(); 
+		for (String arch : defaultAllArchitectures) {
+			archs.add(new Architecture(arch, allArchitectures.contains(arch)));
+		}
+		return archs;
 	}
 
 }

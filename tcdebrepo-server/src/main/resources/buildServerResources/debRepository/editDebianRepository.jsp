@@ -91,6 +91,10 @@
           <th style="width:15%;">URL:</th><td style="width:35%;"><a href="<c:out value="${repoStats.repositoryUrl}"/>"><c:out value="${repoStats.repositoryUrl}"/></a></td>
           <th style="width:15%;">Package Listings:</th><td style="width:35%;">${repoStats.totalPackageCount}</td>
         </tr>
+        <tr>
+          <th style="width:15%;">&quot;All&quot; Architectures:</th>
+          <td style="width:85%;" colspan="3">${debRepoBean.allArchsAsCSL}</td>
+        </tr>
       </table>
       
           <bs:dialog dialogId="editRepoDialog"
@@ -131,6 +135,23 @@
                         </div>
                         The project this repository belongs to. Users with the Project Administrator Role for this project can edit this repository configuration. 
                         When adding/editing Artifact Filters, only builds from this project or sub-projects are available to choose from.</p>
+                    </td>
+                </tr>
+                 <tr>    
+                 	<th>&quot;All&quot; Architectures</th>                
+                    <td>
+                        <div>
+                        	<ul class="editArchitectures">
+                        	<c:forEach items="${debRepoBean.allArchitectureList}" var="arch">
+                        		<li>
+                        			<label><input class="architectureCheckbox" type="checkbox" name="debrepo.arch.${arch.arch}" value="${arch.arch}" <c:if test="${arch.enabled}">checked</c:if>>&nbsp;${arch.arch}</label>
+                        		</li>
+                        	</c:forEach>
+                        	</ul>
+                        </div>
+                        When a package's meta-data has an <em>Architecture</em> value of &quot;all&quot;, it will be 
+                        indexed into all of the selected architectures above. A package's Architecture is defined 
+                        inside the DEBIAN/control file inside the package.  
                     </td>
                 </tr>
             </table>

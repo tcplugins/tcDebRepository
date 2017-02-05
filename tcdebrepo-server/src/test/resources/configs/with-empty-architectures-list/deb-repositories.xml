@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<deb-repositories>
+    <deb-repository-configuration repository-name="TestRepoName01" project-id="project01" uuid="2b077ffa-2c2c-4bdb-a3f1-d976e79b5afd">
+        <build-types>
+            <build-type build-type-id="bt01">
+                <build-artifact-filters>
+                    <filter regex=".+\.deb" dist="wheezy" component="main" id="d0f671d4-5617-4a1b-8e9f-bee1ce787d62"/>
+                    <filter regex="/prod/somthing.*\.deb" dist="wheezy" component="main" id="e7cda76b-d1d1-4c24-bb2b-93d734c78931"/>
+                </build-artifact-filters>
+            </build-type>
+            <build-type build-type-id="bt02">
+                <build-artifact-filters>
+                    <filter regex=".+\.deb" dist="wheezy" component="main" id="dd7824da-c0c2-4895-b0e3-b8af7a05dafe"/>
+                </build-artifact-filters>
+            </build-type>
+            <build-type build-type-id="bt03">
+                <build-artifact-filters>
+                    <filter regex=".+\.deb" dist="wheezy" component="main" id="cd64eeb3-0406-4ede-9d58-8b11c2f5dfe7"/>
+                </build-artifact-filters>
+            </build-type>
+            <build-type build-type-id="bt04">
+                <build-artifact-filters>
+                    <filter regex=".+\.deb" dist="wheezy" component="main" id="2f962c4a-4713-4d28-98e8-d13b0ae273eb"/>
+                </build-artifact-filters>
+            </build-type>
+            <build-type build-type-id="bt05">
+                <build-artifact-filters>
+                    <filter regex=".+\.deb" dist="wheezy" component="main" id="06b043d0-47a0-4295-91aa-c8421a04ddae"/>
+                </build-artifact-filters>
+            </build-type>
+        </build-types>
+        <architectures-represented-by-all>
+        </architectures-represented-by-all>
+    </deb-repository-configuration>
+</deb-repositories>

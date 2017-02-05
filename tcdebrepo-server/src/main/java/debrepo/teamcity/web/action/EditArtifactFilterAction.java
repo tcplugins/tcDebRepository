@@ -98,7 +98,7 @@ public class EditArtifactFilterAction extends ArtifactFilterAction implements Co
 
 			if (!result.isError()) {
 				ActionMessages.getOrCreateMessages(request).addMessage("filterUpdateResult",
-						"Artfact Filter updated");
+						"Artifact Filter updated");
 				ajaxResponse.setAttribute("status", "OK");
 			} else {
 				ajaxResponse.setAttribute("error", result.getReason());

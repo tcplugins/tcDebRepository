@@ -165,6 +165,10 @@ DebRepoPlugin = {
     				"debrepo.project.id": $j("#editRepoForm select[id='debrepo.project.id']").val()
     		};
     		
+    		$j(".architectureCheckbox:checked").each(function() {
+    			parameters[this.name] = this.value;
+    		});
+    		
     		var dialog = this;
     		
     		BS.ajaxRequest(window['base_uri'] + '/admin/debianRepositoryAction.html', {
