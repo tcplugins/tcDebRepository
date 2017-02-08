@@ -43,6 +43,10 @@
        <bean id="addArtifactFilterAction"
      	class="debrepo.teamcity.web.action.AddArtifactFilterAction" 
      	/>
+     	
+       <bean id="copyArtifactFilterAction"
+     	class="debrepo.teamcity.web.action.CopyArtifactFilterAction" 
+     	/>
 
        <bean id="editArtifactFilterAction"
      	class="debrepo.teamcity.web.action.EditArtifactFilterAction" 

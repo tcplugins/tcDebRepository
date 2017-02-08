@@ -33,18 +33,19 @@
 	      <table class="settings filterTable">
 	      <c:set var="buildTypeId" value=""/>
 	      <c:forEach items="${debRepoBean.filtersAndBuildTypes}" var="filterTypeEntry">
-	      <tr class="filterHeading"><td colspan=5 class="filterTableBuildTitle">${filterTypeEntry.key}</td></tr>
-	      	<tr class="filterHeading"><th>Artifact Filename Match (regex)</th><th>Distribution (dist)</th><th colspan=3>Component</th></tr>
+	      <tr class="filterHeading"><td colspan=6 class="filterTableBuildTitle"><a href="../project.html?projectId=${filterTypeEntry.key.projectId}">${filterTypeEntry.key.projectName}</a> :: <a href="../viewType.html?buildTypeId=${filterTypeEntry.key.buildTypeId}">${filterTypeEntry.key.buildTypeName}</td></tr>
+	      	<tr class="filterHeading"><th>Artifact Filename Match (regex)</th><th>Distribution (dist)</th><th colspan=4>Component</th></tr>
 	      	<c:forEach items="${filterTypeEntry.value}" var="filterAndBuild">
 	      		<c:set var="filter" value="${filterAndBuild.filter}"/>
 	      		<c:set var="buildTypeId" value="${filterAndBuild.buildTypeId}"/>
 	      		<tr>
 	      			<td>${filter.regex}</td><td>${filter.dist}</td><td>${filter.component}</td>
 	      			<td><a id="editDebFilter" href="#" onclick="DebRepoFilterPlugin.editFilter({ uuid: '${debRepoBean.uuid}', name: '${debRepoBean.name}', id: '${filter.id}', build: '${buildTypeId}', regex: '${myt:escapeJS(filter.regex)}', dist:'${filter.dist}', component:'${filter.component}' }); return false">edit</a></td>
+	      			<td><a id="copyDebFilter" href="#" onclick="DebRepoFilterPlugin.copyFilter({ uuid: '${debRepoBean.uuid}', name: '${debRepoBean.name}', id: '_copy', build: '${buildTypeId}', regex: '${myt:escapeJS(filter.regex)}', dist:'${filter.dist}', component:'${filter.component}' }); return false">copy</a></td>
 	      			<td><a id="deleteDebFilter" href="#" onclick="DebRepoFilterPlugin.deleteFilter({ uuid: '${debRepoBean.uuid}', name: '${debRepoBean.name}', id: '${filter.id}', build: '${buildTypeId}' }); return false">delete</a></td>
 	      		</tr>     
 	      	</c:forEach>
-	      	<tr><td colspan=5><a href="#" onclick="DebRepoFilterPlugin.addFilter({ uuid: '${repoConfig.uuid}', name: '${debRepoBean.name}', id: '_new', build: '${buildTypeId}', regex: '', dist:'', component:'' }); return false">Add Artifact Filter </a></td></tr>
+	      	<tr><td colspan=6><a href="#" onclick="DebRepoFilterPlugin.addFilter({ uuid: '${repoConfig.uuid}', name: '${debRepoBean.name}', id: '_new', build: '${buildTypeId}', regex: '', dist:'', component:'' }); return false">Add Artifact Filter </a></td></tr>
 	      	<tr class="blankline"><td colspan=5>&nbsp;</td></tr>
 	      </c:forEach>
 	      
