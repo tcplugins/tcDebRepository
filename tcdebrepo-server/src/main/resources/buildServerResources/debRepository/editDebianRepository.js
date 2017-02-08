@@ -220,6 +220,9 @@ DebRepoFilterPlugin = {
     addFilter: function(data) {
     	DebRepoFilterPlugin.RepoEditFilterDialog.showDialog("Add Artifact Filter", 'addArtifactFilter', data);
     },
+    copyFilter: function(data) {
+    	DebRepoFilterPlugin.RepoEditFilterDialog.showDialog("Copy Artifact Filter", 'copyArtifactFilter', data);
+    },
     deleteFilter: function(data) {
     	DebRepoFilterPlugin.RepoDeleteFilterDialog.showDialog("Delete Artifact Filter", 'deleteArtifactFilter', data);
     },

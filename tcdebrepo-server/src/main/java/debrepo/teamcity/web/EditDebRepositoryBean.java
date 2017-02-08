@@ -1,4 +1,4 @@
-/*******************************************************************************
+	/*******************************************************************************
  *
  *  Copyright 2016 Net Wolf UK
  *
@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.TreeSet;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -54,7 +53,7 @@ public class EditDebRepositoryBean {
 	private String editAction = "create";
 	
 	@Getter @Setter 
-	private Map<String, List<FilterAndBuildType>> filtersAndBuildTypes = new TreeMap<>();
+	private Map<BuildTypeData, List<FilterAndBuildType>> filtersAndBuildTypes = new TreeMap<>();
 	
 	@Getter @Setter 
 	private Set<String> allArchitectures;
@@ -90,6 +89,20 @@ public class EditDebRepositoryBean {
 	}
 	
 	@Value
+	public static class BuildTypeData implements Comparable<BuildTypeData>{
+		String buildTypeId;
+		String buildTypeName;
+		String projectId;
+		String projectName;
+		String fullName;
+		
+		@Override
+		public int compareTo(BuildTypeData o) {
+			return fullName.compareTo(o.fullName); 
+		}
+	}
+	
+	@Value
 	public static class FilterAndBuildType {
 		String buildTypeId;
 		Filter filter;
@@ -110,7 +123,13 @@ public class EditDebRepositoryBean {
 				for (Filter f : btConfig.getDebFilters()) {
 					filterAndBuildTypes.add(new FilterAndBuildType(sBuildType.getBuildTypeId(), f));
 				}
-				bean.filtersAndBuildTypes.put(sBuildType.getFullName(), filterAndBuildTypes);
+				bean.filtersAndBuildTypes.put(new BuildTypeData(sBuildType.getExternalId(), 
+																sBuildType.getName(), 
+																sBuildType.getProjectExternalId(), 
+																sBuildType.getProjectName(), 
+																sBuildType.getFullName()
+																), 
+												filterAndBuildTypes);
 			}
 		}
 		bean.defaultAllArchitectures = repoConfig.getDefaultArchitecturesRepresentedByAll();

@@ -41,7 +41,7 @@ public abstract class ArtifactFilterAction {
 		String dist = getParameterAsStringOrNull(request, DEBREPO_FILTER_DIST, "The dist field must not be empty");
 		String component = getParameterAsStringOrNull(request, DEBREPO_FILTER_COMPONENT, "The component field must not be empty");
 		
-		if (id == null || "_new".equals(id)){
+		if (id == null || "_new".equals(id) || "_copy".equals(id)){
 			return new Filter(regex, dist, component);
 		}
 	
@@ -65,6 +65,13 @@ public abstract class ArtifactFilterAction {
 	@SuppressWarnings("serial")
 	public class IncompleteFilterException extends Exception {
 		public IncompleteFilterException(String message) {
+			super(message);
+		}
+	}
+	
+	@SuppressWarnings("serial")
+	public class DuplicateFilterException extends Exception {
+		public DuplicateFilterException(String message) {
 			super(message);
 		}
 	}
