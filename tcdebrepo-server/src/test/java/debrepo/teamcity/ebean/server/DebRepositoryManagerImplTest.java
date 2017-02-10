@@ -6,6 +6,7 @@ import static org.junit.Assert.fail;
 import static org.mockito.Mockito.when;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
 
 import org.junit.Before;
@@ -33,7 +34,7 @@ public class DebRepositoryManagerImplTest extends DebRepositoryBaseTest {
 	DebRepositoryManager debRepositoryManager;
 	
 	@Before
-	public void setuplocal() {
+	public void setuplocal() throws NonExistantRepositoryException, IOException {
 		MockitoAnnotations.initMocks(this);
 		when(serverPaths.getPluginDataDirectory()).thenReturn(new File("target"));
 		
@@ -126,9 +127,13 @@ public class DebRepositoryManagerImplTest extends DebRepositoryBaseTest {
 		
 	}
 
-	@Test @Ignore
-	public void testFindAllByDistComponentArch() {
-		fail("Not yet implemented");
+	@Test
+	public void testFindAllByDistComponentArch() throws NonExistantRepositoryException {
+		List<? extends DebPackage> packages = debRepositoryManager.findAllByDistComponentArch("blahBlah01", "main", "testpackage", "i386");
+		for (DebPackage d : packages) {
+			System.out.println(d.getFilename() + " :: " + d.getUri());
+		}
+		assertEquals(3, packages.size());
 	}
 
 	@Test @Ignore
@@ -139,6 +144,12 @@ public class DebRepositoryManagerImplTest extends DebRepositoryBaseTest {
 	@Test @Ignore
 	public void testIsExistingRepository() {
 		fail("Not yet implemented");
+	}
+
+	@Override
+	public DebRepositoryManager getDebRepositoryManager() throws NonExistantRepositoryException, IOException {
+		setuplocal();
+		return new DebRepositoryManagerImpl(ebeanServerProvider.getEbeanServer(), debRepositoryConfigurationFactory, debRepositoryConfigurationChangePersister);
 	}
 
 }

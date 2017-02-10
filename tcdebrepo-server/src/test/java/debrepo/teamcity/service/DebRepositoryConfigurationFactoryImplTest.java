@@ -50,4 +50,10 @@ public class DebRepositoryConfigurationFactoryImplTest extends DebRepositoryBase
 		assertEquals(oldConfig.getBuildTypes().size(), newConfig.getBuildTypes().size());
 	}
 
+	@Override
+	public DebRepositoryManager getDebRepositoryManager() {
+		setupLocal();
+		return new DebRepositoryManagerImpl(projectManager, debRepositoryDatabaseXmlPersister, debRepositoryConfigurationFactory, debRepositoryConfigurationChangePersister);
+	}
+
 }

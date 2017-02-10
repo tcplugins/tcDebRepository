@@ -22,8 +22,8 @@ import org.mockito.MockitoAnnotations;
 
 import debrepo.teamcity.DebPackage;
 import debrepo.teamcity.Loggers;
-import debrepo.teamcity.ebean.DebPackageModel;
-import debrepo.teamcity.ebean.DebRepositoryModel;
+//import debrepo.teamcity.ebean.DebPackageModel;
+//import debrepo.teamcity.ebean.DebRepositoryModel;
 import debrepo.teamcity.entity.DebPackageEntity;
 import debrepo.teamcity.entity.DebPackageNotFoundInStoreException;
 import debrepo.teamcity.entity.DebRepositoryConfiguration;
@@ -188,14 +188,6 @@ public abstract class DebRepositoryManagerTest {
 		List<DebPackage> packages = new ArrayList<>();
 		packages.add(buildEntity("PackageXYX", "1.0", "i386", "jessie", "main", "package_xyz_1.0_i386.deb", BUILD_TYPE_ID_BT01, 12345L));
 		getDebRepositoryManager().addBuildPackages(config, packages);
-		
-		for (DebRepositoryModel m : DebRepositoryModel.find.all()) {
-			Loggers.SERVER.debug(m.getName() + m.getUuid()+ m.getProjectId());
-			for (DebPackageModel p : DebPackageModel.find.where().eq("repository.name", m.getName()).findList()) {
-				Loggers.SERVER.debug(p.getArch() + p.getPackageName() + p.getUri() + p.getRepository().getName());
-			}
-		}
-		
 		
 		DebPackage result = getDebRepositoryManager().findByUri(config.getRepoName(), packages.get(0).getUri());
 		assertEquals("package_xyz_1.0_i386.deb", result.getFilename());
