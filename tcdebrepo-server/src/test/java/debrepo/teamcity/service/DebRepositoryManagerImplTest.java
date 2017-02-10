@@ -103,4 +103,9 @@ public class DebRepositoryManagerImplTest extends DebRepositoryBaseTest {
 		
 	}
 
+	@Override
+	public DebRepositoryManager getDebRepositoryManager() {
+		return new DebRepositoryManagerImpl(projectManager, debRepositoryDatabaseXmlPersister, debRepositoryConfigurationFactory, debRepositoryConfigurationChangePersister);
+	}
+
 }

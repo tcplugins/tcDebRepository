@@ -28,7 +28,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import debrepo.teamcity.entity.DebPackageEntity;
-import debrepo.teamcity.service.DebRepositoryManagerImpl;
 import debrepo.teamcity.ebean.server.EbeanServerProvider;
 import debrepo.teamcity.entity.DebPackageStore;
 import debrepo.teamcity.entity.DebRepositoryBuildTypeConfig;
@@ -45,7 +44,7 @@ import jetbrains.buildServer.serverSide.SBuildType;
 import jetbrains.buildServer.serverSide.SProject;
 import jetbrains.buildServer.serverSide.ServerPaths;
 
-public class DebRepositoryBaseTest {
+public abstract class DebRepositoryBaseTest {
 
 	final protected String BUILD_TYPE_ID_BT01 = "bt01";
 	final protected String BUILD_TYPE_ID_BT02 = "bt02";
@@ -76,6 +75,8 @@ public class DebRepositoryBaseTest {
 	
 	protected DebPackageEntity entity, entity2, entity3, entity4;
 	protected DebRepositoryDatabase engine;
+	
+	public abstract DebRepositoryManager getDebRepositoryManager() throws NonExistantRepositoryException, IOException;
 	
 	@Before
 	public void setup() throws NonExistantRepositoryException, IOException {
@@ -175,8 +176,7 @@ public class DebRepositoryBaseTest {
 //		ebeanServerProvider = new EbeanServerProvider(pluginDataResolver);
 
 		
-		//debRepositoryManager = new DebRepositoryManagerImpl(ebeanServerProvider, debRepositoryConfigurationFactory, debRepositoryConfigurationChangePersister);
-		debRepositoryManager = new DebRepositoryManagerImpl(projectManager, debRepositoryDatabaseXmlPersister, debRepositoryConfigurationFactory, debRepositoryConfigurationChangePersister);
+		debRepositoryManager = getDebRepositoryManager();
 		debRepositoryConfigManager = (DebRepositoryConfigurationManager) debRepositoryManager;
 		DebRepositoryConfigurationJaxImpl config1 = getDebRepoConfig1();
 		DebRepositoryConfigurations configs = new DebRepositoryConfigurations();

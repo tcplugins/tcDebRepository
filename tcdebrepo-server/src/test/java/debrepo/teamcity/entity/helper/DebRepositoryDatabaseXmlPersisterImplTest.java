@@ -31,6 +31,8 @@ import debrepo.teamcity.entity.DebPackageStore;
 import debrepo.teamcity.entity.DebPackageStoreEntity;
 import debrepo.teamcity.entity.DebRepositoryConfiguration;
 import debrepo.teamcity.service.DebRepositoryBaseTest;
+import debrepo.teamcity.service.DebRepositoryManager;
+import debrepo.teamcity.service.DebRepositoryManagerImpl;
 import debrepo.teamcity.service.MapBackedDebRepositoryDatabase;
 import debrepo.teamcity.service.NonExistantRepositoryException;
 import jetbrains.buildServer.serverSide.ServerPaths;
@@ -72,6 +74,12 @@ public class DebRepositoryDatabaseXmlPersisterImplTest extends DebRepositoryBase
 		engine = new MapBackedDebRepositoryDatabase(debRepositoryManager, debRepositoryConfigManager, projectManager);
 		engine.addPackage(entity);
 		
+	}
+
+	@Override
+	public DebRepositoryManager getDebRepositoryManager() throws IOException, NonExistantRepositoryException {
+		setuplocal();
+		return new DebRepositoryManagerImpl(projectManager, debRepositoryDatabaseXmlPersister, debRepositoryConfigurationFactory, debRepositoryConfigurationChangePersister);
 	}
 
 }

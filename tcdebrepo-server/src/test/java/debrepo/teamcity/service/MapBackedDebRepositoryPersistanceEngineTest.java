@@ -164,4 +164,9 @@ public class MapBackedDebRepositoryPersistanceEngineTest extends DebRepositoryBa
 		assertEquals(0, engine.findAllByBuildType(bt03).size());		
 	}
 
+	@Override
+	public DebRepositoryManager getDebRepositoryManager() {
+		return new DebRepositoryManagerImpl(projectManager, debRepositoryDatabaseXmlPersister, debRepositoryConfigurationFactory, debRepositoryConfigurationChangePersister);
+	}
+
 }
