@@ -117,6 +117,7 @@
         <bean id="jaxToEbeanMigrationManager"
      	class="debrepo.teamcity.ebean.server.JaxToEbeanMigrationManager"
      	init-method="doMigration">
+     	    <constructor-arg ref="jaxDatabaseHelper"/>
      	</bean>
      	
      	<bean id="jaxDatabaseHelper"
