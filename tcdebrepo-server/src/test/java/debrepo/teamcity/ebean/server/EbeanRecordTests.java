@@ -23,6 +23,7 @@ import debrepo.teamcity.entity.DebRepositoryConfiguration;
 import debrepo.teamcity.entity.DebRepositoryConfigurationJaxImpl;
 import debrepo.teamcity.entity.helper.DebRepositoryDatabaseJaxHelperImpl;
 import debrepo.teamcity.entity.helper.DebRepositoryDatabaseXmlPersisterImpl;
+import debrepo.teamcity.entity.helper.JaxDbFileRenamer;
 import debrepo.teamcity.entity.helper.JaxHelper;
 import debrepo.teamcity.entity.helper.PluginDataResolver;
 import debrepo.teamcity.entity.helper.PluginDataResolverImpl;
@@ -50,6 +51,7 @@ public class EbeanRecordTests {
 	JaxHelper<DebPackageStoreEntity> jaxHelper = new DebRepositoryDatabaseJaxHelperImpl();
 	XmlPersister<DebPackageStore, DebRepositoryConfiguration> debRepositoryDatabaseXmlPersister;
 	@Mock protected DebRepositoryConfigurationChangePersister debRepositoryConfigurationChangePersister;
+	@Mock JaxDbFileRenamer jaxDbFileRenamer;
 	
 	EbeanServerProvider ebeanServerProvider;
 	DebRepositoryManager jaxDebRepositoryManager, ebeanDebRepositoryManager;
@@ -77,7 +79,7 @@ public class EbeanRecordTests {
 		config.setUuid(UUID.fromString("a187bd92-b22d-43ea-98ce-55ec2cedb942"));
 		debRepositoryConfigManager.addDebRepository(config);
 		jaxDebRepositoryManager.initialisePackageStore(config);
-		JaxToEbeanMigrator migrator = new JaxToEbeanMigrator(jaxDebRepositoryManager, ebeanDebRepositoryManager);
+		JaxToEbeanMigrator migrator = new JaxToEbeanMigrator(jaxDebRepositoryManager, ebeanDebRepositoryManager, jaxDbFileRenamer);
 		migrator.migrate(config);
 	}
 
@@ -140,7 +142,7 @@ public class EbeanRecordTests {
 		config2.setUuid(UUID.fromString("eafee234-c753-4a7b-9221-6b208eac4ab6"));
 		debRepositoryConfigManager.addDebRepository(config2);
 		jaxDebRepositoryManager.initialisePackageStore(config2);
-		JaxToEbeanMigrator migrator = new JaxToEbeanMigrator(jaxDebRepositoryManager, ebeanDebRepositoryManager);
+		JaxToEbeanMigrator migrator = new JaxToEbeanMigrator(jaxDebRepositoryManager, ebeanDebRepositoryManager, jaxDbFileRenamer);
 		migrator.migrate(config2);
 		
 		assertEquals(1217, ebeanDebRepositoryManager.findAllByDistComponentArch("MyStoreName2", "jessie", "main", "i386").size());

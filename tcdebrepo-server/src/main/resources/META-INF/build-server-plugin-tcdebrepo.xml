@@ -123,6 +123,11 @@
      	<bean id="jaxDatabaseHelper"
      		class="debrepo.teamcity.entity.helper.DebRepositoryDatabaseJaxHelperImpl">
         </bean>
+        
+     	<bean id="jaxDbFileRenamerImpl"
+     		class="debrepo.teamcity.entity.helper.JaxDbFileRenamerImpl">
+        </bean>
+        
      	<!-- End ebean backed DB impl -->
      	
      	
