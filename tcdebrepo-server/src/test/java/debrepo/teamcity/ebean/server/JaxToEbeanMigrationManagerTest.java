@@ -1,7 +1,10 @@
 package debrepo.teamcity.ebean.server;
 
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.any;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -22,6 +25,7 @@ import debrepo.teamcity.entity.DebRepositoryConfigurationJaxImpl;
 import debrepo.teamcity.entity.DebRepositoryConfigurations;
 import debrepo.teamcity.entity.helper.DebRepositoryConfigurationJaxHelperImpl;
 import debrepo.teamcity.entity.helper.DebRepositoryDatabaseJaxHelperImpl;
+import debrepo.teamcity.entity.helper.JaxDbFileRenamer;
 import debrepo.teamcity.entity.helper.JaxHelper;
 import debrepo.teamcity.entity.helper.PluginDataResolver;
 import debrepo.teamcity.entity.helper.PluginDataResolverImpl;
@@ -44,6 +48,7 @@ public class JaxToEbeanMigrationManagerTest {
 	//JaxHelper<DebPackageStoreEntity> jaxHelper = new DebRepositoryDatabaseJaxHelperImpl();
 	XmlPersister<DebPackageStore, DebRepositoryConfiguration> debRepositoryDatabaseXmlPersister;
 	@Mock protected DebRepositoryConfigurationChangePersister debRepositoryConfigurationChangePersister;
+	@Mock JaxDbFileRenamer jaxDbFileRenamer;
 	
 	EbeanServerProvider ebeanServerProvider;
 	DebRepositoryManager jaxDebRepositoryManager, ebeanDebRepositoryManager;
@@ -83,9 +88,12 @@ public class JaxToEbeanMigrationManagerTest {
 				jaxPluginDataResolver, 
 				noOpChangePersister, 
 				new NoOpJaxDBPersister(), 
-				debRepositoryConfigurationFactory);
+				debRepositoryConfigurationFactory, 
+				jaxDbFileRenamer);
 		
 		m.doMigration();
+		
+		verify(jaxDbFileRenamer, times(2)).renameToBackup(any(DebRepositoryConfiguration.class));
 	}
 	
 	public static class NoOpJaxDBPersister extends DebRepositoryDatabaseJaxHelperImpl implements JaxHelper<DebPackageStoreEntity> {

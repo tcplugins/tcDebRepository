@@ -7,6 +7,7 @@ import java.util.TreeSet;
 import debrepo.teamcity.DebPackage;
 import debrepo.teamcity.Loggers;
 import debrepo.teamcity.entity.DebRepositoryConfiguration;
+import debrepo.teamcity.entity.helper.JaxDbFileRenamer;
 import debrepo.teamcity.service.DebRepositoryManager;
 import debrepo.teamcity.service.NonExistantRepositoryException;
 
@@ -14,10 +15,15 @@ public class JaxToEbeanMigrator {
 	
 	private DebRepositoryManager myJaxDebRepositoryManager;
 	private DebRepositoryManager myEbeanDebRepositoryManager;
+	private JaxDbFileRenamer myJaxDbFileRenamer;
 
-	public JaxToEbeanMigrator(DebRepositoryManager jaxDebRepositoryManager, DebRepositoryManager ebeanDebRepositoryManager) {
+	public JaxToEbeanMigrator(
+						DebRepositoryManager jaxDebRepositoryManager, 
+						DebRepositoryManager ebeanDebRepositoryManager,
+						JaxDbFileRenamer jaxDbFileRenamer) {
 		myJaxDebRepositoryManager = jaxDebRepositoryManager;
 		myEbeanDebRepositoryManager = ebeanDebRepositoryManager;
+		myJaxDbFileRenamer = jaxDbFileRenamer;
 		
 	}
 	
@@ -32,8 +38,10 @@ public class JaxToEbeanMigrator {
 		}
 		Loggers.SERVER.info("Packages migrated. Removing repository items...");
 		myJaxDebRepositoryManager.getPackageStore(config.getRepoName()).clear();;
-		Loggers.SERVER.info("Repository items removed. Persisting XML database file...");
-		myJaxDebRepositoryManager.persist(config.getUuid());
+		Loggers.SERVER.info("Repository items removed. Renaming XML database file...");
+		if (myJaxDbFileRenamer.renameToBackup(config)) {
+			Loggers.SERVER.info("XML database file renamed for " + config.getRepoName() + "(" + config.getUuid().toString() + ")");
+		}
 	}
 
 }

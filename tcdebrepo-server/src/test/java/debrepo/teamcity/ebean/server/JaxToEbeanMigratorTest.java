@@ -2,6 +2,8 @@ package debrepo.teamcity.ebean.server;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.times;
 
 import java.io.File;
 import java.io.IOException;
@@ -12,6 +14,7 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import debrepo.teamcity.Loggers;
 import debrepo.teamcity.ebean.server.EbeanServerProvider;
 import debrepo.teamcity.entity.DebPackageStore;
 import debrepo.teamcity.entity.DebPackageStoreEntity;
@@ -19,6 +22,8 @@ import debrepo.teamcity.entity.DebRepositoryConfiguration;
 import debrepo.teamcity.entity.DebRepositoryConfigurationJaxImpl;
 import debrepo.teamcity.entity.helper.DebRepositoryDatabaseJaxHelperImpl;
 import debrepo.teamcity.entity.helper.DebRepositoryDatabaseXmlPersisterImpl;
+import debrepo.teamcity.entity.helper.JaxDbFileRenamer;
+import debrepo.teamcity.entity.helper.JaxDbFileRenamerImpl;
 import debrepo.teamcity.entity.helper.JaxHelper;
 import debrepo.teamcity.entity.helper.PluginDataResolver;
 import debrepo.teamcity.entity.helper.PluginDataResolverImpl;
@@ -42,6 +47,7 @@ public class JaxToEbeanMigratorTest {
 	JaxHelper<DebPackageStoreEntity> jaxHelper = new DebRepositoryDatabaseJaxHelperImpl();
 	XmlPersister<DebPackageStore, DebRepositoryConfiguration> debRepositoryDatabaseXmlPersister;
 	@Mock protected DebRepositoryConfigurationChangePersister debRepositoryConfigurationChangePersister;
+	@Mock JaxDbFileRenamer jaxDbFileRenamer;
 	
 	EbeanServerProvider ebeanServerProvider;
 	DebRepositoryManager jaxDebRepositoryManager, ebeanDebRepositoryManager;
@@ -73,8 +79,9 @@ public class JaxToEbeanMigratorTest {
 		c.setUuid(UUID.fromString("a187bd92-b22d-43ea-98ce-55ec2cedb942"));
 		debRepositoryConfigManager.addDebRepository(c);
 		jaxDebRepositoryManager.initialisePackageStore(c);
-		JaxToEbeanMigrator migrator = new JaxToEbeanMigrator(jaxDebRepositoryManager, ebeanDebRepositoryManager);
+		JaxToEbeanMigrator migrator = new JaxToEbeanMigrator(jaxDebRepositoryManager, ebeanDebRepositoryManager, jaxDbFileRenamer);
 		migrator.migrate(c);
+		verify(jaxDbFileRenamer, times(1)).renameToBackup(c);
 	}
-
+	
 }
