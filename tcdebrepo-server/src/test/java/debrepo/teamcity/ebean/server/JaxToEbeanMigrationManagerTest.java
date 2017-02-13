@@ -4,21 +4,24 @@ import static org.junit.Assert.*;
 import static org.mockito.Mockito.when;
 
 import java.io.File;
-import java.io.IOException;
-import java.util.UUID;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 
-import org.junit.Before;
+import javax.xml.bind.JAXBException;
+
+import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import debrepo.teamcity.ebean.server.EbeanServerProvider;
+import debrepo.teamcity.Loggers;
 import debrepo.teamcity.entity.DebPackageStore;
 import debrepo.teamcity.entity.DebPackageStoreEntity;
 import debrepo.teamcity.entity.DebRepositoryConfiguration;
 import debrepo.teamcity.entity.DebRepositoryConfigurationJaxImpl;
+import debrepo.teamcity.entity.DebRepositoryConfigurations;
+import debrepo.teamcity.entity.helper.DebRepositoryConfigurationJaxHelperImpl;
 import debrepo.teamcity.entity.helper.DebRepositoryDatabaseJaxHelperImpl;
-import debrepo.teamcity.entity.helper.DebRepositoryDatabaseXmlPersisterImpl;
 import debrepo.teamcity.entity.helper.JaxHelper;
 import debrepo.teamcity.entity.helper.PluginDataResolver;
 import debrepo.teamcity.entity.helper.PluginDataResolverImpl;
@@ -27,54 +30,80 @@ import debrepo.teamcity.service.DebRepositoryConfigurationFactory;
 import debrepo.teamcity.service.DebRepositoryConfigurationFactoryImpl;
 import debrepo.teamcity.service.DebRepositoryConfigurationManager;
 import debrepo.teamcity.service.DebRepositoryManager;
-import debrepo.teamcity.service.NonExistantRepositoryException;
 import debrepo.teamcity.settings.DebRepositoryConfigurationChangePersister;
+import debrepo.teamcity.settings.DebRepositoryConfigurationChangePersisterImpl;
 import jetbrains.buildServer.serverSide.ProjectManager;
 import jetbrains.buildServer.serverSide.ServerPaths;
 
-public class JaxToEbeanMigratorTest {
-	
+public class JaxToEbeanMigrationManagerTest {
 	
 	@Mock ServerPaths jaxServerPaths, ebeanServerPaths;
 	PluginDataResolver jaxPluginDataResolver, ebeanPluginDataResolver;
 	@Mock protected ProjectManager projectManager;
 	
-	JaxHelper<DebPackageStoreEntity> jaxHelper = new DebRepositoryDatabaseJaxHelperImpl();
+	//JaxHelper<DebPackageStoreEntity> jaxHelper = new DebRepositoryDatabaseJaxHelperImpl();
 	XmlPersister<DebPackageStore, DebRepositoryConfiguration> debRepositoryDatabaseXmlPersister;
 	@Mock protected DebRepositoryConfigurationChangePersister debRepositoryConfigurationChangePersister;
 	
 	EbeanServerProvider ebeanServerProvider;
 	DebRepositoryManager jaxDebRepositoryManager, ebeanDebRepositoryManager;
+	DebRepositoryConfigurationJaxImpl config;
 	
 	protected DebRepositoryConfigurationManager debRepositoryConfigManager;
 	protected DebRepositoryConfigurationFactory debRepositoryConfigurationFactory = new DebRepositoryConfigurationFactoryImpl();
 	
-	@Before
-	public void setuplocal() throws NonExistantRepositoryException, IOException {
+
+	@Test
+	public void testDoMigration() throws FileNotFoundException, JAXBException {
+		
 		MockitoAnnotations.initMocks(this);
 		when(jaxServerPaths.getPluginDataDirectory()).thenReturn(new File("src/test/resources/testplugindata"));
+		when(jaxServerPaths.getConfigDir()).thenReturn("src/test/resources/testplugindata/config");
 		when(ebeanServerPaths.getPluginDataDirectory()).thenReturn(new File("target"));
 		
 		jaxPluginDataResolver = new PluginDataResolverImpl(jaxServerPaths);
 		ebeanPluginDataResolver = new PluginDataResolverImpl(ebeanServerPaths);
 		ebeanServerProvider = new EbeanServerProvider(ebeanPluginDataResolver);
 		
-		debRepositoryDatabaseXmlPersister = new DebRepositoryDatabaseXmlPersisterImpl(jaxPluginDataResolver, jaxHelper);
-		jaxDebRepositoryManager = new debrepo.teamcity.service.DebRepositoryManagerImpl(projectManager, debRepositoryDatabaseXmlPersister, debRepositoryConfigurationFactory, debRepositoryConfigurationChangePersister);
-		ebeanDebRepositoryManager = new debrepo.teamcity.ebean.server.DebRepositoryManagerImpl(ebeanServerProvider.getEbeanServer(), debRepositoryConfigurationFactory, debRepositoryConfigurationChangePersister);
-		debRepositoryConfigManager = (DebRepositoryConfigurationManager) ebeanDebRepositoryManager;
+		DebRepositoryManager ebeanDebRepositoryManager = new DebRepositoryManagerImpl(
+				ebeanServerProvider.getEbeanServer(), 
+				debRepositoryConfigurationFactory, 
+				debRepositoryConfigurationChangePersister);
+		
+		
+		
+		DebRepositoryConfigurationChangePersister noOpChangePersister = new DebRepositoryConfigurationChangePersisterImpl (
+		 		new NoOpConfigChangePersister(), 
+		 		jaxPluginDataResolver
+		 );
+		
+		JaxToEbeanMigrationManager m = new JaxToEbeanMigrationManager(
+				ebeanDebRepositoryManager, 
+				projectManager, 
+				jaxPluginDataResolver, 
+				noOpChangePersister, 
+				new NoOpJaxDBPersister(), 
+				debRepositoryConfigurationFactory);
+		
+		m.doMigration();
+	}
+	
+	public static class NoOpJaxDBPersister extends DebRepositoryDatabaseJaxHelperImpl implements JaxHelper<DebPackageStoreEntity> {
+
+		@Override
+		public void write(@NotNull DebPackageStoreEntity packages,
+				@NotNull String configFilePath) throws JAXBException {
+			Loggers.SERVER.info("Not persisting the DB changes for JAX Persister because this is inside a test.");
+		}
 		
 	}
-
-	@Test
-	public void testMigrate() throws NonExistantRepositoryException {
-		DebRepositoryConfigurationJaxImpl c = new DebRepositoryConfigurationJaxImpl("project01", "MyStoreName");
-		//c.setUuid(UUID.fromString("eafee234-c753-4a7b-9221-6b208eac4ab6"));
-		c.setUuid(UUID.fromString("a187bd92-b22d-43ea-98ce-55ec2cedb942"));
-		debRepositoryConfigManager.addDebRepository(c);
-		jaxDebRepositoryManager.initialisePackageStore(c);
-		JaxToEbeanMigrator migrator = new JaxToEbeanMigrator(jaxDebRepositoryManager, ebeanDebRepositoryManager);
-		migrator.migrate(c);
+	public static class NoOpConfigChangePersister extends DebRepositoryConfigurationJaxHelperImpl implements JaxHelper<DebRepositoryConfigurations> {
+		
+		@Override
+		public void write(DebRepositoryConfigurations jaxObject, String configFilePath) throws JAXBException {
+			Loggers.SERVER.info("Not persisting the config changes for JAX Persister because this is inside a test.");
+		}
+		
 	}
 
 }
