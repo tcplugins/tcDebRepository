@@ -29,18 +29,22 @@ public class JaxToEbeanMigrator {
 	
 	@SuppressWarnings("unchecked")
 	public void migrate(DebRepositoryConfiguration config) throws NonExistantRepositoryException {
+		if (myJaxDebRepositoryManager.getPackageStore(config.getRepoName()).isEmpty()) {
+			Loggers.SERVER.debug("JaxToEbeanMigrator :: No packages found. Skipping migration of empty repo: " + config.getRepoName() + " (" + config.getUuid().toString() + ")");
+			return;
+		}
 		for (String filename : myJaxDebRepositoryManager.findUniqueFilenames(config.getRepoName())) {
 			myEbeanDebRepositoryManager.initialisePackageStore(config);
 			Set<String> filenames = new TreeSet<>();
 			filenames.add(filename);
-			Loggers.SERVER.info("Migrating all packages in repo \"" + config.getRepoName() + "\" of filename: " + filename);
+			Loggers.SERVER.info("JaxToEbeanMigrator :: Migrating all packages in repo \"" + config.getRepoName() + "\" of filename: " + filename);
 			myEbeanDebRepositoryManager.addBuildPackages(config, (List<DebPackage>) myJaxDebRepositoryManager.findAllByFilenames(config.getRepoName(), filenames));
 		}
-		Loggers.SERVER.info("Packages migrated. Removing repository items...");
+		Loggers.SERVER.info("JaxToEbeanMigrator :: Packages migrated. Removing repository items...");
 		myJaxDebRepositoryManager.getPackageStore(config.getRepoName()).clear();;
-		Loggers.SERVER.info("Repository items removed. Renaming XML database file...");
+		Loggers.SERVER.info("JaxToEbeanMigrator :: Repository items removed. Renaming XML database file...");
 		if (myJaxDbFileRenamer.renameToBackup(config)) {
-			Loggers.SERVER.info("XML database file renamed for " + config.getRepoName() + "(" + config.getUuid().toString() + ")");
+			Loggers.SERVER.info("JaxToEbeanMigrator :: XML database file renamed for " + config.getRepoName() + "(" + config.getUuid().toString() + ")");
 		}
 	}
 

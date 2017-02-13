@@ -51,16 +51,15 @@ public class JaxToEbeanMigrationManager {
 	}
 	
 	public void doMigration() throws FileNotFoundException, JAXBException {
-		Loggers.SERVER.info("Starting XML to EBean migration");
+		Loggers.SERVER.info("JaxToEbeanMigrationManager :: Starting XML to EBean migration");
 		JaxToEbeanMigrator migrator = new JaxToEbeanMigrator(myJaxDebRepositoryManager, myEbeanDebRepositoryManager, myJaxDbFileRenamer);
 		this.myJaxDebRepositoryConfigurationManager.updateRepositoryConfigurations(this.jaxConfigChangePersister.readDebRespositoryConfigurationChanges());
 		for (DebRepositoryConfiguration config : this.myJaxDebRepositoryConfigurationManager.getAllConfigurations()) {
-			Loggers.SERVER.info("Will now migrate repo called " + config.getRepoName() + " (" + config.getUuid().toString() + ")");
+			Loggers.SERVER.info("JaxToEbeanMigrationManager :: Will now migrate repo called " + config.getRepoName() + " (" + config.getUuid().toString() + ")");
 			try {
 				migrator.migrate(config);
 			} catch (NonExistantRepositoryException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				Loggers.SERVER.warn("JaxToEbeanMigrationManager :: Repo was not found in config whilst attempting migration of: "+ config.getRepoName() + "(" + config.getUuid().toString() + ")");
 			}
 		}
 	}
