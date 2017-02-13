@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<deb-repositories>
+    <deb-repository-configuration repository-name="TestRepoName01" project-id="project01" uuid="a187bd92-b22d-43ea-98ce-55ec2cedb942">
+        <build-types>
+            <build-type build-type-id="bt01">
+                <build-artifact-filters>
+                    <filter regex=".+\.deb" dist="wheezy" component="main" id="e4ec5854-2d3c-4a80-b9d8-006e9eeafa0c"/>
+                    <filter regex="/prod/somthing.*\.deb" dist="wheezy" component="main" id="b68999cb-032d-460f-9137-edaab049bb39"/>
+                </build-artifact-filters>
+            </build-type>
+            <build-type build-type-id="bt02">
+                <build-artifact-filters>
+                    <filter regex=".+\.deb" dist="wheezy" component="main" id="539460c7-722e-4491-93e7-3d159efb1eb6"/>
+                </build-artifact-filters>
+            </build-type>
+            <build-type build-type-id="bt03">
+                <build-artifact-filters>
+                    <filter regex=".+\.deb" dist="wheezy" component="main" id="57fff457-9c0b-46fe-b2ba-3e11a94c98bf"/>
+                </build-artifact-filters>
+            </build-type>
+            <build-type build-type-id="bt04">
+                <build-artifact-filters>
+                    <filter regex=".+\.deb" dist="wheezy" component="main" id="4e760d43-d2a4-4a66-b9fa-883bd6e3c541"/>
+                </build-artifact-filters>
+            </build-type>
+            <build-type build-type-id="bt05">
+                <build-artifact-filters>
+                    <filter regex=".+\.deb" dist="wheezy" component="main" id="7c130534-3a38-4db8-b63c-85cf0ee88805"/>
+                </build-artifact-filters>
+            </build-type>
+        </build-types>
+        <architectures-represented-by-all>
+            <arch>amd64</arch>
+            <arch>arm64</arch>
+            <arch>armel</arch>
+            <arch>armhf</arch>
+            <arch>i386</arch>
+            <arch>mips</arch>
+            <arch>mipsel</arch>
+            <arch>powerpc</arch>
+            <arch>ppc64el</arch>
+            <arch>s390x</arch>
+        </architectures-represented-by-all>
+    </deb-repository-configuration>
+    <deb-repository-configuration repository-name="TestRepoName02" project-id="project01" uuid="eafee234-c753-4a7b-9221-6b208eac4ab6">
+        <build-types>
+            <build-type build-type-id="bt01">
+                <build-artifact-filters>
+                    <filter regex=".+\.deb" dist="wheezy" component="main" id="7e1cbcc1-1abb-46e4-875b-3bbf1bfbfc26"/>
+                    <filter regex="/prod/somthing.*\.deb" dist="wheezy" component="main" id="19b68493-a26f-4695-9dd4-0cc6e4826c7a"/>
+                </build-artifact-filters>
+            </build-type>
+            <build-type build-type-id="bt02">
+                <build-artifact-filters>
+                    <filter regex=".+\.deb" dist="wheezy" component="main" id="a80fa7a6-6944-4cc7-bbcb-6c6f07c13eb8"/>
+                </build-artifact-filters>
+            </build-type>
+            <build-type build-type-id="bt03">
+                <build-artifact-filters>
+                    <filter regex=".+\.deb" dist="wheezy" component="main" id="dbc27f71-98c4-4a9c-9dd5-89cc83ddbc73"/>
+                </build-artifact-filters>
+            </build-type>
+            <build-type build-type-id="bt04">
+                <build-artifact-filters>
+                    <filter regex=".+\.deb" dist="wheezy" component="main" id="01b45327-e018-4af5-af91-64ca11f753c9"/>
+                </build-artifact-filters>
+            </build-type>
+            <build-type build-type-id="bt05">
+                <build-artifact-filters>
+                    <filter regex=".+\.deb" dist="wheezy" component="main" id="450d967b-cabf-48fc-a522-1b814024483d"/>
+                </build-artifact-filters>
+            </build-type>
+        </build-types>
+        <architectures-represented-by-all>
+            <arch>amd64</arch>
+            <arch>arm64</arch>
+            <arch>armel</arch>
+            <arch>armhf</arch>
+            <arch>i386</arch>
+            <arch>mips</arch>
+            <arch>mipsel</arch>
+            <arch>powerpc</arch>
+            <arch>ppc64el</arch>
+            <arch>s390x</arch>
+        </architectures-represented-by-all>
+    </deb-repository-configuration>
+</deb-repositories>

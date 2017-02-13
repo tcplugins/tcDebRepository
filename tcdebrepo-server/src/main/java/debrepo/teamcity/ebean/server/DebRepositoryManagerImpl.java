@@ -261,7 +261,7 @@ public class DebRepositoryManagerImpl extends DebRepositoryConfigurationManagerI
 			String component, String archName) throws NonExistantRepositoryException {
 		return DebPackageModel.find.where().or()
 											   .and().eq("repository.name", repoName).eq("dist", distName).eq("component", component).eq("arch", archName).endAnd()
-											   .and().eq("repository.name", repoName).eq("dist", distName).ieq("component", component).ieq("arch", "all").endAnd()
+											   .and().eq("repository.name", repoName).eq("dist", distName).eq("component", component).ieq("arch", "all").endAnd()
 											   .findList();
 	}
 

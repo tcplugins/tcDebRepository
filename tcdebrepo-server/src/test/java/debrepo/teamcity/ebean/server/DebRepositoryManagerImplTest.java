@@ -51,29 +51,9 @@ public class DebRepositoryManagerImplTest extends DebRepositoryBaseTest {
 		debRepositoryManager.addBuildPackage(c, entity2);
 		debRepositoryManager.addBuildPackage(c, entity3);
 		debRepositoryManager.addBuildPackage(c, entity4);
-		debRepositoryManager.addBuildPackage(c, entity);
-		debRepositoryManager.addBuildPackage(c, entity2);
-		debRepositoryManager.addBuildPackage(c, entity3);
-		debRepositoryManager.addBuildPackage(c, entity4);
-		debRepositoryManager.addBuildPackage(c, entity);
-		debRepositoryManager.addBuildPackage(c, entity2);
-		debRepositoryManager.addBuildPackage(c, entity3);
-		debRepositoryManager.addBuildPackage(c, entity4);
-		debRepositoryManager.addBuildPackage(c, entity);
-		debRepositoryManager.addBuildPackage(c, entity2);
-		debRepositoryManager.addBuildPackage(c, entity3);
-		debRepositoryManager.addBuildPackage(c, entity4);
-		debRepositoryManager.addBuildPackage(c, entity);
-		debRepositoryManager.addBuildPackage(c, entity2);
-		debRepositoryManager.addBuildPackage(c, entity3);
-		debRepositoryManager.addBuildPackage(c, entity4);
-		debRepositoryManager.addBuildPackage(c, entity);
-		debRepositoryManager.addBuildPackage(c, entity2);
-		debRepositoryManager.addBuildPackage(c, entity3);
-		debRepositoryManager.addBuildPackage(c, entity4);
 		
 		System.out.println(debRepositoryManager.getRepositoryStatistics(c, "myUrl").getTotalPackageCount());
-		assertTrue(debRepositoryManager.getRepositoryStatistics(c, "myUrl").getTotalPackageCount() == 24);
+		assertTrue(debRepositoryManager.getRepositoryStatistics(c, "myUrl").getTotalPackageCount() == 4);
 	}
 
 	@Test @Ignore
@@ -121,7 +101,7 @@ public class DebRepositoryManagerImplTest extends DebRepositoryBaseTest {
 
 		List<? extends DebPackage> packages = debRepositoryManager.getUniquePackagesByComponentAndPackageName("blahBlah01", "main", "testpackage");
 		for (DebPackage d : packages) {
-			System.out.println(d.getFilename() + " :: " + d.getUri());
+			System.out.println(d.getFilename() + " :: " + d.getUri() + " " + d.getDist() + d.getComponent() + d.getArch());
 		}
 		assertEquals(3, packages.size());
 		
@@ -129,11 +109,11 @@ public class DebRepositoryManagerImplTest extends DebRepositoryBaseTest {
 
 	@Test
 	public void testFindAllByDistComponentArch() throws NonExistantRepositoryException {
-		List<? extends DebPackage> packages = debRepositoryManager.findAllByDistComponentArch("blahBlah01", "main", "testpackage", "i386");
+		List<? extends DebPackage> packages = debRepositoryManager.findAllByDistComponentArch("blahBlah01", "wheezy", "main", "i386");
 		for (DebPackage d : packages) {
-			System.out.println(d.getFilename() + " :: " + d.getUri());
+			System.out.println(d.getFilename() + " :: " + d.getUri() + " " + d.getDist() + d.getComponent() + d.getArch());
 		}
-		assertEquals(3, packages.size());
+		assertEquals(2, packages.size());
 	}
 
 	@Test @Ignore

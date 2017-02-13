@@ -114,7 +114,14 @@
      		<constructor-arg ref="ebeanServerProvider"/>
      	</bean>
      	
+        <bean id="jaxToEbeanMigrationManager"
+     	class="debrepo.teamcity.ebean.server.JaxToEbeanMigrationManager"
+     	init-method="doMigration">
+     	</bean>
      	
+     	<bean id="jaxDatabaseHelper"
+     		class="debrepo.teamcity.entity.helper.DebRepositoryDatabaseJaxHelperImpl">
+        </bean>
      	<!-- End ebean backed DB impl -->
      	
      	
