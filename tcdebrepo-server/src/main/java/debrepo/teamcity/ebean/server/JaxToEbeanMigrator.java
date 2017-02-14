@@ -33,14 +33,18 @@ public class JaxToEbeanMigrator {
 			Loggers.SERVER.debug("JaxToEbeanMigrator :: No packages found. Skipping migration of empty repo: " + config.getRepoName() + " (" + config.getUuid().toString() + ")");
 			return;
 		}
+		int packagesToMigrateCount = myJaxDebRepositoryManager.getPackageStore(config.getRepoName()).size();
+		int packageMigrationCount = 0;
 		for (String filename : myJaxDebRepositoryManager.findUniqueFilenames(config.getRepoName())) {
 			myEbeanDebRepositoryManager.initialisePackageStore(config);
 			Set<String> filenames = new TreeSet<>();
 			filenames.add(filename);
-			Loggers.SERVER.info("JaxToEbeanMigrator :: Migrating all packages in repo \"" + config.getRepoName() + "\" of filename: " + filename);
-			myEbeanDebRepositoryManager.addBuildPackages(config, (List<DebPackage>) myJaxDebRepositoryManager.findAllByFilenames(config.getRepoName(), filenames));
+			List<DebPackage> packages = (List<DebPackage>) myJaxDebRepositoryManager.findAllByFilenames(config.getRepoName(), filenames);
+			Loggers.SERVER.debug("JaxToEbeanMigrator :: Migrating all packages in repo \"" + config.getRepoName() + "\" of filename: " + filename);
+			myEbeanDebRepositoryManager.addBuildPackages(config, packages);
+			packageMigrationCount += packages.size();
 		}
-		Loggers.SERVER.info("JaxToEbeanMigrator :: Packages migrated. Removing repository items...");
+		Loggers.SERVER.info("JaxToEbeanMigrator :: " + packageMigrationCount + " of " + packagesToMigrateCount + " packages migrated. Removing repository items...");
 		myJaxDebRepositoryManager.getPackageStore(config.getRepoName()).clear();;
 		Loggers.SERVER.info("JaxToEbeanMigrator :: Repository items removed. Renaming XML database file...");
 		if (myJaxDbFileRenamer.renameToBackup(config)) {
