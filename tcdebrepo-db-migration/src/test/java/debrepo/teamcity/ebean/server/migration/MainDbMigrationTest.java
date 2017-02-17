@@ -6,7 +6,7 @@ import org.junit.Test;
 
 public class MainDbMigrationTest {
 
-	@Test
+	//@Test
 	public void testGenerateMigrationFiles() throws IOException {
 		MainDbMigration migration= new MainDbMigration();
 		migration.generateMigrationFiles();

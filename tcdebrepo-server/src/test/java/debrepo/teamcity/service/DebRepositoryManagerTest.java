@@ -205,6 +205,9 @@ public abstract class DebRepositoryManagerTest {
 		packages.add(buildEntity("PackageXYX", "1.1", "amd64", "jessie", "main", "package_xyz_1.1_amd64.deb", BUILD_TYPE_ID_BT01, 12346L));
 		packages.add(buildEntity("PackageXYX", "1.1", "i386",  "potato", "main", "package_xyz_1.1_i386.deb",  BUILD_TYPE_ID_BT01, 12346L));
 		packages.add(buildEntity("PackageXYX", "1.1", "amd64", "potato", "main", "package_xyz_1.1_amd64.deb", BUILD_TYPE_ID_BT01, 12346L));
+		packages.add(buildEntity("PackageABC", "1.0", "i386",  "potato", "main", "package_abc_1.0_i386.deb", BUILD_TYPE_ID_BT01, 12346L));
+		packages.add(buildEntity("PackageABC", "1.0", "amd64", "potato", "main", "package_abc_1.0_amd64.deb", BUILD_TYPE_ID_BT01, 12346L));
+		packages.add(buildEntity("PackageABC", "1.0", "risc",  "potato", "main", "package_abc_1.0_risc.deb", BUILD_TYPE_ID_BT01, 12346L));
 		
 		getDebRepositoryManager().addBuildPackages(config, packages);
 		
@@ -353,8 +356,8 @@ public abstract class DebRepositoryManagerTest {
 		packages.add(buildEntity("PackageXYX", "1.1", "amd64", "jessie", "main", "package_xyz_1.1_amd64.deb", BUILD_TYPE_ID_BT01, 12346L));
 		packages.add(buildEntity("PackageXYX", "1.1", "i386",  "potato", "main", "package_xyz_1.1_i386.deb",  BUILD_TYPE_ID_BT01, 12346L));
 		packages.add(buildEntity("PackageXYX", "1.1", "amd64", "potato", "main", "package_xyz_1.1_amd64.deb", BUILD_TYPE_ID_BT01, 12346L));
-		packages.add(buildEntity("SomePackage", "1.10", "amd64", "potato", "main", "package_xyz_1.1_amd64.deb", BUILD_TYPE_ID_BT01, 12346L));
-		packages.add(buildEntity("SomePackage2", "1.10", "amd64", "potato", "contrib", "package_xyz_1.1_amd64.deb", BUILD_TYPE_ID_BT01, 12346L));
+		packages.add(buildEntity("SomePackage", "1.10", "amd64", "potato", "main", "package_somepackage_1.1_amd64.deb", BUILD_TYPE_ID_BT01, 12346L));
+		packages.add(buildEntity("SomePackage2", "1.10", "amd64", "potato", "contrib", "package_somepackage_1.1_amd64.deb", BUILD_TYPE_ID_BT01, 12346L));
 		
 		getDebRepositoryManager().addBuildPackages(config, packages);
 		

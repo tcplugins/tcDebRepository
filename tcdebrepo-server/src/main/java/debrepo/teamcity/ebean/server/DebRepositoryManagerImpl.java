@@ -28,6 +28,7 @@ import com.avaje.ebean.EbeanServer;
 
 import debrepo.teamcity.DebPackage;
 import debrepo.teamcity.Loggers;
+import debrepo.teamcity.ebean.DebFileModel;
 import debrepo.teamcity.ebean.DebPackageModel;
 import debrepo.teamcity.ebean.DebRepositoryModel;
 import debrepo.teamcity.entity.DebPackageNotFoundInStoreException;
@@ -129,12 +130,12 @@ public class DebRepositoryManagerImpl extends DebRepositoryConfigurationManagerI
 //				.dist.eq(distName)
 //				.component.eq(component)
 //				.findSingleAttributeList();
-		List<String> archs = DebPackageModel.find.select("arch")
-				  .setDistinct(false)
+		List<String> archs = DebFileModel.find.select("arch")
+				  .setDistinct(true)
 				  .where()
-				  .eq("repository.name", repoName)
-				  .eq("dist", distName)
-				  .eq("component", component)
+				  .eq("debpackages.repository.name", repoName)
+				  .eq("debpackages.dist", distName)
+				  .eq("debpackages.component", component)
 				  .findSingleAttributeList();
 		if (archs.contains("all")) {
 			archs.addAll(getDebRepositoryConfigurationByName(repoName).getArchitecturesRepresentedByAll());
@@ -220,10 +221,10 @@ public class DebRepositoryManagerImpl extends DebRepositoryConfigurationManagerI
 //				 					  .component.eq(component)
 //				 					  .findSingleAttributeList();
 		
-		List<String> packages = DebPackageModel.find.select("packageName")
-				.setDistinct(false)
-				.where().eq("repository.name", repoName)
-				.and().eq("component", component)
+		List<String> packages = DebFileModel.find.select("packageName")
+				.setDistinct(true)
+				.where().eq("debpackages.repository.name", repoName)
+				.and().eq("debpackages.component", component)
 				.findSingleAttributeList();
 		
 		return new TreeSet<String>(packages);
@@ -244,15 +245,16 @@ public class DebRepositoryManagerImpl extends DebRepositoryConfigurationManagerI
 //									 .findList(); 
 		return DebPackageModel.find.select("filename, uri, packageName, version, arch")
 				.setDistinct(true)
+				.fetch("debFile")
 				.where().eq("repository.name",repoName)
 				.eq("component", component)
-				.eq("packageName", packageName)
+				.eq("debFile.packageName", packageName)
 				.findList(); 
 	}
 
 	@Override
 	public List<? extends DebPackage> findAllByDistComponentArch(String repoName, String distName, String component, String archName) throws NonExistantRepositoryException {
-		return DebPackageModel.find.where().eq("repository.name", repoName).eq("dist", distName).eq("component", component).eq("arch", archName).findList(); 
+		return DebPackageModel.find.where().eq("repository.name", repoName).eq("dist", distName).eq("component", component).eq("debFile.arch", archName).findList(); 
 	}
 	
 
@@ -260,8 +262,8 @@ public class DebRepositoryManagerImpl extends DebRepositoryConfigurationManagerI
 	public List<? extends DebPackage> findAllByDistComponentArchIncludingAll(String repoName, String distName,
 			String component, String archName) throws NonExistantRepositoryException {
 		return DebPackageModel.find.where().or()
-											   .and().eq("repository.name", repoName).eq("dist", distName).eq("component", component).eq("arch", archName).endAnd()
-											   .and().eq("repository.name", repoName).eq("dist", distName).eq("component", component).ieq("arch", "all").endAnd()
+											   .and().eq("repository.name", repoName).eq("dist", distName).eq("component", component).eq("debFile.arch", archName).endAnd()
+											   .and().eq("repository.name", repoName).eq("dist", distName).eq("component", component).ieq("debFile.arch", "all").endAnd()
 											   .findList();
 	}
 
@@ -312,9 +314,9 @@ public class DebRepositoryManagerImpl extends DebRepositoryConfigurationManagerI
 		
 		List<DebPackageModel> packagesForDeletion = DebPackageModel.find.where()
 									.eq("repository.uuid", packageRemovalBean.getDebRepositoryConfiguration().getUuid().toString())
-									.eq("buildTypeId", packageRemovalBean.getBuildTypeId())
-									.eq("buildId", packageRemovalBean.getBuildId())
-								    .notIn("filename", extractFileNames(packageRemovalBean.getPackagesToKeep()))
+									.eq("debFile.buildTypeId", packageRemovalBean.getBuildTypeId())
+									.eq("debFile.buildId", packageRemovalBean.getBuildId())
+								    .notIn("debFile.filename", extractFileNames(packageRemovalBean.getPackagesToKeep()))
 								    .findList();
 		DebPackageModel.db().beginTransaction();
 		try {

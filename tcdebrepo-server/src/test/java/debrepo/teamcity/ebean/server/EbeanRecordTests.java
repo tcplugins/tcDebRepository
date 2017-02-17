@@ -89,10 +89,10 @@ public class EbeanRecordTests {
 		assertEquals(1, ebeanDebRepositoryManager.findAllByDistComponentArch("MyStoreName", "jessie", "main", "amd64").size());
 		assertEquals(1, ebeanDebRepositoryManager.findAllByDistComponentArch("MyStoreName", "jessie", "main", "i386").size());
 		assertEquals(1, ebeanDebRepositoryManager.findAllByDistComponentArch("MyStoreName", "jessie", "main", "all").size());
-		assertEquals(1, ebeanDebRepositoryManager.findAllByDistComponentArch("MyStoreName", "wily", "main", "i386").size());
+		assertEquals(0, ebeanDebRepositoryManager.findAllByDistComponentArch("MyStoreName", "wily", "main", "i386").size());
 		assertEquals(0, ebeanDebRepositoryManager.findAllByDistComponentArch("MyStoreName", "wily", "main", "amd64").size());
-		assertEquals(1, ebeanDebRepositoryManager.findAllByDistComponentArch("MyStoreName", "potato", "stable", "amd64").size());
-		assertEquals(1, ebeanDebRepositoryManager.findAllByDistComponentArch("MyStoreName", "potato", "stable", "i386").size());
+		assertEquals(0, ebeanDebRepositoryManager.findAllByDistComponentArch("MyStoreName", "potato", "stable", "amd64").size());
+		assertEquals(0, ebeanDebRepositoryManager.findAllByDistComponentArch("MyStoreName", "potato", "stable", "i386").size());
 		
 	}
 	
@@ -101,7 +101,7 @@ public class EbeanRecordTests {
 		
 		assertEquals(2, ebeanDebRepositoryManager.findAllByDistComponentArchIncludingAll("MyStoreName", "jessie", "main", "i386").size());
 		assertEquals(0, ebeanDebRepositoryManager.findAllByDistComponentArchIncludingAll("MyStoreName", "potato", "main", "i386").size());
-		assertEquals(1, ebeanDebRepositoryManager.findAllByDistComponentArchIncludingAll("MyStoreName", "potato", "stable", "i386").size());
+		assertEquals(0, ebeanDebRepositoryManager.findAllByDistComponentArchIncludingAll("MyStoreName", "potato", "stable", "i386").size());
 		
 	}
 	

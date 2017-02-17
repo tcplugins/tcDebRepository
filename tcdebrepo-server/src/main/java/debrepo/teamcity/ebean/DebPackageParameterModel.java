@@ -15,7 +15,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Entity
-@Table(name = "o_debpackage_parameter")
+@Table(name = "o_debfile_parameter")
 @Getter
 @Setter @AllArgsConstructor
 public class DebPackageParameterModel extends Model {
@@ -31,8 +31,8 @@ public class DebPackageParameterModel extends Model {
 		@GeneratedValue(strategy = GenerationType.IDENTITY)
 		Long id;
 		
-		@ManyToOne @Column(name="package")
-		private DebPackageModel debPackage;
+		@ManyToOne @Column(name="file")
+		private DebFileModel debFile;
 
 
 		private String name;

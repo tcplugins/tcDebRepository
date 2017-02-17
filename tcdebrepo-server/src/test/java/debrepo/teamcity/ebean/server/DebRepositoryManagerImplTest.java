@@ -16,6 +16,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import debrepo.teamcity.DebPackage;
+import debrepo.teamcity.Loggers;
 import debrepo.teamcity.entity.DebRepositoryConfiguration;
 import debrepo.teamcity.entity.helper.PluginDataResolver;
 import debrepo.teamcity.entity.helper.PluginDataResolverImpl;
@@ -101,6 +102,7 @@ public class DebRepositoryManagerImplTest extends DebRepositoryBaseTest {
 
 		List<? extends DebPackage> packages = debRepositoryManager.getUniquePackagesByComponentAndPackageName("blahBlah01", "main", "testpackage");
 		for (DebPackage d : packages) {
+			Loggers.SERVER.debug(d.toString());
 			System.out.println(d.getFilename() + " :: " + d.getUri() + " " + d.getDist() + d.getComponent() + d.getArch());
 		}
 		assertEquals(3, packages.size());

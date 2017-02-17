@@ -56,113 +56,148 @@ public class DebPackageModel extends Model implements DebPackage {
 	
 	@ManyToOne
 	private DebRepositoryModel repository;
-
-	private String packageName;
-
-	private String version;
-
-	private String arch;
+	
+	@ManyToOne(cascade=CascadeType.ALL)
+	private DebFileModel debFile;
 
 	private String dist;
-
+	
 	private String component;
 
-	private Long buildId;
-
-	private String buildTypeId;
-
-	private String filename;
-
 	private String uri;
-
-	@OneToMany(mappedBy = "debPackage", fetch=FetchType.EAGER, cascade=CascadeType.ALL)
-	private List<DebPackageParameterModel> packageParameters;
 	
-	public Map<String,String> getParameters() {
-		Map<String, String> map = new TreeMap<>();
-		for (DebPackageParameterModel m : packageParameters) {
-			map.put(m.getName(), m.getValue());
-		}
-		return map;
-	}
-	
-	public void setParameters(Map<String,String> parametersMap) {
-		packageParameters.clear();
-		for (Entry<String,String> e : parametersMap.entrySet()) {
-			packageParameters.add(new DebPackageParameterModel(null, this, e.getKey(), e.getValue()));
-		}
-	}
+	//private String filename;
 	
 	public static DebPackageModel copy(DebPackage deb) {
+		
+		DebFileModel f = DebFileModel.find.where().eq("buildId", deb.getBuildId()).eq("filename", deb.getFilename()).findUnique();
+		if (f == null) {
+			f = new DebFileModel();
+			f.setArch(deb.getArch());
+			f.setFilename(deb.getFilename());
+			f.setPackageName(deb.getPackageName());
+			f.setParameters(deb.getParameters());
+			f.setBuildId(deb.getBuildId());
+			f.setBuildTypeId(deb.getBuildTypeId());
+			f.setVersion(deb.getVersion());
+			//f.save();
+		}
 		DebPackageModel e = new DebPackageModel();
-		e.setArch(deb.getArch());
+		e.setDebFile(f);
 		e.setComponent(deb.getComponent());
 		e.setDist(deb.getDist());
-		e.setFilename(deb.getFilename());
-		e.setPackageName(deb.getPackageName());
-		e.setParameters(deb.getParameters());
-		e.setBuildId(deb.getBuildId());
-		e.setBuildTypeId(deb.getBuildTypeId());
 		e.setUri(deb.getUri());
-		e.setVersion(deb.getVersion());
 		return e;
 	}
 
-	@Override
-	public boolean isPopulated() {
-		return this.arch != null && this.packageName != null && this.version != null;
-	}
 
-	@Override
-	public void populateMetadata(Map<String, String> metaData) {
-		this.packageParameters.clear();
-		this.setParameters(metaData);
-		
-		if (metaData.containsKey("Package")) {
-			this.setPackageName(metaData.get("Package"));
-		}
-		
-		if (metaData.containsKey("Version")) {
-			this.setVersion(metaData.get("Version"));
-		}
-		
-		if (metaData.containsKey("Architecture")) {
-			this.setArch(metaData.get("Architecture"));
-		}
-	}
 
 	@Override
 	public void buildUri() {
-		if ("".equals(this.component) || "".equals(this.packageName) || this.filename == null || "".equals(this.filename)) {
+		if ("".equals(this.component) || "".equals(this.debFile.getPackageName()) || this.debFile.getFilename() == null || "".equals(this.debFile.getFilename())) {
 			this.uri = "";
-			if (this.getParameters().containsKey("Filename")) {
-				this.removeParameter("Filename");
-			}
-		} else {
-			this.setUri("pool/" + this.getComponent() + "/" + this.getPackageName() + "/" + filename.replace("\\", "/"));
-			this.replaceParameter("Filename", this.getUri());
+			//if (this.debFile.getParameters().containsKey("Filename")) {
+			//	this.debFile.removeParameter("Filename");
+			//}
+		} else {	
+			this.setUri("pool/" + this.getComponent() + "/" + this.getPackageName() + "/" + this.debFile.getFilename().replace("\\", "/"));
+			//this.debFile.replaceParameter("Filename", this.getUri());
 		}
 	}
 
-	private void replaceParameter(String key, String newValue) {
-		for (DebPackageParameterModel p : getPackageParameters()) {
-			if (key.equals(p.getName())) {
-				p.setValue(newValue);
-			}
-		}
+
+
+	@Override
+	public String getPackageName() {
+		return debFile.getPackageName();
 	}
 
-	private void removeParameter(String key) {
-		DebPackageParameterModel itemToRemove = null;
-		for (DebPackageParameterModel p : getPackageParameters()) {
-			if (key.equals(p.getName())) {
-				itemToRemove = p;
-			}
-		}
-		if (itemToRemove != null) {
-			getPackageParameters().remove(itemToRemove);
-		}
+	@Override
+	public void setPackageName(String packageName) {
+		debFile.setPackageName(packageName);
+	}
+
+	@Override
+	public String getVersion() {
+		return debFile.getVersion();
+	}
+
+	@Override
+	public void setVersion(String version) {
+		debFile.setVersion(version);
+	}
+
+	@Override
+	public String getArch() {
+		return debFile.getArch();
+	}
+
+	@Override
+	public void setArch(String arch) {
+		debFile.setArch(arch);
+	}
+
+	@Override
+	public Long getBuildId() {
+		return debFile.getBuildId();
+	}
+
+	@Override
+	public void setBuildId(Long sBuildId) {
+		debFile.setBuildId(sBuildId);
+	}
+
+	@Override
+	public String getBuildTypeId() {
+		return debFile.getBuildTypeId();
+	}
+
+	@Override
+	public void setBuildTypeId(String sBuildTypeId) {
+		debFile.setBuildTypeId(sBuildTypeId);
+	}
+	
+	@Override
+	public String getFilename() {
+		return debFile.getFilename();
+	}
+	
+	@Override
+	public void setFilename(String filename) {
+		debFile.setFilename(filename);
 		
 	}
+
+	@Override
+	public Map<String, String> getParameters() {
+		Map<String, String> params = debFile.getParameters();
+		params.put("Filename", getUri());
+		return params;
+	}
+
+
+
+	@Override
+	public void setParameters(Map<String, String> parameters) {
+		Map<String, String> params= new TreeMap<>();
+		params.putAll(parameters);
+		params.remove("Filename");
+		debFile.setParameters(params);
+	}
+
+
+
+	@Override
+	public boolean isPopulated() {
+		return debFile.isPopulated();
+	}
+
+
+
+	@Override
+	public void populateMetadata(Map<String, String> metaDataFromPackage) {
+		debFile.populateMetadata(metaDataFromPackage);
+	}
+
 
 }
