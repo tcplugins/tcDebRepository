@@ -25,11 +25,11 @@ public class MainDbMigration {
   
   public void generateMigrationFiles() throws IOException {
 	    // optionally specify the version and name
-	    System.setProperty("ddl.migration.version", "1.1");
-	    System.setProperty("ddl.migration.name", "Add Indexes");
+	    System.setProperty("ddl.migration.version", "1.1.0");
+	    System.setProperty("ddl.migration.name", "Refactor DebPackageModel to split out DebFileModel and add some Indexes");
 
 	    // generate a migration using drops from a prior version
-	    //System.setProperty("ddl.migration.pendingDropsFor", "1.2");
+	    //System.setProperty("ddl.migration.pendingDropsFor", "1.0");
 	    
 	    System.setProperty("disableTestProperties", "true");
 	    

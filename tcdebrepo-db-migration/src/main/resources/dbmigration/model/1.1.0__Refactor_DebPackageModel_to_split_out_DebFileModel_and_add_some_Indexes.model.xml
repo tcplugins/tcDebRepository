@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<migration xmlns="http://ebean-orm.github.io/xml/ns/dbmigration">
+    <changeSet type="apply">
+        <createTable name="o_debfile" identityType="identity" pkName="pk_o_debfile">
+            <column name="id" type="bigint" primaryKey="true"/>
+            <column name="package_name" type="varchar"/>
+            <column name="version" type="varchar"/>
+            <column name="arch" type="varchar"/>
+            <column name="build_id" type="bigint"/>
+            <column name="build_type_id" type="varchar"/>
+            <column name="filename" type="varchar"/>
+        </createTable>
+        <addColumn tableName="o_debpackage">
+            <column name="deb_file_id" type="bigint" references="o_debfile.id" foreignKeyName="fk_o_debpackage_deb_file_id" foreignKeyIndex="ix_o_debpackage_deb_file_id"/>
+        </addColumn>
+        <createTable name="o_debfile_parameter" identityType="identity" pkName="pk_o_debfile_parameter">
+            <column name="id" type="bigint" primaryKey="true"/>
+            <column name="deb_file_id" type="bigint" references="o_debfile.id" foreignKeyName="fk_o_debfile_parameter_deb_file_id" foreignKeyIndex="ix_o_debfile_parameter_deb_file_id"/>
+            <column name="name" type="varchar"/>
+            <column name="value" type="varchar"/>
+        </createTable>
+        <createIndex indexName="ix_o_debfile_build_id_filename" tableName="o_debfile" columns="build_id,filename"/>
+    </changeSet>
+    <changeSet type="pendingDrops">
+        <dropColumn columnName="package_name" tableName="o_debpackage"/>
+        <dropColumn columnName="version" tableName="o_debpackage"/>
+        <dropColumn columnName="arch" tableName="o_debpackage"/>
+        <dropColumn columnName="build_id" tableName="o_debpackage"/>
+        <dropColumn columnName="build_type_id" tableName="o_debpackage"/>
+        <dropColumn columnName="filename" tableName="o_debpackage"/>
+        <dropTable name="o_debpackage_parameter"/>
+    </changeSet>
+</migration>

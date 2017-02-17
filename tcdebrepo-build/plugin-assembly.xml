@@ -16,6 +16,7 @@
        <useAllReactorProjects>true</useAllReactorProjects>
        <includes>
            <include>netwolfuk.teamcity.plugins.tcdebrepo:tcdebrepo-server</include>
+           <include>netwolfuk.teamcity.plugins.tcdebrepo:tcdebrepo-db-migration</include>
        </includes> 
        <binaries>
            <outputDirectory>server</outputDirectory>
