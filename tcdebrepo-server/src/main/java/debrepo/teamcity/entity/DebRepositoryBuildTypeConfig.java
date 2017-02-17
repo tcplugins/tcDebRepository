@@ -50,28 +50,12 @@ public class DebRepositoryBuildTypeConfig {
 	@XmlElement(name="filter") @XmlElementWrapper(name="build-artifact-filters")
 	private Set<Filter> debFilters = new TreeSet<>();
 	
-	/**
-	 * dist is the debian distribution name, eg versions like "wheezy", "squeeze", or symbolic names like "stable", "testing", "unstable" 
-	 */
-//	@NotNull @XmlAttribute(name="dist-name")
-//	private String dist;
-	
-	/** 
-	 * Component is the debian component, eg "main", "contrib", "non-free"
-	 */
-//	@NotNull @XmlAttribute(name="component-name")
-//	private String component;
-	
 	public DebRepositoryBuildTypeConfig(String strBuildTypeId){
 		this.buildTypeId = strBuildTypeId;
-//		this.dist = dist;
-//		this.component = component;		
 	}
 	
 	public DebRepositoryBuildTypeConfig(String strBuildTypeId, String dist, String component, String filter){
 		this.buildTypeId = strBuildTypeId;
-//		this.dist = dist;
-//		this.component = component;
 		this.debFilters.add(new Filter(filter, dist, component));
 	}
 	
@@ -115,11 +99,11 @@ public class DebRepositoryBuildTypeConfig {
 	@XmlType(propOrder = { "regex", "dist", "component", "id" })
 	public static class Filter implements Comparable<Filter>{
 		@XmlTransient
-		final int BEFORE = -1;
+		static final int BEFORE = -1;
 		@XmlTransient
-		final int EQUAL = 0;
+		static final int EQUAL = 0;
 		@XmlTransient
-		final int AFTER = 1;
+		static final int AFTER = 1;
 		
 		@XmlAttribute @NotNull
 		private String id = UUID.randomUUID().toString();
