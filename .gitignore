@@ -8,3 +8,5 @@
 target
 */.factorypath
 .factorypath
+*/.DS_Store
+/.DS_Store
