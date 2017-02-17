@@ -64,17 +64,6 @@ public class EditDebRepositoryBean {
 	@Getter
 	private Set<String> defaultAllArchitectures;
 	
-	public String getAllArchsAsCSL() {
-		if (allArchitectures.size() == 0) {
-			return "None";
-		}
-		StringBuilder sb = new StringBuilder();
-		for (String s : allArchitectures) {
-			sb.append(", ").append(s);
-		}
-		return sb.toString().substring(2);
-	}
-
 	public EditDebRepositoryBean() {
 		name = "";
 		uuid = "";
@@ -86,6 +75,17 @@ public class EditDebRepositoryBean {
 		uuid = repoConfig.getUuid().toString();
 		project = sproject;
 		editAction = "update";
+	}
+	
+	public String getAllArchsAsCSL() {
+		if (allArchitectures.isEmpty()) {
+			return "None";
+		}
+		StringBuilder sb = new StringBuilder();
+		for (String s : allArchitectures) {
+			sb.append(", ").append(s);
+		}
+		return sb.toString().substring(2);
 	}
 	
 	@Value
