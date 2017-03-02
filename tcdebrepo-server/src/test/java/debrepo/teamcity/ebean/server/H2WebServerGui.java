@@ -23,15 +23,11 @@ import org.h2.tools.Server;
 
 public class H2WebServerGui {
 	
-	// 					"jdbc:h2:file:" + myDataDir.getAbsolutePath() + File.separator + "tcDebRepositoryDB;DB_CLOSE_ON_EXIT=FALSE");
-
-	
 	private static final String H2_DB_URL = "jdbc:h2:file:./target/tcDebRepository/database/tcDebRepositoryDB";
 
 	public static void main(String[] args) throws SQLException {
-		Server server = null;
         try {
-            server = Server.createWebServer().start();
+        	Server.createWebServer().start();
             Class.forName("org.h2.Driver");
             Connection conn = DriverManager.
                 getConnection(H2_DB_URL, "sa", "");
