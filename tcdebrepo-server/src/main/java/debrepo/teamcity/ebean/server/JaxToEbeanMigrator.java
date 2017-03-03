@@ -59,9 +59,9 @@ public class JaxToEbeanMigrator {
 			myEbeanDebRepositoryManager.addBuildPackages(config, packages);
 			packageMigrationCount += packages.size();
 		}
-		Loggers.SERVER.info("JaxToEbeanMigrator :: " + packageMigrationCount + " of " + packagesToMigrateCount + " packages migrated. Removing repository items...");
+		Loggers.SERVER.info("JaxToEbeanMigrator :: " + packageMigrationCount + " of " + packagesToMigrateCount + " packages migrated from JAX to eBean. Removing repository items from JAX cache...");
 		myJaxDebRepositoryManager.getPackageStore(config.getRepoName()).clear();;
-		Loggers.SERVER.info("JaxToEbeanMigrator :: Repository items removed. Renaming XML database file...");
+		Loggers.SERVER.info("JaxToEbeanMigrator :: Repository items removed from JAX cache. Renaming XML database file so it won't be migrated again in future...");
 		if (myJaxDbFileRenamer.renameToBackup(config)) {
 			Loggers.SERVER.info("JaxToEbeanMigrator :: XML database file renamed for " + config.getRepoName() + "(" + config.getUuid().toString() + ")");
 		}
