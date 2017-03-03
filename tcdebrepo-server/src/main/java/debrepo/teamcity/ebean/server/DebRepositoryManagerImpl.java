@@ -66,7 +66,7 @@ public class DebRepositoryManagerImpl extends DebRepositoryConfigurationManagerI
 		DebRepositoryModel repo = DebRepositoryModel.find.where().eq("uuid", conf.getUuid().toString()).findUnique();
 		if (repo == null) {
 			repo = new DebRepositoryModel();
-			Loggers.SERVER.info("DebRepositoryManagerImpl:initialisePackageStore :: Repository '" + conf.getRepoName() + " not found in DB. Initliasing...");
+			Loggers.SERVER.info("DebRepositoryManagerImpl:initialisePackageStore :: Repository '" + conf.getRepoName() + "' not found in DB. Initialising...");
 		}
 		repo.setName(conf.getRepoName());
 		repo.setUuid(conf.getUuid().toString());
