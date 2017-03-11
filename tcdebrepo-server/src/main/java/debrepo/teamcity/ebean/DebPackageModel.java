@@ -57,7 +57,7 @@ public class DebPackageModel extends Model implements DebPackage {
 	@ManyToOne
 	private DebRepositoryModel repository;
 	
-	@ManyToOne(cascade=CascadeType.ALL)
+	@ManyToOne(optional=false, cascade=CascadeType.PERSIST)
 	private DebFileModel debFile;
 
 	private String dist;

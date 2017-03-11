@@ -40,8 +40,8 @@ public class MainDbMigration {
   
   public void generateMigrationFiles() throws IOException {
 	    // optionally specify the version and name
-	    System.setProperty("ddl.migration.version", "1.1.0");
-	    System.setProperty("ddl.migration.name", "Refactor DebPackageModel to split out DebFileModel and add some Indexes");
+	    System.setProperty("ddl.migration.version", "1.1.1");
+	    System.setProperty("ddl.migration.name", "Change CascadeType on DebPackageModel.debFile to 'PERSIST' instead of 'ALL'");
 
 	    // generate a migration using drops from a prior version
 	    //System.setProperty("ddl.migration.pendingDropsFor", "1.0");
