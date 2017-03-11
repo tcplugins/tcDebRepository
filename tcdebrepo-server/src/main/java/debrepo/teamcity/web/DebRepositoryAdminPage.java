@@ -24,6 +24,7 @@ import org.jetbrains.annotations.NotNull;
 
 import debrepo.teamcity.ebean.DebPackageModel;
 import debrepo.teamcity.service.DebRepositoryConfigurationManager;
+import debrepo.teamcity.service.DebRepositoryMaintenanceManager;
 import jetbrains.buildServer.controllers.admin.AdminPage;
 import jetbrains.buildServer.serverSide.auth.Permission;
 import jetbrains.buildServer.web.openapi.PagePlaces;
@@ -32,13 +33,16 @@ import jetbrains.buildServer.web.openapi.PositionConstraint;
 
 public class DebRepositoryAdminPage extends AdminPage {
 	final private DebRepositoryConfigurationManager myConfigurationManager;
+	final private DebRepositoryMaintenanceManager myMaintenanceManager;
 
 	public DebRepositoryAdminPage(@NotNull PagePlaces pagePlaces, 
 								  @NotNull PluginDescriptor descriptor,
-								  @NotNull DebRepositoryConfigurationManager configurationManager
+								  @NotNull DebRepositoryConfigurationManager configurationManager,
+								  @NotNull DebRepositoryMaintenanceManager maintenanceManager
 								  ) {
 		super(pagePlaces);
 		myConfigurationManager = configurationManager;
+		myMaintenanceManager = maintenanceManager;
 		setPluginName("tcDebRepository");
 		setIncludeUrl(descriptor.getPluginResourcesPath("debRepository/adminTab.jsp"));
 		setTabTitle("Debian Repositories");
@@ -59,20 +63,10 @@ public class DebRepositoryAdminPage extends AdminPage {
 	@Override
 	public void fillModel(Map<String, Object> model, HttpServletRequest request) {
 		model.put("repoCount", myConfigurationManager.getAllConfigurations().size());
-		model.put("totalPackageCount", getTotalPackages());
-		model.put("packagesAssociated", getPackagesAssociated());
-		model.put("packagesUnassociated", getPackagesUnassociated());
+		model.put("totalPackageCount", myMaintenanceManager.getTotalPackageCount());
+		model.put("totalFileCount", myMaintenanceManager.getTotalFileCount());
+		model.put("filesAssociated", myMaintenanceManager.getAssociatedFileCount());
+		model.put("filesUnassociated", myMaintenanceManager.getDanglingFileCount());
 	}
-	
-	private int getTotalPackages() {
-		return DebPackageModel.find.findCount();
-	}
-	
-	private int getPackagesAssociated() {
-		return DebPackageModel.find.where().isNotNull("repository.uuid").findCount();
-	}
-	
-	private int getPackagesUnassociated() {
-		return DebPackageModel.find.where().isNull("repository.uuid").findCount();
-	}
+
 }

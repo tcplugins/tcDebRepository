@@ -25,6 +25,9 @@ import java.util.TreeSet;
 import java.util.UUID;
 
 import com.avaje.ebean.EbeanServer;
+import com.avaje.ebean.RawSql;
+import com.avaje.ebean.RawSqlBuilder;
+import com.avaje.ebean.SqlUpdate;
 
 import debrepo.teamcity.DebPackage;
 import debrepo.teamcity.Loggers;
@@ -39,17 +42,22 @@ import debrepo.teamcity.entity.DebRepositoryStatistics;
 import debrepo.teamcity.service.DebRepositoryConfigurationFactory;
 import debrepo.teamcity.service.DebRepositoryConfigurationManager;
 import debrepo.teamcity.service.DebRepositoryConfigurationManagerImpl;
+import debrepo.teamcity.service.DebRepositoryMaintenanceManager;
 import debrepo.teamcity.service.DebRepositoryManager;
+import debrepo.teamcity.service.DebRepositoryPersistanceException;
 import debrepo.teamcity.service.NonExistantRepositoryException;
 import debrepo.teamcity.settings.DebRepositoryConfigurationChangePersister;
 
-public class DebRepositoryManagerImpl extends DebRepositoryConfigurationManagerImpl implements DebRepositoryManager, DebRepositoryConfigurationManager {
+public class DebRepositoryManagerImpl extends DebRepositoryConfigurationManagerImpl implements DebRepositoryManager, DebRepositoryConfigurationManager, DebRepositoryMaintenanceManager {
+
+	private EbeanServer myEbeanServer;
 
 	public DebRepositoryManagerImpl(
 			EbeanServer ebeanServer,
 			DebRepositoryConfigurationFactory debRepositoryConfigurationFactory,
 			DebRepositoryConfigurationChangePersister debRepositoryConfigurationChangePersister) {
 		super(debRepositoryConfigurationFactory, debRepositoryConfigurationChangePersister);
+		this.myEbeanServer = ebeanServer;
 	}
 
 	/**
@@ -335,6 +343,107 @@ public class DebRepositoryManagerImpl extends DebRepositoryConfigurationManagerI
 			filenames.add(debPackage.getFilename());
 		}
 		return filenames;
+	}
+
+	@Override
+	public int getTotalPackageCount() {
+		return DebPackageModel.find.findCount();
+	}
+
+	@Override
+	public int getTotalFileCount() {
+		return DebFileModel.find.findCount();
+	}
+
+	@Override
+	public int getTotalRepositoryCount() {
+		return DebRepositoryModel.find.findCount();
+	}
+
+	@Override
+	public int getDanglingFileCount() {
+		
+		 String sql = " SELECT O_DEBFILE.id FROM O_DEBFILE "
+				    + " left join O_DEBPACKAGE"
+				    + " on O_DEBFILE.ID = O_DEBPACKAGE.DEB_FILE_ID"
+				    + " where O_DEBPACKAGE.DEB_FILE_ID IS NULL";
+
+		  RawSql rawSql = RawSqlBuilder.parse(sql).create();
+
+		  return DebFileModel.getFind().setRawSql(rawSql).findCount();
+	}
+
+	@Override
+	public List<DebFileModel> getDanglingFiles() {
+		 String sql = " SELECT O_DEBFILE.* FROM O_DEBFILE "
+				    + " left join O_DEBPACKAGE"
+				    + " on O_DEBFILE.ID = O_DEBPACKAGE.DEB_FILE_ID"
+				    + " where O_DEBPACKAGE.DEB_FILE_ID IS NULL";
+
+		  RawSql rawSql = RawSqlBuilder.parse(sql).create();
+
+		  return DebFileModel.getFind().setRawSql(rawSql).findList();
+	}
+
+	@Override
+	public void removeDanglingFiles() throws DebRepositoryPersistanceException {
+		try {
+			myEbeanServer.beginTransaction();
+			executeRemoveDanglingPackageParameters();
+			executeRemoveDanglingFiles();
+			myEbeanServer.commitTransaction();
+		} catch (Exception e) {
+			myEbeanServer.rollbackTransaction();
+			Loggers.SERVER.debug(e);
+			throw new DebRepositoryPersistanceException("Unable to remove dangling DebFileModel rows.");
+		}
+
+	}
+	
+	private int executeRemoveDanglingFiles() throws Exception {
+		/* Delete the DebFile rows that don't
+		 * have a corresponding DebPackage row.
+		 */
+ 		
+		String dml = "delete from O_DEBFILE where ID in "
+				+ "(" 
+				+ " SELECT O_DEBFILE.id FROM O_DEBFILE  "
+				+ "		left join O_DEBPACKAGE  "
+				+ "		on O_DEBFILE.ID = O_DEBPACKAGE.DEB_FILE_ID "
+				+ "		where O_DEBPACKAGE.DEB_FILE_ID IS NULL"
+				+ ")";
+		SqlUpdate update = myEbeanServer.createSqlUpdate(dml);
+		return update.execute();
+		
+	}
+	
+	private int executeRemoveDanglingPackageParameters() throws Exception {
+		
+		/* Delete the package parameters for DebFile rows that don't
+		 * have a corresponding DebPackage row.
+		 * Do this first before deleting the DebFile row due to FK constraints.
+		 */
+		String dml = "delete from o_debfile_parameter where deb_file_id in"
+				+ "("
+				+ "	SELECT O_DEBFILE.id FROM O_DEBFILE  "
+				+ "			left join O_DEBPACKAGE  "
+				+ "			on O_DEBFILE.ID = O_DEBPACKAGE.DEB_FILE_ID "
+				+ "			where O_DEBPACKAGE.DEB_FILE_ID IS NULL "
+				+ ")";
+		SqlUpdate update = myEbeanServer.createSqlUpdate(dml);
+		return update.execute();			
+	}
+
+	@Override
+	public int getAssociatedFileCount() {
+		 String sql = "	SELECT O_DEBFILE.id FROM O_DEBFILE  "
+					+ "			left join O_DEBPACKAGE  "
+					+ "			on O_DEBFILE.ID = O_DEBPACKAGE.DEB_FILE_ID "
+					+ "			where O_DEBPACKAGE.DEB_FILE_ID IS NOT NULL ";
+
+		  RawSql rawSql = RawSqlBuilder.parse(sql).create();
+
+		  return DebFileModel.getFind().setRawSql(rawSql).findCount();
 	}
 	
 }

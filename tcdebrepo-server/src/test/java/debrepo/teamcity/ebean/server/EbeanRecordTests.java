@@ -55,8 +55,10 @@ import debrepo.teamcity.service.DebRepositoryConfigurationFactory;
 import debrepo.teamcity.service.DebRepositoryConfigurationFactoryImpl;
 import debrepo.teamcity.service.DebRepositoryConfigurationManager;
 import debrepo.teamcity.service.DebRepositoryConfigurationManager.DebRepositoryActionResult;
+import debrepo.teamcity.service.DebRepositoryMaintenanceManager;
 import debrepo.teamcity.service.DebRepositoryManager;
 import debrepo.teamcity.service.DebRepositoryManager.DebPackageRemovalBean;
+import debrepo.teamcity.service.DebRepositoryPersistanceException;
 import debrepo.teamcity.service.NonExistantRepositoryException;
 import debrepo.teamcity.settings.DebRepositoryConfigurationChangePersister;
 import jetbrains.buildServer.serverSide.ProjectManager;
@@ -78,6 +80,7 @@ public class EbeanRecordTests {
 	DebRepositoryManager jaxDebRepositoryManager, ebeanDebRepositoryManager;
 	DebRepositoryConfigurationJaxImpl config;
 	
+	protected DebRepositoryMaintenanceManager debRepositoryMaintenanceManager;
 	protected DebRepositoryConfigurationManager debRepositoryConfigManager;
 	protected DebRepositoryConfigurationFactory debRepositoryConfigurationFactory = new DebRepositoryConfigurationFactoryImpl();
 	
@@ -95,6 +98,7 @@ public class EbeanRecordTests {
 		jaxDebRepositoryManager = new debrepo.teamcity.service.DebRepositoryManagerImpl(projectManager, debRepositoryDatabaseXmlPersister, debRepositoryConfigurationFactory, debRepositoryConfigurationChangePersister);
 		ebeanDebRepositoryManager = new debrepo.teamcity.ebean.server.DebRepositoryManagerImpl(ebeanServerProvider.getEbeanServer(), debRepositoryConfigurationFactory, debRepositoryConfigurationChangePersister);
 		debRepositoryConfigManager = (DebRepositoryConfigurationManager) ebeanDebRepositoryManager;
+		debRepositoryMaintenanceManager = (DebRepositoryMaintenanceManager) ebeanDebRepositoryManager;
 		
 		config = new DebRepositoryConfigurationJaxImpl("project01", "MyStoreName");
 		config.setUuid(UUID.fromString("a187bd92-b22d-43ea-98ce-55ec2cedb942"));
@@ -198,8 +202,8 @@ public class EbeanRecordTests {
 
 		assertEquals(1, ebeanDebRepositoryManager.findAllByDistComponentArch("MyStoreName", "jessie", "main", "i386").size());
 		assertEquals(1, ebeanDebRepositoryManager.findAllByDistComponentArch("MyStoreName", "jessie", "main", "amd64").size());
-		assertEquals(1, ebeanDebRepositoryManager.findAllByDistComponentArch("MyStoreForDeletion", "jessie", "main", "i386").size());
-		assertEquals(1, ebeanDebRepositoryManager.findAllByDistComponentArch("MyStoreForDeletion", "jessie", "main", "amd64").size());
+		assertEquals(2, ebeanDebRepositoryManager.findAllByDistComponentArch("MyStoreForDeletion", "jessie", "main", "i386").size());
+		assertEquals(2, ebeanDebRepositoryManager.findAllByDistComponentArch("MyStoreForDeletion", "jessie", "main", "amd64").size());
 		
 		logger.info("DebRepositoryModel count:" + DebRepositoryModel.getFind().findCount());
 		logger.info("DebPackageModel count:" + DebPackageModel.getFind().findCount());
@@ -217,5 +221,53 @@ public class EbeanRecordTests {
 		assertEquals(1, ebeanDebRepositoryManager.findAllByDistComponentArch("MyStoreName", "jessie", "main", "i386").size());
 		assertEquals(1, ebeanDebRepositoryManager.findAllByDistComponentArch("MyStoreName", "jessie", "main", "amd64").size());
 
+	}
+	
+	@Test
+	public void testRemoveDanglingDebFileModelRows() throws NonExistantRepositoryException, DebRepositoryPersistanceException {
+		logger.info("DebRepositoryModel count:" + DebRepositoryModel.getFind().findCount());
+		logger.info("DebPackageModel count:" + DebPackageModel.getFind().findCount());
+		logger.info("DebFileModel count:" + DebFileModel.getFind().findCount());
+		logger.info("DebPackageParameterModel count:" + DebPackageParameterModel.getFind().findCount());
+		
+		DebRepositoryConfigurationJaxImpl config3 = new DebRepositoryConfigurationJaxImpl("project02", "MyStoreForDeletion");
+		config3.setUuid(UUID.fromString("dd7824da-c0c2-4895-b0e3-b8af7a05dafe"));
+		debRepositoryConfigManager.addDebRepository(config3);
+		jaxDebRepositoryManager.initialisePackageStore(config3);
+		JaxToEbeanMigrator migrator = new JaxToEbeanMigrator(jaxDebRepositoryManager, ebeanDebRepositoryManager, jaxDbFileRenamer);
+		migrator.migrate(config3);
+
+		assertEquals(1, ebeanDebRepositoryManager.findAllByDistComponentArch("MyStoreName", "jessie", "main", "i386").size());
+		assertEquals(1, ebeanDebRepositoryManager.findAllByDistComponentArch("MyStoreName", "jessie", "main", "amd64").size());
+		assertEquals(2, ebeanDebRepositoryManager.findAllByDistComponentArch("MyStoreForDeletion", "jessie", "main", "i386").size());
+		assertEquals(2, ebeanDebRepositoryManager.findAllByDistComponentArch("MyStoreForDeletion", "jessie", "main", "amd64").size());
+		
+		logger.info("DebRepositoryModel count:" + DebRepositoryModel.getFind().findCount());
+		logger.info("DebPackageModel count:" + DebPackageModel.getFind().findCount());
+		logger.info("DebFileModel count:" + DebFileModel.getFind().findCount());
+		logger.info("DebPackageParameterModel count:" + DebPackageParameterModel.getFind().findCount());
+		
+		DebRepositoryActionResult result = debRepositoryConfigManager.removeDebRespository(config);
+		assertFalse(result.isError());
+		result = debRepositoryConfigManager.removeDebRespository(config3);
+		assertFalse(result.isError());
+		
+		logger.info("DebRepositoryModel count:" + DebRepositoryModel.getFind().findCount());
+		logger.info("DebPackageModel count:" + DebPackageModel.getFind().findCount());
+		logger.info("DebFileModel count:" + DebFileModel.getFind().findCount());
+		logger.info("DebPackageParameterModel count:" + DebPackageParameterModel.getFind().findCount());
+		
+		assertEquals(0, ebeanDebRepositoryManager.findAllByDistComponentArch("MyStoreName", "jessie", "main", "i386").size());
+		assertEquals(0, ebeanDebRepositoryManager.findAllByDistComponentArch("MyStoreName", "jessie", "main", "amd64").size());
+	
+		assertEquals(5, debRepositoryMaintenanceManager.getDanglingFileCount());
+		debRepositoryMaintenanceManager.removeDanglingFiles();
+		assertEquals(0, debRepositoryMaintenanceManager.getDanglingFileCount());
+		
+		logger.info("DebRepositoryModel count:" + DebRepositoryModel.getFind().findCount());
+		logger.info("DebPackageModel count:" + DebPackageModel.getFind().findCount());
+		logger.info("DebFileModel count:" + DebFileModel.getFind().findCount());
+		logger.info("DebPackageParameterModel count:" + DebPackageParameterModel.getFind().findCount());
+		
 	}
 }

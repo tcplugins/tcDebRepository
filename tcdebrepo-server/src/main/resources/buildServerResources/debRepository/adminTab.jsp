@@ -8,6 +8,6 @@
 	        <h2 class="noBorder">Debian Package Repositories</h2>
 	        
 	        <p>There are <a href="debianRepositories.html">${repoCount} repositories</a> 
-	        	configured containing ${totalPackageCount} packages.</p>
-			<p>Of these, ${packagesAssociated} are associated to a valid repository, and ${packagesUnassociated} are associated with a non-existent repository.</p> 
+	        	configured containing ${totalPackageCount} packages referring to ${totalFileCount} Deb Files.</p>
+			<p>Of these, ${filesAssociated} deb files are associated to a package, and ${filesUnassociated} are associated with a non-existent package.</p> 
 	        </div>

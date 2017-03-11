@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<migration xmlns="http://ebean-orm.github.io/xml/ns/dbmigration">
+    <changeSet type="apply">
+        <alterColumn columnName="deb_file_id" tableName="o_debpackage" currentType="bigint" notnull="true" currentNotnull="false"/>
+    </changeSet>
+</migration>

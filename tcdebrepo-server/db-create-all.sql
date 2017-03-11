@@ -12,7 +12,7 @@ create table o_debfile (
 create table o_debpackage (
   id                            bigint auto_increment not null,
   repository_id                 bigint,
-  deb_file_id                   bigint,
+  deb_file_id                   bigint not null,
   dist                          varchar(255),
   component                     varchar(255),
   uri                           varchar(255),
