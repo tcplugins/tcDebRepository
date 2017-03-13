@@ -245,19 +245,30 @@ public class DebRepositoryManagerImpl extends DebRepositoryConfigurationManagerI
 		if (! isExistingRepository(repoName)){
 			throw new NonExistantRepositoryException();
 		}
-//		return new QDebPackageModel().select("filename, uri")
-//									 .setDistinct(true)
-//									 .repository.name.eq(repoName)
-//									 .component.eq(component)
-//									 .packageName.eq(packageName)
-//									 .findList(); 
-		return DebPackageModel.find.select("filename, uri, packageName, version, arch")
-				.setDistinct(true)
-				.fetch("debFile")
-				.where().eq("repository.name",repoName)
-				.eq("component", component)
-				.eq("debFile.packageName", packageName)
-				.findList(); 
+				
+		String sql = " SELECT distinct FILENAME, URI, O_DEBFILE.ID "
+		 		+ " FROM O_DEBFILE "
+		 		+ " JOIN O_DEBPACKAGE"
+		 		+ " JOIN O_REPOSITORY "
+		 		+ "   on O_DEBFILE.ID = O_DEBPACKAGE.DEB_FILE_ID "
+		 		+ "   AND O_DEBPACKAGE.REPOSITORY_ID = O_REPOSITORY.ID "
+		 		+ "where O_REPOSITORY.NAME = :repoName "
+		 		+ "   AND COMPONENT = :component "
+		 		+ "   AND PACKAGE_NAME = :packageName";
+
+		RawSql rawSql = RawSqlBuilder.parse(sql)
+				  					 .columnMapping("O_DEBFILE.ID", "debFile.id")
+				  					 .columnMapping("FILENAME", "debFile.filename")
+				  					 .columnMapping("URI", "uri")				
+				  					 .create();
+
+		return DebPackageModel.getFind()
+				  			  .setRawSql(rawSql)
+				  			  .setParameter("repoName", repoName)
+				  			  .setParameter("component", component)
+				  			  .setParameter("packageName", packageName)
+				  			  .findList();
+		  
 	}
 
 	@Override
@@ -387,17 +398,20 @@ public class DebRepositoryManagerImpl extends DebRepositoryConfigurationManagerI
 
 	@Override
 	public void removeDanglingFiles() throws DebRepositoryPersistanceException {
+		int removedParams = 0;
+		int removedFiles = 0;
 		try {
 			myEbeanServer.beginTransaction();
-			executeRemoveDanglingPackageParameters();
-			executeRemoveDanglingFiles();
+			removedParams = executeRemoveDanglingPackageParameters();
+			removedFiles = executeRemoveDanglingFiles();
 			myEbeanServer.commitTransaction();
 		} catch (Exception e) {
 			myEbeanServer.rollbackTransaction();
 			Loggers.SERVER.debug(e);
 			throw new DebRepositoryPersistanceException("Unable to remove dangling DebFileModel rows.");
+		} finally {
+			Loggers.SERVER.info("DebRepositoryManagerImpl:removeDanglingFiles:: Removed " + removedFiles + " Deb Files and " + removedParams + " file parameters from Database.");
 		}
-
 	}
 	
 	private int executeRemoveDanglingFiles() throws Exception {

@@ -48,7 +48,7 @@ public class DebRepoServerEventListener extends BuildServerAdapter {
 	
 	@Override
 	public void cleanupFinished() {
-		//myCleaner.removeDetachedArtifactsFromRepositories();
+		myCleaner.removeDetachedDebFilesFromRepositories();
 	}
 	
 	@Override

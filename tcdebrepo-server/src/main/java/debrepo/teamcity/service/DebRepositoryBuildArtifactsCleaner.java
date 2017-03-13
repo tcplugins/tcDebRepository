@@ -17,6 +17,6 @@ package debrepo.teamcity.service;
 
 public interface DebRepositoryBuildArtifactsCleaner {
 	
-	public abstract void removeDetachedArtifactsFromRepositories();
+	public abstract void removeDetachedDebFilesFromRepositories();
 
 }

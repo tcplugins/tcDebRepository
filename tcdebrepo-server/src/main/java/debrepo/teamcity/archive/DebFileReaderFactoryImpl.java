@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2017 Net Wolf UK
+ * Copyright 2016 Net Wolf UK
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,13 +15,23 @@
  *******************************************************************************/
 package debrepo.teamcity.archive;
 
-import java.io.IOException;
-import java.util.Map;
+import debrepo.teamcity.entity.helper.PluginDataResolver;
+import jetbrains.buildServer.serverSide.SBuild;
+import jetbrains.buildServer.serverSide.ServerPaths;
 
-public interface DebFileReader {
+public class DebFileReaderFactoryImpl implements DebFileReaderFactory {
+	
+	private PluginDataResolver myPluginPaths;
 
-	Map<String, String> getMetaDataFromPackage(String filename) throws IOException;
+	public DebFileReaderFactoryImpl(PluginDataResolver pluginPaths, ServerPaths serverPaths) {
+		this.myPluginPaths = pluginPaths;
+	}
 
-	boolean fileExists(String filename);
+	@Override
+	public DebFileReader createFileReader(SBuild build) {
+		return new DebFileReaderImpl(build.getArtifactsDirectory(), this.myPluginPaths.getPluginTempFileDirectory());
+	}
+	
+	
 
 }
