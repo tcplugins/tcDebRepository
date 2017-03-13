@@ -246,20 +246,20 @@ public class DebRepositoryManagerImpl extends DebRepositoryConfigurationManagerI
 			throw new NonExistantRepositoryException();
 		}
 				
-		String sql = " SELECT distinct FILENAME, URI, O_DEBFILE.ID "
+		String sql = " SELECT distinct O_DEBFILE.FILENAME, O_DEBPACKAGE.URI, O_DEBFILE.ID "
 		 		+ " FROM O_DEBFILE "
 		 		+ " JOIN O_DEBPACKAGE"
 		 		+ " JOIN O_REPOSITORY "
 		 		+ "   on O_DEBFILE.ID = O_DEBPACKAGE.DEB_FILE_ID "
 		 		+ "   AND O_DEBPACKAGE.REPOSITORY_ID = O_REPOSITORY.ID "
 		 		+ "where O_REPOSITORY.NAME = :repoName "
-		 		+ "   AND COMPONENT = :component "
-		 		+ "   AND PACKAGE_NAME = :packageName";
+		 		+ "   AND O_DEBPACKAGE.COMPONENT = :component "
+		 		+ "   AND O_DEBFILE.PACKAGE_NAME = :packageName";
 
 		RawSql rawSql = RawSqlBuilder.parse(sql)
 				  					 .columnMapping("O_DEBFILE.ID", "debFile.id")
-				  					 .columnMapping("FILENAME", "debFile.filename")
-				  					 .columnMapping("URI", "uri")				
+				  					 .columnMapping("O_DEBFILE.FILENAME", "debFile.filename")
+				  					 .columnMapping("O_DEBPACKAGE.URI", "uri")				
 				  					 .create();
 
 		return DebPackageModel.getFind()
