@@ -46,4 +46,17 @@ select distinct t0.id c0, t0.uri c1, t0.id c2, t0.id c3, t0.id c4, t1.id c5, t1.
 	left join o_repository t2 on t2.id = t0.repository_id  
 	where t2.name = ?  and t0.component = ?  and t1.package_name = ?
 	
-[2017-03-09 16:00:16,277]  DEBUG -            org.avaje.ebean.SUM - txn[56322] FindMany type[DebPackageModel] origin[BFetci.CiggGZ.DzVvb_] exeMicros[46875] rows[1224] predicates[t2.name = ?  and t0.component = ?  and t1.package_name = ? ] bind[RootTest01,main,tcDummyDeb]
+DEBUG -            org.avaje.ebean.SUM - txn[56322] FindMany type[DebPackageModel] origin[BFetci.CiggGZ.DzVvb_] exeMicros[46875] rows[1224] predicates[t2.name = ?  and t0.component = ?  and t1.package_name = ? ] bind[RootTest01,main,tcDummyDeb]
+
+
+-- This appears to produce a better result.
+
+SELECT distinct (FILENAME , URI), FILENAME, URI  
+	FROM O_DEBFILE 
+	JOIN O_DEBPACKAGE 
+	JOIN O_REPOSITORY  
+	ON O_DEBFILE.ID = O_DEBPACKAGE.DEB_FILE_ID 
+		AND O_DEBPACKAGE.REPOSITORY_ID = O_REPOSITORY.ID 
+	WHERE O_REPOSITORY.NAME = 'MyStore03' 
+		AND COMPONENT ='main' 
+		AND PACKAGE_NAME = 'e3';

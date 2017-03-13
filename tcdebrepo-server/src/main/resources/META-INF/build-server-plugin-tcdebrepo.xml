@@ -140,6 +140,10 @@
      	class="debrepo.teamcity.entity.helper.PluginDataResolverImpl"
      	/>
 
+       <bean id="debFileBuildArtifactsProcessorFactory"
+     	class="debrepo.teamcity.service.DebFileBuildArtifactsProcessorFactoryImpl"
+     	/>
+
        <bean id="jaxConfigHelper"
      		class="debrepo.teamcity.entity.helper.DebRepositoryConfigurationJaxHelperImpl">
        </bean>
@@ -173,7 +177,7 @@
        </bean>
     
        <bean id="debFileReaderFactory"
-     		class="debrepo.teamcity.archive.DebFileReaderFactory">
+     		class="debrepo.teamcity.archive.DebFileReaderFactoryImpl">
        </bean>
     
        <bean id="debRepositoryConfigurationFactory"

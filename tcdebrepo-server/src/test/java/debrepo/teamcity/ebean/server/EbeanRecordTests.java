@@ -22,6 +22,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.UUID;
 
 import org.apache.log4j.LogManager;
@@ -33,6 +35,8 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import debrepo.teamcity.DebPackage;
+import debrepo.teamcity.archive.DebFileReader;
+import debrepo.teamcity.archive.DebFileReaderFactory;
 import debrepo.teamcity.ebean.DebFileModel;
 import debrepo.teamcity.ebean.DebPackageModel;
 import debrepo.teamcity.ebean.DebPackageParameterModel;
@@ -40,6 +44,7 @@ import debrepo.teamcity.ebean.DebRepositoryModel;
 import debrepo.teamcity.ebean.server.EbeanServerProvider;
 import debrepo.teamcity.entity.DebPackageStore;
 import debrepo.teamcity.entity.DebPackageStoreEntity;
+import debrepo.teamcity.entity.DebRepositoryBuildTypeConfig;
 import debrepo.teamcity.entity.DebRepositoryConfiguration;
 import debrepo.teamcity.entity.DebRepositoryConfigurationJaxImpl;
 import debrepo.teamcity.entity.helper.DebRepositoryDatabaseJaxHelperImpl;
@@ -49,8 +54,12 @@ import debrepo.teamcity.entity.helper.JaxHelper;
 import debrepo.teamcity.entity.helper.PluginDataResolver;
 import debrepo.teamcity.entity.helper.PluginDataResolverImpl;
 import debrepo.teamcity.entity.helper.XmlPersister;
+import debrepo.teamcity.service.DebFileBuildArtifactsProcessorFactory;
+import debrepo.teamcity.service.DebPackageFactory;
 import debrepo.teamcity.service.DebRepositoryBuildArtifactsCleaner;
 import debrepo.teamcity.service.DebRepositoryBuildArtifactsCleanerImpl;
+import debrepo.teamcity.service.DebRepositoryBuildArtifactsPublisher;
+import debrepo.teamcity.service.DebRepositoryBuildArtifactsPublisherImpl;
 import debrepo.teamcity.service.DebRepositoryConfigurationFactory;
 import debrepo.teamcity.service.DebRepositoryConfigurationFactoryImpl;
 import debrepo.teamcity.service.DebRepositoryConfigurationManager;
@@ -62,7 +71,12 @@ import debrepo.teamcity.service.DebRepositoryPersistanceException;
 import debrepo.teamcity.service.NonExistantRepositoryException;
 import debrepo.teamcity.settings.DebRepositoryConfigurationChangePersister;
 import jetbrains.buildServer.serverSide.ProjectManager;
+import jetbrains.buildServer.serverSide.SBuild;
+import jetbrains.buildServer.serverSide.SBuildType;
 import jetbrains.buildServer.serverSide.ServerPaths;
+import jetbrains.buildServer.serverSide.artifacts.BuildArtifact;
+import jetbrains.buildServer.serverSide.artifacts.BuildArtifacts;
+import jetbrains.buildServer.serverSide.artifacts.BuildArtifacts.BuildArtifactsProcessor;
 
 public class EbeanRecordTests {
 	
@@ -79,6 +93,12 @@ public class EbeanRecordTests {
 	EbeanServerProvider ebeanServerProvider;
 	DebRepositoryManager jaxDebRepositoryManager, ebeanDebRepositoryManager;
 	DebRepositoryConfigurationJaxImpl config;
+	
+	@Mock SBuild build;
+	@Mock SBuildType sBuildType;
+	@Mock BuildArtifact buildArtifact;
+	@Mock BuildArtifacts buildArtifacts;
+	
 	
 	protected DebRepositoryMaintenanceManager debRepositoryMaintenanceManager;
 	protected DebRepositoryConfigurationManager debRepositoryConfigManager;
@@ -130,16 +150,22 @@ public class EbeanRecordTests {
 		
 	}
 	
-	@Test @Ignore
+	@Test
 	public void testCleaner() throws NonExistantRepositoryException {
+		assertEquals(0, debRepositoryMaintenanceManager.getDanglingFileCount());
+		
+		DebRepositoryBuildArtifactsCleaner cleaner = new DebRepositoryBuildArtifactsCleanerImpl((DebRepositoryMaintenanceManager) ebeanDebRepositoryManager);
+		cleaner.removeDetachedDebFilesFromRepositories();
 		
 		assertEquals(2, ebeanDebRepositoryManager.findAllByDistComponentArchIncludingAll("MyStoreName", "jessie", "main", "i386").size());
 		assertEquals(0, ebeanDebRepositoryManager.findAllByDistComponentArchIncludingAll("MyStoreName", "potato", "main", "i386").size());
-		assertEquals(1, ebeanDebRepositoryManager.findAllByDistComponentArchIncludingAll("MyStoreName", "potato", "stable", "i386").size());
 		
-		DebRepositoryBuildArtifactsCleaner cleaner = new DebRepositoryBuildArtifactsCleanerImpl(projectManager, debRepositoryConfigManager, ebeanDebRepositoryManager);
-		cleaner.removeDetachedArtifactsFromRepositories();
-		fail("Not implemented yet");
+		ebeanDebRepositoryManager.removeBuildPackages(new DebPackageRemovalBean(config, "bt25", 3221L, new ArrayList<DebPackage>()));
+		assertEquals(1, ebeanDebRepositoryManager.findAllByDistComponentArchIncludingAll("MyStoreName", "jessie", "main", "i386").size());
+		assertEquals(2, debRepositoryMaintenanceManager.getDanglingFileCount());
+
+		cleaner.removeDetachedDebFilesFromRepositories();
+		assertEquals(0, debRepositoryMaintenanceManager.getDanglingFileCount());
 	}
 	
 	@Test
@@ -270,4 +296,71 @@ public class EbeanRecordTests {
 		logger.info("DebPackageParameterModel count:" + DebPackageParameterModel.getFind().findCount());
 		
 	}
+	
+	@Test
+	public void testAddingPackageToDbWithIdenticalRulesAndReturningSinglePackage() throws NonExistantRepositoryException {
+		when(build.isArtifactsExists()).thenReturn(true);
+		when(build.getBuildTypeId()).thenReturn("bt1");
+		when(build.getBuildType()).thenReturn(sBuildType);
+		when(sBuildType.getBuildTypeId()).thenReturn("bt1");
+		
+		DebRepositoryConfigurationJaxImpl config3 = new DebRepositoryConfigurationJaxImpl("project02", "MyStore03");
+		config3.addBuildType(new DebRepositoryBuildTypeConfig("bt1", "jessie", "main", ".+\\.deb$"));
+		config3.addBuildType(new DebRepositoryBuildTypeConfig("bt1", "jessie", "main", ".+\\.deb$"));
+		debRepositoryConfigManager.addDebRepository(config3);
+		DebRepositoryBuildArtifactsPublisher publisher =  new DebRepositoryBuildArtifactsPublisherImpl(ebeanDebRepositoryManager, debRepositoryConfigManager, new DebFileReaderFactory() {
+			
+			@Override
+			public DebFileReader createFileReader(SBuild build) {
+				return new DebFileReaderMock();
+			}
+		}, new DebFileBuildArtifactsProcessorFactory() {
+			
+			@Override
+			public BuildArtifactsProcessor getBuildArtifactsProcessor(SBuild build, List<DebPackage> entities) {
+				return new BuildArtifactsProcessorMock(entities, build, "dist/e3_2.71_amd64.deb");
+			}
+		});
+		publisher.addArtifactsToRepositories(build, buildArtifacts);
+		assertEquals(1, ebeanDebRepositoryManager.getUniquePackagesByComponentAndPackageName("MyStore03", "main", "e3").size());
+	}
+	
+	public static class DebFileReaderMock implements DebFileReader {
+		
+		@Override
+		public Map<String, String> getMetaDataFromPackage(String filename) throws IOException {
+			Map<String,String> params = new TreeMap<>();
+			
+			params.put("Package","e3");
+			params.put("Version","2.71-1");
+			params.put("Architecture", "amd64");
+			params.put("Maintainer","Paweł Więcek <coven@debian.org>");
+			params.put("Installed-Size","120");
+			params.put("Section","editors");
+			params.put("Priority","optional");
+			params.put("Homepage","http://mitglied.lycos.de/albkleine/");
+			params.put("Description","A very small editor");
+			
+			return params;
+		}
+		
+		@Override
+		public boolean fileExists(String filename) {
+			return true;
+		}
+	}
+	
+	public static class BuildArtifactsProcessorMock implements BuildArtifactsProcessor {
+		
+		public BuildArtifactsProcessorMock(List<DebPackage> entities, SBuild myBuild, String filename) {
+			entities.add(DebPackageFactory.buildFromArtifact(myBuild, filename));
+		}
+
+		@Override
+		public Continuation processBuildArtifact(BuildArtifact artifact) {
+			return Continuation.BREAK;
+		}
+		
+	}
+	
 }

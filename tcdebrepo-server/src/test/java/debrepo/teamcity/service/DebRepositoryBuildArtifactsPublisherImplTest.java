@@ -35,7 +35,7 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import debrepo.teamcity.archive.DebFileReaderFactory;
+import debrepo.teamcity.archive.DebFileReaderFactoryImpl;
 import debrepo.teamcity.entity.DebPackageEntity;
 import debrepo.teamcity.entity.DebRepositoryBuildTypeConfig;
 import debrepo.teamcity.entity.DebRepositoryBuildTypeConfig.Filter;
@@ -71,7 +71,7 @@ public class DebRepositoryBuildArtifactsPublisherImplTest {
 	
 	BuildArtifacts buildArtifacts;
 	
-	DebFileReaderFactory debFileReaderFactory;
+	DebFileReaderFactoryImpl debFileReaderFactory;
 	DebRepositoryConfiguration config;
 	
 	Set<DebRepositoryConfiguration> configs = new TreeSet<>();
@@ -80,7 +80,7 @@ public class DebRepositoryBuildArtifactsPublisherImplTest {
 	public void setup() {
 		MockitoAnnotations.initMocks(this);
 		when(pluginDataResolver.getPluginTempFileDirectory()).thenReturn("target/temp");
-		debFileReaderFactory = new DebFileReaderFactory(pluginDataResolver, serverPaths);
+		debFileReaderFactory = new DebFileReaderFactoryImpl(pluginDataResolver, serverPaths);
 		config = new DebRepositoryConfigurationJaxImpl("project01", "MyTestRepoName");
 		config.addBuildType(new DebRepositoryBuildTypeConfig("bt01", "potato", "main", ".+\\.deb").af(new Filter(".+\\.deb", "whezzy", "main")));
 		configs.add(config);
@@ -94,7 +94,7 @@ public class DebRepositoryBuildArtifactsPublisherImplTest {
 	@Test
 	public void testAddArtifactsToRepositories() throws NonExistantRepositoryException {
 		
-		DebRepositoryBuildArtifactsPublisherImpl publisher = new DebRepositoryBuildArtifactsPublisherImpl(debRepositoryManager, debRepositoryConfigManager, debFileReaderFactory);
+		DebRepositoryBuildArtifactsPublisherImpl publisher = new DebRepositoryBuildArtifactsPublisherImpl(debRepositoryManager, debRepositoryConfigManager, debFileReaderFactory, new DebFileBuildArtifactsProcessorFactoryImpl());
 		buildArtifacts = new MyBuildArtifacts();
 		publisher.addArtifactsToRepositories(build, buildArtifacts);
 		

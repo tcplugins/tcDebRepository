@@ -77,7 +77,7 @@ public class ArStreamerTest {
 	public void getControlFileAsStringTest() throws IOException {
 		Path ephemeralTempDir = Files.createTempDirectory(Paths.get("target"), "deb-temp-", new FileAttribute<?>[] {});
 		File debFile = new File("src/test/resources/build-essential_11.6ubuntu6_amd64.deb");
-		DebFileReader reader = new DebFileReader(new File("src/test/resources"), "target");
+		DebFileReaderImpl reader = new DebFileReaderImpl(new File("src/test/resources"), "target");
 		File controlTarGz = reader.getControlTarGzFromDeb(debFile, ephemeralTempDir.toFile());
 		String controlFileContents = reader.getControlFromControlTarGz(controlTarGz);
 		System.out.println(controlFileContents);
@@ -93,7 +93,7 @@ public class ArStreamerTest {
 	public void getControlFileAsStringFromAllTest() throws IOException {
 		Path ephemeralTempDir = Files.createTempDirectory(Paths.get("target"), "deb-temp-", new FileAttribute<?>[] {});
 		File debFile = new File("src/test/resources/packages_for_testing/debhelper_9.20120909_all.deb");
-		DebFileReader reader = new DebFileReader(new File("src/test/resources/packages_for_testing"), "target");
+		DebFileReaderImpl reader = new DebFileReaderImpl(new File("src/test/resources/packages_for_testing"), "target");
 		File controlTarGz = reader.getControlTarGzFromDeb(debFile, ephemeralTempDir.toFile());
 		String controlFileContents = reader.getControlFromControlTarGz(controlTarGz);
 		System.out.println(controlFileContents);
@@ -109,7 +109,7 @@ public class ArStreamerTest {
 	public void getControlFileAsStringFromAllTest2() throws IOException {
 		Path ephemeralTempDir = Files.createTempDirectory(Paths.get("target"), "deb-temp-", new FileAttribute<?>[] {});
 		File debFile = new File("src/test/resources/packages_for_testing/autoconf_2.69-8_all.deb");
-		DebFileReader reader = new DebFileReader(new File("src/test/resources/packages_for_testing"), "target");
+		DebFileReaderImpl reader = new DebFileReaderImpl(new File("src/test/resources/packages_for_testing"), "target");
 		File controlTarGz = reader.getControlTarGzFromDeb(debFile, ephemeralTempDir.toFile());
 		String controlFileContents = reader.getControlFromControlTarGz(controlTarGz);
 		System.out.println(controlFileContents);
@@ -125,7 +125,7 @@ public class ArStreamerTest {
 	public void getControlFileAsStringTest2() throws IOException {
 		Path ephemeralTempDir = Files.createTempDirectory(Paths.get("target"), "deb-temp-", new FileAttribute<?>[] {});
 		File debFile = new File("src/test/resources/packages_for_testing/e3_2.71-1_amd64.deb");
-		DebFileReader reader = new DebFileReader(new File("src/test/resources/packages_for_testing"), "target");
+		DebFileReaderImpl reader = new DebFileReaderImpl(new File("src/test/resources/packages_for_testing"), "target");
 		File controlTarGz = reader.getControlTarGzFromDeb(debFile, ephemeralTempDir.toFile());
 		String controlFileContents = reader.getControlFromControlTarGz(controlTarGz);
 		System.out.println(controlFileContents);

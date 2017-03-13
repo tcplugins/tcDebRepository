@@ -68,7 +68,7 @@ public interface DebRepositoryManager {
 	public List<? extends DebPackage> findAllByDistComponentArchIncludingAll(String repoName, String distName, String component, String archName) throws NonExistantRepositoryException;
 	
 	/**
-	 * Returns a unique list of the DebPackage items (files) in the repository for the specified component and package name. The filename is used as the unique key.
+	 * Returns a unique list of the DebPackage items (files) in the repository for the specified component and package name. The packageName & filename are used as the unique key.
 	 * @param repoName The name of the repository to search in.
 	 * @param component The component to filter on.
 	 * @param packageName The package name to filter on.

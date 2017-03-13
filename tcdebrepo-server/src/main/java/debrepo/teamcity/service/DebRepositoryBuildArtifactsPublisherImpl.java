@@ -42,14 +42,17 @@ public class DebRepositoryBuildArtifactsPublisherImpl implements DebRepositoryBu
 	private final DebRepositoryManager myDepRepositoryManager;
 	private final DebRepositoryConfigurationManager myDepRepositoryConfigManager;
 	private final DebFileReaderFactory myDebFileReaderFactory;
+	private final DebFileBuildArtifactsProcessorFactory myDebFileBuildArtifactsProcessorFactory;
 	
 
 	public DebRepositoryBuildArtifactsPublisherImpl(DebRepositoryManager debRepositoryManager, 
 							DebRepositoryConfigurationManager debRepositoryConfigManager,
-							DebFileReaderFactory debFileReaderFactory) {
+							DebFileReaderFactory debFileReaderFactory,
+							DebFileBuildArtifactsProcessorFactory debFileBuildArtifactsProcessorFactory) {
 		this.myDepRepositoryManager = debRepositoryManager;
 		this.myDepRepositoryConfigManager = debRepositoryConfigManager;
 		this.myDebFileReaderFactory = debFileReaderFactory;
+		this.myDebFileBuildArtifactsProcessorFactory = debFileBuildArtifactsProcessorFactory;
 		Loggers.SERVER.info("DebRepositoryBuildArtifactsPublisherImpl :: Starting");
 	}
 	
@@ -61,7 +64,7 @@ public class DebRepositoryBuildArtifactsPublisherImpl implements DebRepositoryBu
 		Loggers.SERVER.info("DebRepositoryBuildArtifactsPublisherImpl#removeArtifactsFromRepositories :: found " + configs.size() + " repos interested in " + build.getFullName());
 		List<DebPackage> entitiesToKeep = new ArrayList<>();
 		
-		BuildArtifactsProcessor  processor = new MyBuildArtifactsProcessor(build, entitiesToKeep);
+		BuildArtifactsProcessor  processor = myDebFileBuildArtifactsProcessorFactory.getBuildArtifactsProcessor(build, entitiesToKeep);
 		buildArtifacts.iterateArtifacts(processor);
 		
 		Loggers.SERVER.info("DebRepositoryBuildArtifactsPublisherImpl#removeArtifactsFromRepositories :: found " + entitiesToKeep.size() + " artifacts in " + build.getFullName() + " # " + String.valueOf(build.getBuildId()));
@@ -76,7 +79,7 @@ public class DebRepositoryBuildArtifactsPublisherImpl implements DebRepositoryBu
 		if (build.isArtifactsExists()) {
 			List<DebPackage> entities = new ArrayList<>();
 			
-			BuildArtifactsProcessor  processor = new MyBuildArtifactsProcessor(build, entities);
+			BuildArtifactsProcessor  processor = myDebFileBuildArtifactsProcessorFactory.getBuildArtifactsProcessor(build, entities);
 			buildArtifacts.iterateArtifacts(processor);
 			
 			ParametersProvider provider = build.getParametersProvider();
@@ -134,26 +137,6 @@ public class DebRepositoryBuildArtifactsPublisherImpl implements DebRepositoryBu
 			}
 		}
 		return e;
-	}
-	
-	public static class MyBuildArtifactsProcessor implements BuildArtifacts.BuildArtifactsProcessor {
-		
-		private List<DebPackage> myEntities;
-		private SBuild myBuild;
-
-		public MyBuildArtifactsProcessor(SBuild build, List<DebPackage> entities) {
-			this.myBuild = build;
-			this.myEntities = entities;
-		}
-
-		@Override
-		public Continuation processBuildArtifact(BuildArtifact artifact) {
-			Loggers.SERVER.debug("DebRepositoryBuildArtifactsPublisherImpl :: Processing artifact: " 
-						+ artifact.getRelativePath() + " " + artifact.getName());
-			this.myEntities.add(DebPackageFactory.buildFromArtifact(this.myBuild, artifact.getRelativePath()));
-			return Continuation.CONTINUE;
-		}
-		
 	}
 
 }
