@@ -30,8 +30,20 @@ public class StringUtils {
     	
     }
 
-	public static String getDebRepoUrl(String rootUrl, String repositoryName) {
-		return stripTrailingSlash(rootUrl) + DebDownloadController.DEBREPO_BASE_URL + "/" + repositoryName + "/";
+	public static String getDebRepoUrl(String rootUrl, String repositoryName, boolean isRestricted) {
+		if (isRestricted) {
+			return stripTrailingSlash(rootUrl) + DebDownloadController.DEBREPO_BASE_URL_FOR_REDIRECT_RESTRICTED + "/" + repositoryName + "/";
+		}
+		return stripTrailingSlash(rootUrl) + DebDownloadController.DEBREPO_BASE_URL_FOR_REDIRECT_UNRESTRICTED + "/" + repositoryName + "/";
 	}
-
+	
+	public static String getDebRepoUrlWithUserPassExample(String rootUrl, String repositoryName, boolean isRestricted) {
+		if (isRestricted) {
+			return getDebRepoUrl(rootUrl, repositoryName, isRestricted)
+					.replaceFirst("(^https?://)", "$1<em><strong>username:password</strong></em>@");
+		}
+		return getDebRepoUrl(rootUrl, repositoryName, isRestricted); 
+		
+	}
+	
 }

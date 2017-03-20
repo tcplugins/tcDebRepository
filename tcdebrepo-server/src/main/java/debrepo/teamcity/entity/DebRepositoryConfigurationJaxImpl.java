@@ -16,7 +16,6 @@
 package debrepo.teamcity.entity;
 
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -34,7 +33,6 @@ import javax.xml.bind.annotation.XmlType;
 import org.jetbrains.annotations.NotNull;
 
 import lombok.Data;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 /* Use the XmlAttributes on the fields rather than the getters
@@ -45,7 +43,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor // Empty constructor for JAXB.
 
 @XmlRootElement()
-@XmlType(propOrder = { "repoName", "projectId", "uuid", "buildTypes", "architecturesRepresentedByAll" })
+@XmlType(propOrder = { "repoName", "projectId", "restricted", "uuid", "buildTypes", "architecturesRepresentedByAll" })
 public class DebRepositoryConfigurationJaxImpl implements DebRepositoryConfiguration {
 	
 	private static final String[] defaultArchitecturesForAll = { "arm64", "amd64", "armel", "amd64", "armhf", 
@@ -61,6 +59,9 @@ public class DebRepositoryConfigurationJaxImpl implements DebRepositoryConfigura
 	
 	@NotNull @XmlAttribute(name="repository-name")
 	private String repoName;
+	
+	@XmlAttribute(name="restricted")
+	private boolean restricted = false;
 	
 	@XmlElement(name="build-type") @XmlElementWrapper(name="build-types")
 	private List<DebRepositoryBuildTypeConfig> buildTypes = new CopyOnWriteArrayList<>();

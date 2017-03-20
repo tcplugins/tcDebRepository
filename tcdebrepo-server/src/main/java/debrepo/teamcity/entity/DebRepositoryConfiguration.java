@@ -29,6 +29,8 @@ public interface DebRepositoryConfiguration extends Comparable<DebRepositoryConf
 	public abstract UUID getUuid();
 	public abstract String getRepoName();
 	public abstract void setRepoName(String repoName);
+	public abstract boolean isRestricted();
+	public abstract void setRestricted(boolean restricted);
 	public abstract boolean containsBuildType(String buildTypeid);
 	public abstract List<DebRepositoryBuildTypeConfig> getBuildTypes();
 	public abstract boolean addBuildType(DebRepositoryBuildTypeConfig buildTypeConfig);

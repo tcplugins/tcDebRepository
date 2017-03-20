@@ -85,7 +85,8 @@ public class DebRepoListingPageController extends BaseController {
 						   						config, 
 						   						StringUtils.getDebRepoUrl(
 						   										myServer.getRootUrl(), 
-						   										config.getRepoName())
+						   										config.getRepoName(),
+						   										config.isRestricted())
 						   						), 
 							permissioned)
 					);

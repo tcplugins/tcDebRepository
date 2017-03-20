@@ -43,6 +43,7 @@ public class DebRepositoryConfigurationFactoryImpl implements DebRepositoryConfi
 			}
 			newConfig.addBuildType(newBtConfig);
 		}
+		newConfig.setRestricted(sourceConfig.isRestricted());
 		newConfig.getArchitecturesRepresentedByAll().clear();
 		for (String arch : sourceConfig.getArchitecturesRepresentedByAll()) {
 			newConfig.getArchitecturesRepresentedByAll().add(new String(arch));

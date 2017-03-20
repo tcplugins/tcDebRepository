@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -132,7 +131,7 @@ public class DebRepositoryManagerImpl extends  DebRepositoryConfigurationManager
 		for (DebRepositoryBuildTypeConfig btConfig : config.getBuildTypes()) {
 			filterCount = filterCount + btConfig.getDebFilters().size();
 		}
-		return new DebRepositoryStatistics(repositories.get(UUID.fromString(uuid)).size(), repoURL, filterCount);
+		return new DebRepositoryStatistics(repositories.get(UUID.fromString(uuid)).size(), repoURL, filterCount, config.isRestricted());
 	}
 	
 	@Override

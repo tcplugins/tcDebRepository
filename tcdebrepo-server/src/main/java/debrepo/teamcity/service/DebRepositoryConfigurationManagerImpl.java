@@ -257,6 +257,15 @@ public abstract class DebRepositoryConfigurationManagerImpl implements DebReposi
 		return copiedConfigs;
 	}
 	
+	@Override
+	public boolean isRestrictedRepository(String repoName) throws NonExistantRepositoryException {
+		DebRepositoryConfiguration conf = getDebRepositoryConfigurationByName(repoName);
+		if (conf == null) {
+			throw new NonExistantRepositoryException();
+		}
+		return conf.isRestricted();
+	}
+	
 	private static class DebRepositoryConfigurationAlphabeticComparator implements Comparator<DebRepositoryConfiguration> {
 		@Override
 		public int compare(DebRepositoryConfiguration o1, DebRepositoryConfiguration o2) {

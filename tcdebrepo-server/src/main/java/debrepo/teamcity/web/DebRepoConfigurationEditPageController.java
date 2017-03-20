@@ -85,7 +85,8 @@ public class DebRepoConfigurationEditPageController extends BaseController {
 											repoConfig, 
         									StringUtils.getDebRepoUrl(
         											myServer.getRootUrl(), 
-        											repoConfig.getRepoName()
+        											repoConfig.getRepoName(),
+        											repoConfig.isRestricted()
         											)
         									)
         							);

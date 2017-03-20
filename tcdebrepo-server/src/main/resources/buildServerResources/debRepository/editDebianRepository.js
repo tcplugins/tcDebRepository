@@ -162,6 +162,7 @@ DebRepoPlugin = {
     				action: $j("#editRepoForm #DebRepoaction").val(),
     				"debrepo.uuid": $j("#editRepoForm input[id='debrepo.uuid']").val(),
     				"debrepo.name": $j("#editRepoForm input[id='debrepo.name']").val(),
+    				"debrepo.restricted": $j("#editRepoForm input[id='debrepo.restricted']").prop("checked"),
     				"debrepo.project.id": $j("#editRepoForm select[id='debrepo.project.id']").val()
     		};
     		

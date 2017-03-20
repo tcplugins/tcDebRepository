@@ -4,7 +4,7 @@
   <parent>
     <artifactId>tcdebrepo</artifactId>
     <groupId>netwolfuk.teamcity.plugins.tcdebrepo</groupId>
-    <version>1.0.1</version>
+    <version>1.0.2</version>
   </parent>
   <artifactId>tcdebrepo-build</artifactId>
   <packaging>pom</packaging>
@@ -18,7 +18,7 @@
       <dependency>
            <groupId>netwolfuk.teamcity.plugins.tcdebrepo</groupId>
            <artifactId>tcdebrepo-server</artifactId>
-           <version>1.0.1</version>
+           <version>1.0.2</version>
       </dependency>
   </dependencies>
   <build>

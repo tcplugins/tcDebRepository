@@ -16,7 +16,6 @@
 package debrepo.teamcity.service;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -48,6 +47,7 @@ public interface DebRepositoryManager {
 	public boolean isExistingRepository(String repoName);
 	public boolean isExistingRepository(UUID uuid);
 	public void removeRepository(UUID uuid);
+	public boolean isRestrictedRepository(String repoName) throws NonExistantRepositoryException;
 	
 	void addBuildPackages(DebRepositoryConfiguration debRepositoryConfiguration, List<DebPackage> newPackages) throws NonExistantRepositoryException;
 	public void removeBuildPackages(DebPackageRemovalBean packageRemovalBean);
@@ -59,6 +59,7 @@ public interface DebRepositoryManager {
 		private Long buildId;
 		private List<DebPackage> packagesToKeep;
 	}
+
 
 
 }
