@@ -46,7 +46,7 @@
 	      		</tr>     
 	      	</c:forEach>
 	      	<tr><td colspan=6><a href="#" onclick="DebRepoFilterPlugin.addFilter({ uuid: '${repoConfig.uuid}', name: '${debRepoBean.name}', id: '_new', build: '${buildTypeId}', regex: '', dist:'', component:'' }); return false">Add Artifact Filter </a></td></tr>
-	      	<tr class="blankline"><td colspan=5>&nbsp;</td></tr>
+	      	<tr class="blankline"><td colspan=6>&nbsp;</td></tr>
 	      </c:forEach>
 	      
 	      </table>
