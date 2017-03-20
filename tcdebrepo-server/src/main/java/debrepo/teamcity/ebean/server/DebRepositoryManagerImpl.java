@@ -97,7 +97,7 @@ public class DebRepositoryManagerImpl extends DebRepositoryConfigurationManagerI
 		for (DebRepositoryBuildTypeConfig btConfig : config.getBuildTypes()) {
 			filterCount = filterCount + btConfig.getDebFilters().size();
 		}
-		return new DebRepositoryStatistics(count, repoUrl, filterCount);
+		return new DebRepositoryStatistics(count, repoUrl, filterCount, config.isRestricted());
 	}
 
 	@Override

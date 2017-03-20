@@ -5,7 +5,7 @@
 	<parent>
 		<artifactId>tcdebrepo</artifactId>
 		<groupId>netwolfuk.teamcity.plugins.tcdebrepo</groupId>
-		<version>1.0.1</version>
+		<version>1.0.2</version>
 	</parent>
 	<artifactId>tcdebrepo-server</artifactId>
 	<packaging>jar</packaging>

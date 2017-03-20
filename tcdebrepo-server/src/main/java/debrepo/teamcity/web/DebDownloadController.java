@@ -53,52 +53,62 @@ import jetbrains.buildServer.web.openapi.WebControllerManager;
 import lombok.Builder;
 import lombok.Data;
 
-public class DebDownloadController extends BaseController {
+public abstract class DebDownloadController extends BaseController {
 	
 	private static final String LINK_TYPE_REPO_FILE = "repositoryFile";
 	private static final String LINK_TYPE_REPO_DIR = "repositoryDirectory";
 	private static final String LINK_TYPE_REP_DIR_SLASH = "repositoryDirectorySeparator";
-	public static final String DEBREPO_URL_PART = "/debrepo";
-	public static final String DEBREPO_BASE_URL = "/app" + DEBREPO_URL_PART;
-	private static final String DEBREPO_BASE_URL_WITH_WILDCARD = DEBREPO_BASE_URL + "/**";
+	
+	public static final String DEBREPO_URL_PART_UNRESTRICTED = "/debrepo";
+	public static final String DEBREPO_URL_PART_RESTRICTED = "/debrepo-restricted";
+	
+	public static final String DEBREPO_BASE_URL_UNRESTRICTED = "/app" + DEBREPO_URL_PART_UNRESTRICTED;
+	public static final String DEBREPO_BASE_URL_RESTRICTED = "/app" + DEBREPO_URL_PART_RESTRICTED;
+	
+	public static final String DEBREPO_BASE_URL_FOR_REDIRECT_UNRESTRICTED = "/app" + DEBREPO_URL_PART_UNRESTRICTED;
+	public static final String DEBREPO_BASE_URL_FOR_REDIRECT_RESTRICTED = "/httpAuth/app" + DEBREPO_URL_PART_RESTRICTED;
+	
+	public static final String DEBREPO_BASE_URL_UNRESTRICTED_WITH_WILDCARD = DEBREPO_BASE_URL_UNRESTRICTED + "/**";
+	public static final String DEBREPO_BASE_URL_RESTRICTED_WITH_WILDCARD = DEBREPO_BASE_URL_RESTRICTED + "/**";
 	
 	/**                                                             /debrepo/{RepoName}/dists/{Distribution}/{Component}/binary-{Arch}/Packages.gz		*/
-	final private Pattern packagesGzPattern      = Pattern.compile("^" + DEBREPO_URL_PART + "/(\\S+)/dists/(\\S+?)/(\\S+?)/binary-(\\S+?)/[Pp]ackages.gz");
+	final private Pattern packagesGzPattern      = Pattern.compile("^" + getDebRepoUrlPart() + "/(\\S+)/dists/(\\S+?)/(\\S+?)/binary-(\\S+?)/[Pp]ackages.gz");
 	
 	/**                                                             /debrepo/{RepoName}/dists/{Distribution}/{Component}/{Arch}/Packages.bz2		    */
-	final private Pattern packagesBz2Pattern     = Pattern.compile("^" + DEBREPO_URL_PART + "/(\\S+?)/dists/(\\S+?)/(\\S+?)/(\\S+?)/[Pp]ackages.bz2");
+	@SuppressWarnings("unused")
+	final private Pattern packagesBz2Pattern     = Pattern.compile("^" + getDebRepoUrlPart() + "/(\\S+?)/dists/(\\S+?)/(\\S+?)/(\\S+?)/[Pp]ackages.bz2");
 	
 	/**                                                             /debrepo/{RepoName}/dists/{Distribution}/{Component}/{Arch}/Packages		        */
-	final private Pattern packagesPattern        = Pattern.compile("^" + DEBREPO_URL_PART + "/(\\S+?)/dists/(\\S+?)/(\\S+?)/binary-(\\S+?)/[Pp]ackages");
+	final private Pattern packagesPattern        = Pattern.compile("^" + getDebRepoUrlPart() + "/(\\S+?)/dists/(\\S+?)/(\\S+?)/binary-(\\S+?)/[Pp]ackages");
 	
 	/**                                                             /debrepo/{RepoName}/dists/{Distribution}/{Component}/binary-{Arch}/		            */
-	final private Pattern browseArchPattern      = Pattern.compile("^" + DEBREPO_URL_PART + "/(\\S+?)/dists/(\\S+?)/(\\S+?)/binary-(\\S+?)/$");
+	final private Pattern browseArchPattern      = Pattern.compile("^" + getDebRepoUrlPart() + "/(\\S+?)/dists/(\\S+?)/(\\S+?)/binary-(\\S+?)/$");
 	
 	/**                                                             /debrepo/{RepoName}/dists/{Distribution}/{Component}/		                        */
-	final private Pattern browseComponentPattern = Pattern.compile("^" + DEBREPO_URL_PART + "/(\\S+?)/dists/(\\S+?)/(\\S+?)/$");
+	final private Pattern browseComponentPattern = Pattern.compile("^" + getDebRepoUrlPart() + "/(\\S+?)/dists/(\\S+?)/(\\S+?)/$");
 	
 	/**                                                             /debrepo/{RepoName}/dists/{Distribution}/		                                    */
-	final private Pattern browseDistPattern      = Pattern.compile("^" + DEBREPO_URL_PART + "/(\\S+?)/dists/(\\S+?)/$");
+	final private Pattern browseDistPattern      = Pattern.compile("^" + getDebRepoUrlPart() + "/(\\S+?)/dists/(\\S+?)/$");
 	
 	/**                                                             /debrepo/{RepoName}/dists/		                                                    */
-	final private Pattern browseRepoDistPattern  = Pattern.compile("^" + DEBREPO_URL_PART + "/(\\S+?)/dists/$");
+	final private Pattern browseRepoDistPattern  = Pattern.compile("^" + getDebRepoUrlPart() + "/(\\S+?)/dists/$");
 	
 	/**                                                             /debrepo/{RepoName}/pool/{Component}/{packageName}/		                            */
-	final private Pattern browsePoolPackagePat   = Pattern.compile("^" + DEBREPO_URL_PART + "/(\\S+?)/pool/(\\S+?)/(\\S+?)/");
+	final private Pattern browsePoolPackagePat   = Pattern.compile("^" + getDebRepoUrlPart() + "/(\\S+?)/pool/(\\S+?)/(\\S+?)/");
 	
 	/**                                                             /debrepo/{RepoName}/pool/{Component}/{packageName/packageFile}		                */
-    final private Pattern packageFilenamePattern = Pattern.compile("^" + DEBREPO_URL_PART + "/(\\S+?)/pool/(\\S+?)/(.+)");
+    final private Pattern packageFilenamePattern = Pattern.compile("^" + getDebRepoUrlPart() + "/(\\S+?)/pool/(\\S+?)/(.+)");
 
     /**                                                             /debrepo/{RepoName}/pool/{Component}/		                                        */
-    final private Pattern browsePoolComponentPat = Pattern.compile("^" + DEBREPO_URL_PART + "/(\\S+?)/pool/(\\S+?)/");
+    final private Pattern browsePoolComponentPat = Pattern.compile("^" + getDebRepoUrlPart() + "/(\\S+?)/pool/(\\S+?)/");
 
     /**                                                             /debrepo/{RepoName}/pool/    		                                                */
-    final private Pattern browsePoolPattern      = Pattern.compile("^" + DEBREPO_URL_PART + "/(\\S+?)/pool/");
+    final private Pattern browsePoolPattern      = Pattern.compile("^" + getDebRepoUrlPart() + "/(\\S+?)/pool/");
     
     /**                                                             /debrepo/{RepoName}                    		                                        */
-    final private Pattern infoPattern            = Pattern.compile("^" + DEBREPO_URL_PART + "/(\\S+?)/$");
+    final private Pattern infoPattern            = Pattern.compile("^" + getDebRepoUrlPart() + "/(\\S+?)/$");
     
-    private final DebRepositoryManager myDebRepositoryManager;
+    protected final DebRepositoryManager myDebRepositoryManager;
     private final PluginDescriptor myPluginDescriptor;
 
 	public DebDownloadController(SBuildServer sBuildServer, WebControllerManager webControllerManager, 
@@ -106,15 +116,50 @@ public class DebDownloadController extends BaseController {
 								 AuthorizationInterceptor authorizationInterceptor, 
 								 DebRepositoryManager debRepositoryManager) {
 		super(sBuildServer);
-		webControllerManager.registerController(DEBREPO_BASE_URL_WITH_WILDCARD, this);
-		authorizationInterceptor.addPathNotRequiringAuth(DEBREPO_BASE_URL_WITH_WILDCARD);
+		configureUrlAndAuthorisation(webControllerManager, authorizationInterceptor);
 		this.myDebRepositoryManager = debRepositoryManager;
 		this.myPluginDescriptor = descriptor;
 	}
+	
+
+	/**
+	 * <p>This method returns the correct controller path prefix for the 
+	 * relevant controller. This should be provided by the concrete impl
+	 * because it knows it's own path prefix</p>
+	 *   
+	 * @return /debrepo or /debrepo-restricted 
+	 */
+	protected abstract String getDebRepoUrlPart();
+	
+	/**
+	 * <p>This method is used to build the breadcrumb URLs.
+	 * For some reason, when /httpAuth is prepended to the URL,
+	 * the request.getServletPath() method returns a string prefixed 
+	 * with /httpAuth rather than /httpAuth/app</p>
+	 * 
+	 * <p>Therefore, for the restricted controller, we need to build
+	 * a URL with that re-instated.</p>
+	 * 
+	 * <p>For the unrestricted controller, just return the string not prepended with /app</p>
+	 * 
+	 * @return A string like /debrepo or /app/debrepo-restricted (see above for explanation)
+	 *    
+	 */
+	protected abstract String getDebRepoUrlPartWithContext();
+
+	protected abstract void checkRepoIsRestricted(String repoName) throws DebRepositoryAccessIsRestrictedException,
+			DebRepositoryPermissionDeniedException, NonExistantRepositoryException;
+	
+	protected abstract void configureUrlAndAuthorisation(WebControllerManager webControllerManager,
+			AuthorizationInterceptor authorizationInterceptor) ;
+
 		
 	@Override
 	protected ModelAndView doHandle(HttpServletRequest request, HttpServletResponse response) throws Exception {
-		final String uriPath = request.getPathInfo();
+		String uriPath = request.getPathInfo();
+		if (uriPath.startsWith(DEBREPO_BASE_URL_UNRESTRICTED)){
+			uriPath = uriPath.substring(4); // "/app" off the front.
+		}
 		final Map<String,Object> params = new HashMap<String,Object>();
 		
 		params.put("pluginName", this.myPluginDescriptor.getPluginName());
@@ -129,7 +174,16 @@ public class DebDownloadController extends BaseController {
 			String component= matcher.group(3);
 			String archName = matcher.group(4);
 			try {
+				checkRepoIsRestricted(repoName);
 				return servePackagesGzFile(request, response, myDebRepositoryManager.findAllByDistComponentArchIncludingAll(repoName, distName, component, archName));
+			} catch (DebRepositoryPermissionDeniedException ex){
+				response.sendError(HttpServletResponse.SC_FORBIDDEN);
+				Loggers.SERVER.info("DebDownloadController:: Returning 403 : Deb Repository is restricted and user is not permissioned on project: " + request.getPathInfo());
+				return null;			
+			} catch (DebRepositoryAccessIsRestrictedException ex){
+				response.sendRedirect(buildRedirectToRestrictedUrl(request, uriPath));
+				Loggers.SERVER.info("DebDownloadController:: Returning 302 : Deb Repository is restricted: " + request.getPathInfo());
+				return null;
 			} catch (NonExistantRepositoryException ex){
 				response.sendError(HttpServletResponse.SC_NOT_FOUND);
 				Loggers.SERVER.info("DebDownloadController:: Returning 404 : Not Found: No Deb Repository exists with the name: " + request.getPathInfo());
@@ -144,7 +198,16 @@ public class DebDownloadController extends BaseController {
 			String component= matcher.group(3);
 			String archName = matcher.group(4);
 			try {
+				checkRepoIsRestricted(repoName);
 				return servePackagesFile(request, response, myDebRepositoryManager.findAllByDistComponentArchIncludingAll(repoName, distName, component, archName));
+			} catch (DebRepositoryPermissionDeniedException ex){
+				response.sendError(HttpServletResponse.SC_FORBIDDEN);
+				Loggers.SERVER.info("DebDownloadController:: Returning 403 : Deb Repository is restricted and user is not permissioned on project: " + request.getPathInfo());
+				return null;			
+			} catch (DebRepositoryAccessIsRestrictedException ex){
+				response.sendRedirect(buildRedirectToRestrictedUrl(request, uriPath));
+				Loggers.SERVER.info("DebDownloadController:: Returning 302 : Deb Repository is restricted: " + request.getPathInfo());
+				return null;
 			} catch (NonExistantRepositoryException ex){
 				response.sendError(HttpServletResponse.SC_NOT_FOUND);
 				Loggers.SERVER.info("DebDownloadController:: Returning 404 : Not Found: No Deb Repository exists with the name: " + request.getPathInfo());
@@ -160,19 +223,20 @@ public class DebDownloadController extends BaseController {
 			String component= matcher.group(3);
 			String archName = matcher.group(4);
 			try {
+				checkRepoIsRestricted(repoName);
 				if (myDebRepositoryManager.findAllByDistComponentArchIncludingAll(repoName, distName, component, archName).size() > 0) {
 					List<LinkItem> breadcrumbItems = new ArrayList<>();
 					breadcrumbItems.add(LinkItem.builder().text("<b>Index of</b> ").type(LINK_TYPE_REP_DIR_SLASH).url("").build());
 					breadcrumbItems.add(LinkItem.builder().text("/").type(LINK_TYPE_REP_DIR_SLASH).url("").build());
-					breadcrumbItems.add(LinkItem.builder().text(repoName).type(LINK_TYPE_REPO_DIR).url(request.getServletPath() + DEBREPO_URL_PART + "/" + repoName + "/").build());
+					breadcrumbItems.add(LinkItem.builder().text(repoName).type(LINK_TYPE_REPO_DIR).url(request.getServletPath() + getDebRepoUrlPartWithContext() + "/" + repoName + "/").build());
 					breadcrumbItems.add(LinkItem.builder().text("/").type(LINK_TYPE_REP_DIR_SLASH).url("").build());
-					breadcrumbItems.add(LinkItem.builder().text("dists").type(LINK_TYPE_REPO_DIR).url(request.getServletPath() + DEBREPO_URL_PART + "/" + repoName + "/dists/").build());
+					breadcrumbItems.add(LinkItem.builder().text("dists").type(LINK_TYPE_REPO_DIR).url(request.getServletPath() + getDebRepoUrlPartWithContext() + "/" + repoName + "/dists/").build());
 					breadcrumbItems.add(LinkItem.builder().text("/").type(LINK_TYPE_REP_DIR_SLASH).url("").build());
-					breadcrumbItems.add(LinkItem.builder().text(distName).type(LINK_TYPE_REPO_DIR).url(request.getServletPath() + DEBREPO_URL_PART + "/" + repoName + "/dists/" + distName + "/").build());
+					breadcrumbItems.add(LinkItem.builder().text(distName).type(LINK_TYPE_REPO_DIR).url(request.getServletPath() + getDebRepoUrlPartWithContext() + "/" + repoName + "/dists/" + distName + "/").build());
 					breadcrumbItems.add(LinkItem.builder().text("/").type(LINK_TYPE_REP_DIR_SLASH).url("").build());
-					breadcrumbItems.add(LinkItem.builder().text(component).type(LINK_TYPE_REPO_DIR).url(request.getServletPath() + DEBREPO_URL_PART + "/" + repoName + "/dists/" + distName + "/" + component + "/").build());
+					breadcrumbItems.add(LinkItem.builder().text(component).type(LINK_TYPE_REPO_DIR).url(request.getServletPath() + getDebRepoUrlPartWithContext() + "/" + repoName + "/dists/" + distName + "/" + component + "/").build());
 					breadcrumbItems.add(LinkItem.builder().text("/").type(LINK_TYPE_REP_DIR_SLASH).url("").build());
-					breadcrumbItems.add(LinkItem.builder().text("binary-" + archName).type(LINK_TYPE_REPO_DIR).url(request.getServletPath() + DEBREPO_URL_PART + "/" + repoName + "/dists/" + distName + "/" + component + "/binary-" + archName + "/").build());
+					breadcrumbItems.add(LinkItem.builder().text("binary-" + archName).type(LINK_TYPE_REPO_DIR).url(request.getServletPath() + getDebRepoUrlPartWithContext() + "/" + repoName + "/dists/" + distName + "/" + component + "/binary-" + archName + "/").build());
 					breadcrumbItems.add(LinkItem.builder().text("/").type(LINK_TYPE_REP_DIR_SLASH).url("").build());
 					params.put("breadcrumbItems", breadcrumbItems);
 					
@@ -184,6 +248,14 @@ public class DebDownloadController extends BaseController {
 					params.put("currentPathLevel", "binary-" + archName);
 					return new ModelAndView(myPluginDescriptor.getPluginResourcesPath("debRepository/directoryListing.jsp"), params);
 				}
+			} catch (DebRepositoryPermissionDeniedException ex){
+				response.sendError(HttpServletResponse.SC_FORBIDDEN);
+				Loggers.SERVER.info("DebDownloadController:: Returning 403 : Deb Repository is restricted and user is not permissioned on project: " + request.getPathInfo());
+				return null;			
+			} catch (DebRepositoryAccessIsRestrictedException ex){
+				response.sendRedirect(buildRedirectToRestrictedUrl(request, uriPath));
+				Loggers.SERVER.info("DebDownloadController:: Returning 302 : Deb Repository is restricted: " + request.getPathInfo());
+				return null;
 			} catch (NonExistantRepositoryException ex){
 				response.sendError(HttpServletResponse.SC_NOT_FOUND);
 				Loggers.SERVER.info("DebDownloadController:: Returning 404 : Not Found: No Deb Repository exists with the name: " + request.getPathInfo());
@@ -198,28 +270,37 @@ public class DebDownloadController extends BaseController {
 			String distName = matcher.group(2);
 			String component= matcher.group(3);
 			try {
+				checkRepoIsRestricted(repoName);
 				List<LinkItem> linkItems = new ArrayList<>();
 				for (String arch : myDebRepositoryManager.findUniqueArchByDistAndComponent(repoName, distName, component)) {
 					linkItems.add(LinkItem.builder().text("binary-" + arch).type(LINK_TYPE_REPO_DIR).url("./binary-" + arch + "/").build());
 				}
 				params.put("linkItems", linkItems);
-				params.put("alertInfo", "deb  " + StringUtils.getDebRepoUrl(myServer.getRootUrl(), repoName) + "  " + distName + "  " + component);
+				params.put("alertInfo", "deb  " + StringUtils.getDebRepoUrlWithUserPassExample(myServer.getRootUrl(), repoName, myDebRepositoryManager.isRestrictedRepository(repoName)) + "  " + distName + "  " + component);
 				params.put("directoryTitle", repoName);
 				params.put("currentPathLevel", component);
 				
 				List<LinkItem> breadcrumbItems = new ArrayList<>();
 				breadcrumbItems.add(LinkItem.builder().text("<b>Index of</b> ").type(LINK_TYPE_REP_DIR_SLASH).url("").build());
 				breadcrumbItems.add(LinkItem.builder().text("/").type(LINK_TYPE_REP_DIR_SLASH).url("").build());
-				breadcrumbItems.add(LinkItem.builder().text(repoName).type(LINK_TYPE_REPO_DIR).url(request.getServletPath() + DEBREPO_URL_PART + "/" + repoName + "/").build());
+				breadcrumbItems.add(LinkItem.builder().text(repoName).type(LINK_TYPE_REPO_DIR).url(request.getServletPath() + getDebRepoUrlPartWithContext() + "/" + repoName + "/").build());
 				breadcrumbItems.add(LinkItem.builder().text("/").type(LINK_TYPE_REP_DIR_SLASH).url("").build());
-				breadcrumbItems.add(LinkItem.builder().text("dists").type(LINK_TYPE_REPO_DIR).url(request.getServletPath() + DEBREPO_URL_PART + "/" + repoName + "/dists/").build());
+				breadcrumbItems.add(LinkItem.builder().text("dists").type(LINK_TYPE_REPO_DIR).url(request.getServletPath() + getDebRepoUrlPartWithContext() + "/" + repoName + "/dists/").build());
 				breadcrumbItems.add(LinkItem.builder().text("/").type(LINK_TYPE_REP_DIR_SLASH).url("").build());
-				breadcrumbItems.add(LinkItem.builder().text(distName).type(LINK_TYPE_REPO_DIR).url(request.getServletPath() + DEBREPO_URL_PART + "/" + repoName + "/dists/" + distName + "/").build());
+				breadcrumbItems.add(LinkItem.builder().text(distName).type(LINK_TYPE_REPO_DIR).url(request.getServletPath() + getDebRepoUrlPartWithContext() + "/" + repoName + "/dists/" + distName + "/").build());
 				breadcrumbItems.add(LinkItem.builder().text("/").type(LINK_TYPE_REP_DIR_SLASH).url("").build());
-				breadcrumbItems.add(LinkItem.builder().text(component).type(LINK_TYPE_REPO_DIR).url(request.getServletPath() + DEBREPO_URL_PART + "/" + repoName + "/dists/" + distName + "/" + component + "/").build());
+				breadcrumbItems.add(LinkItem.builder().text(component).type(LINK_TYPE_REPO_DIR).url(request.getServletPath() + getDebRepoUrlPartWithContext() + "/" + repoName + "/dists/" + distName + "/" + component + "/").build());
 				breadcrumbItems.add(LinkItem.builder().text("/").type(LINK_TYPE_REP_DIR_SLASH).url("").build());
 				params.put("breadcrumbItems", breadcrumbItems);
 				return new ModelAndView(myPluginDescriptor.getPluginResourcesPath("debRepository/directoryListing.jsp"), params);
+			} catch (DebRepositoryPermissionDeniedException ex){
+				response.sendError(HttpServletResponse.SC_FORBIDDEN);
+				Loggers.SERVER.info("DebDownloadController:: Returning 403 : Deb Repository is restricted and user is not permissioned on project: " + request.getPathInfo());
+				return null;			
+			} catch (DebRepositoryAccessIsRestrictedException ex){
+				response.sendRedirect(buildRedirectToRestrictedUrl(request, uriPath));
+				Loggers.SERVER.info("DebDownloadController:: Returning 302 : Deb Repository is restricted: " + request.getPathInfo());
+				return null;
 			} catch (NonExistantRepositoryException ex){
 				response.sendError(HttpServletResponse.SC_NOT_FOUND);
 				Loggers.SERVER.info("DebDownloadController:: Returning 404 : Not Found: No Deb Repository exists with the name: " + request.getPathInfo());
@@ -233,6 +314,7 @@ public class DebDownloadController extends BaseController {
 			String repoName = matcher.group(1);
 			String distName = matcher.group(2);
 			try {
+				checkRepoIsRestricted(repoName);
 				List<LinkItem> linkItems = new ArrayList<>();
 				for (String component : myDebRepositoryManager.findUniqueComponentByDist(repoName, distName)) {
 					linkItems.add(LinkItem.builder().text(component).type(LINK_TYPE_REPO_DIR).url("./" + component + "/").build());
@@ -244,14 +326,22 @@ public class DebDownloadController extends BaseController {
 				List<LinkItem> breadcrumbItems = new ArrayList<>();
 				breadcrumbItems.add(LinkItem.builder().text("<b>Index of</b> ").type(LINK_TYPE_REP_DIR_SLASH).url("").build());
 				breadcrumbItems.add(LinkItem.builder().text("/").type(LINK_TYPE_REP_DIR_SLASH).url("").build());
-				breadcrumbItems.add(LinkItem.builder().text(repoName).type(LINK_TYPE_REPO_DIR).url(request.getServletPath() + DEBREPO_URL_PART + "/" + repoName + "/").build());
+				breadcrumbItems.add(LinkItem.builder().text(repoName).type(LINK_TYPE_REPO_DIR).url(request.getServletPath() + getDebRepoUrlPartWithContext() + "/" + repoName + "/").build());
 				breadcrumbItems.add(LinkItem.builder().text("/").type(LINK_TYPE_REP_DIR_SLASH).url("").build());
-				breadcrumbItems.add(LinkItem.builder().text("dists").type(LINK_TYPE_REPO_DIR).url(request.getServletPath() + DEBREPO_URL_PART + "/" + repoName + "/dists/").build());
+				breadcrumbItems.add(LinkItem.builder().text("dists").type(LINK_TYPE_REPO_DIR).url(request.getServletPath() + getDebRepoUrlPartWithContext() + "/" + repoName + "/dists/").build());
 				breadcrumbItems.add(LinkItem.builder().text("/").type(LINK_TYPE_REP_DIR_SLASH).url("").build());
-				breadcrumbItems.add(LinkItem.builder().text(distName).type(LINK_TYPE_REPO_DIR).url(request.getServletPath() + DEBREPO_URL_PART + "/" + repoName + "/dists/" + distName + "/").build());
+				breadcrumbItems.add(LinkItem.builder().text(distName).type(LINK_TYPE_REPO_DIR).url(request.getServletPath() + getDebRepoUrlPartWithContext() + "/" + repoName + "/dists/" + distName + "/").build());
 				breadcrumbItems.add(LinkItem.builder().text("/").type(LINK_TYPE_REP_DIR_SLASH).url("").build());
 				params.put("breadcrumbItems", breadcrumbItems);
 				return new ModelAndView(myPluginDescriptor.getPluginResourcesPath("debRepository/directoryListing.jsp"), params);
+			} catch (DebRepositoryPermissionDeniedException ex){
+				response.sendError(HttpServletResponse.SC_FORBIDDEN);
+				Loggers.SERVER.info("DebDownloadController:: Returning 403 : Deb Repository is restricted and user is not permissioned on project: " + request.getPathInfo());
+				return null;			
+			} catch (DebRepositoryAccessIsRestrictedException ex){
+				response.sendRedirect(buildRedirectToRestrictedUrl(request, uriPath));
+				Loggers.SERVER.info("DebDownloadController:: Returning 302 : Deb Repository is restricted: " + request.getPathInfo());
+				return null;
 			} catch (NonExistantRepositoryException ex){
 				response.sendError(HttpServletResponse.SC_NOT_FOUND);
 				Loggers.SERVER.info("DebDownloadController:: Returning 404 : Not Found: No Deb Repository exists with the name: " + request.getPathInfo());
@@ -264,6 +354,7 @@ public class DebDownloadController extends BaseController {
 		if (matcher.matches()) {
 			String repoName = matcher.group(1);
 			try {
+				checkRepoIsRestricted(repoName);
 				List<LinkItem> linkItems = new ArrayList<>();
 				for (String dist : myDebRepositoryManager.findUniqueDist(repoName)) {
 					linkItems.add(LinkItem.builder().text(dist).type(LINK_TYPE_REPO_DIR).url("./" + dist + "/").build());
@@ -275,12 +366,20 @@ public class DebDownloadController extends BaseController {
 				List<LinkItem> breadcrumbItems = new ArrayList<>();
 				breadcrumbItems.add(LinkItem.builder().text("<b>Index of</b> ").type(LINK_TYPE_REP_DIR_SLASH).url("").build());
 				breadcrumbItems.add(LinkItem.builder().text("/").type(LINK_TYPE_REP_DIR_SLASH).url("").build());
-				breadcrumbItems.add(LinkItem.builder().text(repoName).type(LINK_TYPE_REPO_DIR).url(request.getServletPath() + DEBREPO_URL_PART + "/" + repoName + "/").build());
+				breadcrumbItems.add(LinkItem.builder().text(repoName).type(LINK_TYPE_REPO_DIR).url(request.getServletPath() + getDebRepoUrlPartWithContext() + "/" + repoName + "/").build());
 				breadcrumbItems.add(LinkItem.builder().text("/").type(LINK_TYPE_REP_DIR_SLASH).url("").build());
-				breadcrumbItems.add(LinkItem.builder().text("dists").type(LINK_TYPE_REPO_DIR).url(request.getServletPath() + DEBREPO_URL_PART + "/" + repoName + "/dists/").build());
+				breadcrumbItems.add(LinkItem.builder().text("dists").type(LINK_TYPE_REPO_DIR).url(request.getServletPath() + getDebRepoUrlPartWithContext() + "/" + repoName + "/dists/").build());
 				breadcrumbItems.add(LinkItem.builder().text("/").type(LINK_TYPE_REP_DIR_SLASH).url("").build());
 				params.put("breadcrumbItems", breadcrumbItems);
 				return new ModelAndView(myPluginDescriptor.getPluginResourcesPath("debRepository/directoryListing.jsp"), params);
+			} catch (DebRepositoryPermissionDeniedException ex){
+				response.sendError(HttpServletResponse.SC_FORBIDDEN);
+				Loggers.SERVER.info("DebDownloadController:: Returning 403 : Deb Repository is restricted and user is not permissioned on project: " + request.getPathInfo());
+				return null;			
+			} catch (DebRepositoryAccessIsRestrictedException ex){
+				response.sendRedirect(buildRedirectToRestrictedUrl(request, uriPath));
+				Loggers.SERVER.info("DebDownloadController:: Returning 302 : Deb Repository is restricted: " + request.getPathInfo());
+				return null;
 			} catch (NonExistantRepositoryException ex){
 				response.sendError(HttpServletResponse.SC_NOT_FOUND);
 				Loggers.SERVER.info("DebDownloadController:: Returning 404 : Not Found: No Deb Repository exists with the name: " + request.getPathInfo());
@@ -296,6 +395,7 @@ public class DebDownloadController extends BaseController {
 			String component= matcher.group(2);
 			String packageName = matcher.group(3);
 			try {
+				checkRepoIsRestricted(repoName);
 				List<LinkItem> linkItems = new ArrayList<>();
 				List<? extends DebPackage> debs = myDebRepositoryManager.getUniquePackagesByComponentAndPackageName(repoName, component, packageName);
 				Collections.sort(debs, new DebPackageComparator());
@@ -309,16 +409,24 @@ public class DebDownloadController extends BaseController {
 				List<LinkItem> breadcrumbItems = new ArrayList<>();
 				breadcrumbItems.add(LinkItem.builder().text("<b>Index of</b> ").type(LINK_TYPE_REP_DIR_SLASH).url("").build());
 				breadcrumbItems.add(LinkItem.builder().text("/").type(LINK_TYPE_REP_DIR_SLASH).url("").build());
-				breadcrumbItems.add(LinkItem.builder().text(repoName).type(LINK_TYPE_REPO_DIR).url(request.getServletPath() + DEBREPO_URL_PART + "/" + repoName + "/").build());
+				breadcrumbItems.add(LinkItem.builder().text(repoName).type(LINK_TYPE_REPO_DIR).url(request.getServletPath() + getDebRepoUrlPartWithContext() + "/" + repoName + "/").build());
 				breadcrumbItems.add(LinkItem.builder().text("/").type(LINK_TYPE_REP_DIR_SLASH).url("").build());
-				breadcrumbItems.add(LinkItem.builder().text("pool").type(LINK_TYPE_REPO_DIR).url(request.getServletPath() + DEBREPO_URL_PART  + "/" + repoName + "/pool/").build());
+				breadcrumbItems.add(LinkItem.builder().text("pool").type(LINK_TYPE_REPO_DIR).url(request.getServletPath() + getDebRepoUrlPartWithContext()  + "/" + repoName + "/pool/").build());
 				breadcrumbItems.add(LinkItem.builder().text("/").type(LINK_TYPE_REP_DIR_SLASH).url("").build());
-				breadcrumbItems.add(LinkItem.builder().text(component).type(LINK_TYPE_REPO_DIR).url(request.getServletPath() + DEBREPO_URL_PART + "/" + repoName + "/pool/" + component + "/").build());
+				breadcrumbItems.add(LinkItem.builder().text(component).type(LINK_TYPE_REPO_DIR).url(request.getServletPath() + getDebRepoUrlPartWithContext() + "/" + repoName + "/pool/" + component + "/").build());
 				breadcrumbItems.add(LinkItem.builder().text("/").type(LINK_TYPE_REP_DIR_SLASH).url("").build());
-				breadcrumbItems.add(LinkItem.builder().text(packageName).type(LINK_TYPE_REPO_DIR).url(request.getServletPath() + DEBREPO_URL_PART + "/" + repoName + "/pool/" + component + "/"+ packageName + "/").build());
+				breadcrumbItems.add(LinkItem.builder().text(packageName).type(LINK_TYPE_REPO_DIR).url(request.getServletPath() + getDebRepoUrlPartWithContext() + "/" + repoName + "/pool/" + component + "/"+ packageName + "/").build());
 				breadcrumbItems.add(LinkItem.builder().text("/").type(LINK_TYPE_REP_DIR_SLASH).url("").build());
 				params.put("breadcrumbItems", breadcrumbItems);
 				return new ModelAndView(myPluginDescriptor.getPluginResourcesPath("debRepository/directoryListing.jsp"), params);				
+			} catch (DebRepositoryPermissionDeniedException ex){
+				response.sendError(HttpServletResponse.SC_FORBIDDEN);
+				Loggers.SERVER.info("DebDownloadController:: Returning 403 : Deb Repository is restricted and user is not permissioned on project: " + request.getPathInfo());
+				return null;			
+			} catch (DebRepositoryAccessIsRestrictedException ex){
+				response.sendRedirect(buildRedirectToRestrictedUrl(request, uriPath));
+				Loggers.SERVER.info("DebDownloadController:: Returning 302 : Deb Repository is restricted: " + request.getPathInfo());
+				return null;
 			} catch (NonExistantRepositoryException ex){
 				response.sendError(HttpServletResponse.SC_NOT_FOUND);
 				Loggers.SERVER.info("DebDownloadController:: Returning 404 : Not Found: No Deb Repository exists with the name: " + request.getPathInfo());
@@ -332,6 +440,7 @@ public class DebDownloadController extends BaseController {
 			String repoName = matcher.group(1);
 			String component= matcher.group(2);
 			try {
+				checkRepoIsRestricted(repoName);
 				List<LinkItem> linkItems = new ArrayList<>();
 				for (String packageName : myDebRepositoryManager.findUniquePackageNameByComponent(repoName, component)) {
 					linkItems.add(LinkItem.builder().text(packageName).type(LINK_TYPE_REPO_FILE).url("./" + packageName + "/").build());
@@ -343,14 +452,22 @@ public class DebDownloadController extends BaseController {
 				List<LinkItem> breadcrumbItems = new ArrayList<>();
 				breadcrumbItems.add(LinkItem.builder().text("<b>Index of</b> ").type(LINK_TYPE_REP_DIR_SLASH).url("").build());
 				breadcrumbItems.add(LinkItem.builder().text("/").type(LINK_TYPE_REP_DIR_SLASH).url("").build());
-				breadcrumbItems.add(LinkItem.builder().text(repoName).type(LINK_TYPE_REPO_DIR).url(request.getServletPath() + DEBREPO_URL_PART + "/" + repoName + "/").build());
+				breadcrumbItems.add(LinkItem.builder().text(repoName).type(LINK_TYPE_REPO_DIR).url(request.getServletPath() + getDebRepoUrlPartWithContext() + "/" + repoName + "/").build());
 				breadcrumbItems.add(LinkItem.builder().text("/").type(LINK_TYPE_REP_DIR_SLASH).url("").build());
-				breadcrumbItems.add(LinkItem.builder().text("pool").type(LINK_TYPE_REPO_DIR).url(request.getServletPath() + DEBREPO_URL_PART  + "/" + repoName + "/pool/").build());
+				breadcrumbItems.add(LinkItem.builder().text("pool").type(LINK_TYPE_REPO_DIR).url(request.getServletPath() + getDebRepoUrlPartWithContext()  + "/" + repoName + "/pool/").build());
 				breadcrumbItems.add(LinkItem.builder().text("/").type(LINK_TYPE_REP_DIR_SLASH).url("").build());
-				breadcrumbItems.add(LinkItem.builder().text(component).type(LINK_TYPE_REPO_DIR).url(request.getServletPath() + DEBREPO_URL_PART + "/" + repoName + "/pool/" + component + "/").build());
+				breadcrumbItems.add(LinkItem.builder().text(component).type(LINK_TYPE_REPO_DIR).url(request.getServletPath() + getDebRepoUrlPartWithContext() + "/" + repoName + "/pool/" + component + "/").build());
 				breadcrumbItems.add(LinkItem.builder().text("/").type(LINK_TYPE_REP_DIR_SLASH).url("").build());
 				params.put("breadcrumbItems", breadcrumbItems);
 				return new ModelAndView(myPluginDescriptor.getPluginResourcesPath("debRepository/directoryListing.jsp"), params);				
+			} catch (DebRepositoryPermissionDeniedException ex){
+				response.sendError(HttpServletResponse.SC_FORBIDDEN);
+				Loggers.SERVER.info("DebDownloadController:: Returning 403 : Deb Repository is restricted and user is not permissioned on project: " + request.getPathInfo());
+				return null;			
+			} catch (DebRepositoryAccessIsRestrictedException ex){
+				response.sendRedirect(buildRedirectToRestrictedUrl(request, uriPath));
+				Loggers.SERVER.info("DebDownloadController:: Returning 302 : Deb Repository is restricted: " + request.getPathInfo());
+				return null;
 			} catch (NonExistantRepositoryException ex){
 				response.sendError(HttpServletResponse.SC_NOT_FOUND);
 				Loggers.SERVER.info("DebDownloadController:: Returning 404 : Not Found: No Deb Repository exists with the name: " + request.getPathInfo());
@@ -364,6 +481,7 @@ public class DebDownloadController extends BaseController {
 		if (matcher.matches()) {
 			String repoName = matcher.group(1);
 			try {
+				checkRepoIsRestricted(repoName);
 				List<LinkItem> linkItems = new ArrayList<>();
 				for (String component : myDebRepositoryManager.findUniqueComponent(repoName)) {
 					linkItems.add(LinkItem.builder().text(component).type(LINK_TYPE_REPO_FILE).url("./" + component + "/").build());
@@ -375,12 +493,20 @@ public class DebDownloadController extends BaseController {
 				List<LinkItem> breadcrumbItems = new ArrayList<>();
 				breadcrumbItems.add(LinkItem.builder().text("<b>Index of</b> ").type(LINK_TYPE_REP_DIR_SLASH).url("").build());
 				breadcrumbItems.add(LinkItem.builder().text("/").type(LINK_TYPE_REP_DIR_SLASH).url("").build());
-				breadcrumbItems.add(LinkItem.builder().text(repoName).type(LINK_TYPE_REPO_DIR).url(request.getServletPath() + DEBREPO_URL_PART + "/" + repoName + "/").build());
+				breadcrumbItems.add(LinkItem.builder().text(repoName).type(LINK_TYPE_REPO_DIR).url(request.getServletPath() + getDebRepoUrlPartWithContext() + "/" + repoName + "/").build());
 				breadcrumbItems.add(LinkItem.builder().text("/").type(LINK_TYPE_REP_DIR_SLASH).url("").build());
-				breadcrumbItems.add(LinkItem.builder().text("pool").type(LINK_TYPE_REPO_DIR).url(request.getServletPath() + DEBREPO_URL_PART  + "/" + repoName + "/pool/").build());
+				breadcrumbItems.add(LinkItem.builder().text("pool").type(LINK_TYPE_REPO_DIR).url(request.getServletPath() + getDebRepoUrlPartWithContext()  + "/" + repoName + "/pool/").build());
 				breadcrumbItems.add(LinkItem.builder().text("/").type(LINK_TYPE_REP_DIR_SLASH).url("").build());
 				params.put("breadcrumbItems", breadcrumbItems);
 				return new ModelAndView(myPluginDescriptor.getPluginResourcesPath("debRepository/directoryListing.jsp"), params);						
+			} catch (DebRepositoryPermissionDeniedException ex){
+				response.sendError(HttpServletResponse.SC_FORBIDDEN);
+				Loggers.SERVER.info("DebDownloadController:: Returning 403 : Deb Repository is restricted and user is not permissioned on project: " + request.getPathInfo());
+				return null;			
+			} catch (DebRepositoryAccessIsRestrictedException ex){
+				response.sendRedirect(buildRedirectToRestrictedUrl(request, uriPath));
+				Loggers.SERVER.info("DebDownloadController:: Returning 302 : Deb Repository is restricted: " + request.getPathInfo());
+				return null;
 			} catch (NonExistantRepositoryException ex){
 				response.sendError(HttpServletResponse.SC_NOT_FOUND);
 				Loggers.SERVER.info("DebDownloadController:: Returning 404 : Not Found: No Deb Repository exists with the name: " + request.getPathInfo());
@@ -395,7 +521,8 @@ public class DebDownloadController extends BaseController {
 			String repoName = matcher.group(1);
 			String uri = matcher.group(3);
 			try {
-				uri = uriPath.substring(DEBREPO_URL_PART.length() + 1 + repoName.length() + 1);
+				checkRepoIsRestricted(repoName);
+				uri = uriPath.substring(getDebRepoUrlPart().length() + 1 + repoName.length() + 1);
 				DebPackage debPackage = myDebRepositoryManager.findByUri(repoName, uri);
 				SBuild build = this.myServer.findBuildInstanceById(debPackage.getBuildId());
 				return servePackage(request, response, new File(build.getArtifactsDirectory() + File.separator + debPackage.getFilename()));
@@ -404,6 +531,14 @@ public class DebDownloadController extends BaseController {
 				Loggers.SERVER.info("DebDownloadController:: Returning 404 : Not Found: No Deb file found in repository: " + request.getPathInfo());
 				Loggers.SERVER.debug(ex);
 				return null;
+			} catch (DebRepositoryPermissionDeniedException ex){
+				response.sendError(HttpServletResponse.SC_FORBIDDEN);
+				Loggers.SERVER.info("DebDownloadController:: Returning 403 : Deb Repository is restricted and user is not permissioned on project: " + request.getPathInfo());
+				return null;			
+			} catch (DebRepositoryAccessIsRestrictedException ex){
+				response.sendRedirect(buildRedirectToRestrictedUrl(request, uriPath));
+				Loggers.SERVER.info("DebDownloadController:: Returning 302 : Deb Repository is restricted: " + request.getPathInfo());
+				return null;			
 			} catch (NonExistantRepositoryException ex){
 				response.sendError(HttpServletResponse.SC_NOT_FOUND);
 				Loggers.SERVER.info("DebDownloadController:: Returning 404 : Not Found: No Deb Repository exists with the name: " + request.getPathInfo());
@@ -417,7 +552,8 @@ public class DebDownloadController extends BaseController {
 		matcher = infoPattern.matcher(uriPath);
 		if (matcher.matches()) {
 			String repoName = matcher.group(1);
-			if (myDebRepositoryManager.isExistingRepository(repoName)){
+			try {
+				checkRepoIsRestricted(repoName);
 				List<LinkItem> linkItems = new ArrayList<>();
 				linkItems.add(LinkItem.builder().text("dists").type(LINK_TYPE_REPO_DIR).url("./dists/").build());
 				linkItems.add(LinkItem.builder().text("pool").type(LINK_TYPE_REPO_DIR).url("./pool/").build());
@@ -427,19 +563,31 @@ public class DebDownloadController extends BaseController {
 				List<LinkItem> breadcrumbItems = new ArrayList<>();
 				breadcrumbItems.add(LinkItem.builder().text("<b>Index of</b> ").type(LINK_TYPE_REP_DIR_SLASH).url("").build());
 				breadcrumbItems.add(LinkItem.builder().text("/").type(LINK_TYPE_REP_DIR_SLASH).url("").build());
-				breadcrumbItems.add(LinkItem.builder().text(repoName).type(LINK_TYPE_REPO_DIR).url(request.getServletPath() + DEBREPO_URL_PART + "/" + repoName + "/").build());
+				breadcrumbItems.add(LinkItem.builder().text(repoName).type(LINK_TYPE_REPO_DIR).url(request.getServletPath() + getDebRepoUrlPartWithContext() + "/" + repoName + "/").build());
 				breadcrumbItems.add(LinkItem.builder().text("/").type(LINK_TYPE_REP_DIR_SLASH).url("").build());
 				params.put("breadcrumbItems", breadcrumbItems);
+				Loggers.SERVER.info("DebDownloadController:: Returning 200: " + request.getPathInfo() + " Comparing to " + infoPattern + " Class: " + this.getClass().getName());
 				return new ModelAndView(myPluginDescriptor.getPluginResourcesPath("debRepository/directoryListing.jsp"), params);
-			} else {
+			
+			} catch (DebRepositoryPermissionDeniedException ex){
+				response.sendError(HttpServletResponse.SC_FORBIDDEN);
+				Loggers.SERVER.info("DebDownloadController:: Returning 403 : Deb Repository is restricted and user is not permissioned on project: " + request.getPathInfo());
+				return null;			
+			} catch (DebRepositoryAccessIsRestrictedException ex){
+				response.sendRedirect(buildRedirectToRestrictedUrl(request, uriPath));
+				Loggers.SERVER.info("DebDownloadController:: Returning 302 : Deb Repository is restricted: " + request.getPathInfo());
+				return null;			
+			} catch (NonExistantRepositoryException ex){
 				response.sendError(HttpServletResponse.SC_NOT_FOUND);
 				Loggers.SERVER.info("DebDownloadController:: Returning 404 : Not Found: No Deb Repository exists with the name: " + request.getPathInfo());
+				Loggers.SERVER.debug(ex);
 				return null;
 			}
+
 		}
 		
 		response.sendError(HttpServletResponse.SC_NOT_FOUND);
-		Loggers.SERVER.info("DebDownloadController:: Returning 404 : All regex tried: " + request.getPathInfo());
+		Loggers.SERVER.info("DebDownloadController:: Returning 404 : All regex tried: " + request.getPathInfo() + " Comparing to " + infoPattern + " Class: " + this.getClass().getName());
 		return null;
 	}
 
@@ -506,6 +654,14 @@ public class DebDownloadController extends BaseController {
 		return null;
 	}
 	
+	private String buildRedirectToRestrictedUrl(HttpServletRequest request, String uriPath) {
+		StringBuilder sb = new StringBuilder();
+		sb.append(request.getContextPath())
+		  .append(DEBREPO_BASE_URL_FOR_REDIRECT_RESTRICTED)
+		  .append(uriPath.substring(getDebRepoUrlPart().length()));
+		return sb.toString();
+	}
+	
 	@Data @Builder
 	public static class LinkItem {
 		String text;
@@ -514,9 +670,7 @@ public class DebDownloadController extends BaseController {
 	}
 	
 	private static class DebPackageComparator implements Comparator<DebPackage> {
-		final int BEFORE = -1;
 		final int EQUAL = 0;
-		final int AFTER = 1;
 		
 		@Override
 		public int compare(DebPackage o1, DebPackage o2) {

@@ -102,7 +102,8 @@ public class DebRepoProjectSettingsTab extends EditProjectTab {
         									config, 
         									StringUtils.getDebRepoUrl(
         											myServer.getRootUrl(), 
-        											config.getRepoName()
+        											config.getRepoName(),
+        											config.isRestricted()
         											)
         									)
         							)

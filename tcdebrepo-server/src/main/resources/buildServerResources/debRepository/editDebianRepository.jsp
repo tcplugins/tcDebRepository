@@ -95,6 +95,10 @@
           <th style="width:15%;">&quot;All&quot; Architectures:</th>
           <td style="width:85%;" colspan="3">${debRepoBean.allArchsAsCSL}</td>
         </tr>
+        <tr>
+          <th style="width:15%;">Restricted Access:</th>
+          <td style="width:85%;" colspan="3">${repoStats.isRestricted ? 'Authentication required' : 'No authentication required' }</td>
+        </tr>
       </table>
       
           <bs:dialog dialogId="editRepoDialog"
@@ -135,6 +139,16 @@
                         </div>
                         The project this repository belongs to. Users with the Project Administrator Role for this project can edit this repository configuration. 
                         When adding/editing Artifact Filters, only builds from this project or sub-projects are available to choose from.</p>
+                    </td>
+                </tr>
+                 <tr>    
+                 	<th>Restricted Access</th>                
+                    <td>
+                        <div>
+  							<label><input type="checkbox" id="debrepo.restricted" name="debrepo.restricted" ${repoStats.isRestricted ? 'checked' : '' }> Authentication Required</label>
+                        </div>
+                        Whether the repository requires a username and password for access. If a repository is restricted, the APT client must present valid TeamCity credentials
+                        and the account must have read permission on the project specified above (or a subproject).   
                     </td>
                 </tr>
                  <tr>    

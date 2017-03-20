@@ -18,7 +18,9 @@
  *******************************************************************************/
 package debrepo.teamcity.web.action;
 
-import static debrepo.teamcity.web.DebRepoConfigurationEditPageActionController.*;
+import static debrepo.teamcity.web.DebRepoConfigurationEditPageActionController.DEBREPO_NAME;
+import static debrepo.teamcity.web.DebRepoConfigurationEditPageActionController.DEBREPO_PROJECT_ID;
+import static debrepo.teamcity.web.DebRepoConfigurationEditPageActionController.DEBREPO_RESTRICTED;
 import static debrepo.teamcity.web.DebRepoConfigurationEditPageActionController.DEBREPO_UUID;
 
 import java.util.Enumeration;
@@ -37,7 +39,6 @@ import debrepo.teamcity.service.DebRepositoryConfigurationManager;
 import debrepo.teamcity.util.RepositoryNameValidator;
 import debrepo.teamcity.util.RepositoryNameValidator.RepositoryNameValidationResult;
 import debrepo.teamcity.web.DebRepoConfigurationEditPageActionController;
-import debrepo.teamcity.web.action.ArtifactFilterAction.IncompleteFilterException;
 import jetbrains.buildServer.controllers.ActionMessages;
 import jetbrains.buildServer.web.openapi.ControllerAction;
 
@@ -64,11 +65,13 @@ public class EditRepositoryAction extends ArtifactFilterAction implements Contro
 		String repoUuid;
 		String repoName;
 		String projectId;
+		boolean restricted = false;
 		Set<String> archs = new TreeSet<>();
 		try {
 			repoUuid = getParameterAsStringOrNull(request, DEBREPO_UUID, "request is missing repo uuid");
 			repoName = getParameterAsStringOrNull(request, DEBREPO_NAME, "Please enter a Repository Name");
 			projectId = getParameterAsStringOrNull(request, DEBREPO_PROJECT_ID, "Please choose a project");
+			restricted = Boolean.valueOf(getParameterAsStringOrNull(request, DEBREPO_RESTRICTED, "Request is missing restricted setting"));
 		} catch (IncompleteFilterException e) {
 			ajaxResponse.setAttribute("error", e.getMessage());
 			return;
@@ -101,6 +104,11 @@ public class EditRepositoryAction extends ArtifactFilterAction implements Contro
 			}
 			if (!debConfig.getProjectId().equals(projectId)) {
 				debConfig.setProjectId(projectId);
+				change = true;
+			}
+			
+			if (debConfig.isRestricted() != restricted) {
+				debConfig.setRestricted(restricted);
 				change = true;
 			}
 			
