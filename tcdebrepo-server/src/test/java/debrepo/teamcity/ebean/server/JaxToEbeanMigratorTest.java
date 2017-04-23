@@ -28,6 +28,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.internal.matchers.Any;
 
 import debrepo.teamcity.Loggers;
 import debrepo.teamcity.ebean.server.EbeanServerProvider;
@@ -37,12 +38,15 @@ import debrepo.teamcity.entity.DebRepositoryConfiguration;
 import debrepo.teamcity.entity.DebRepositoryConfigurationJaxImpl;
 import debrepo.teamcity.entity.helper.DebRepositoryDatabaseJaxHelperImpl;
 import debrepo.teamcity.entity.helper.DebRepositoryDatabaseXmlPersisterImpl;
+import debrepo.teamcity.entity.helper.DebRepositoryToReleaseDescriptionBuilder;
 import debrepo.teamcity.entity.helper.JaxDbFileRenamer;
 import debrepo.teamcity.entity.helper.JaxDbFileRenamerImpl;
 import debrepo.teamcity.entity.helper.JaxHelper;
 import debrepo.teamcity.entity.helper.PluginDataResolver;
 import debrepo.teamcity.entity.helper.PluginDataResolverImpl;
+import debrepo.teamcity.entity.helper.ReleaseDescriptionBuilder;
 import debrepo.teamcity.entity.helper.XmlPersister;
+import debrepo.teamcity.service.DebReleaseFileGenerator;
 import debrepo.teamcity.service.DebRepositoryConfigurationFactory;
 import debrepo.teamcity.service.DebRepositoryConfigurationFactoryImpl;
 import debrepo.teamcity.service.DebRepositoryConfigurationManager;
@@ -50,6 +54,7 @@ import debrepo.teamcity.service.DebRepositoryManager;
 import debrepo.teamcity.service.NonExistantRepositoryException;
 import debrepo.teamcity.settings.DebRepositoryConfigurationChangePersister;
 import jetbrains.buildServer.serverSide.ProjectManager;
+import jetbrains.buildServer.serverSide.SProject;
 import jetbrains.buildServer.serverSide.ServerPaths;
 
 public class JaxToEbeanMigratorTest {
@@ -58,6 +63,8 @@ public class JaxToEbeanMigratorTest {
 	@Mock ServerPaths jaxServerPaths, ebeanServerPaths;
 	PluginDataResolver jaxPluginDataResolver, ebeanPluginDataResolver;
 	@Mock protected ProjectManager projectManager;
+	ReleaseDescriptionBuilder releaseDescriptionBuilder;
+	@Mock SProject project;
 	
 	JaxHelper<DebPackageStoreEntity> jaxHelper = new DebRepositoryDatabaseJaxHelperImpl();
 	XmlPersister<DebPackageStore, DebRepositoryConfiguration> debRepositoryDatabaseXmlPersister;
@@ -75,14 +82,18 @@ public class JaxToEbeanMigratorTest {
 		MockitoAnnotations.initMocks(this);
 		when(jaxServerPaths.getPluginDataDirectory()).thenReturn(new File("src/test/resources/testplugindata"));
 		when(ebeanServerPaths.getPluginDataDirectory()).thenReturn(new File("target"));
+		when(projectManager.findProjectById("project01")).thenReturn(project);
+		when(project.getExternalId()).thenReturn("My_Project_Name");
+		when(project.getDescription()).thenReturn("My Project Name - Long description");
 		
 		jaxPluginDataResolver = new PluginDataResolverImpl(jaxServerPaths);
 		ebeanPluginDataResolver = new PluginDataResolverImpl(ebeanServerPaths);
 		ebeanServerProvider = new EbeanServerProvider(ebeanPluginDataResolver);
+		releaseDescriptionBuilder = new DebRepositoryToReleaseDescriptionBuilder(projectManager);
 		
 		debRepositoryDatabaseXmlPersister = new DebRepositoryDatabaseXmlPersisterImpl(jaxPluginDataResolver, jaxHelper);
 		jaxDebRepositoryManager = new debrepo.teamcity.service.DebRepositoryManagerImpl(projectManager, debRepositoryDatabaseXmlPersister, debRepositoryConfigurationFactory, debRepositoryConfigurationChangePersister);
-		ebeanDebRepositoryManager = new debrepo.teamcity.ebean.server.DebRepositoryManagerImpl(ebeanServerProvider.getEbeanServer(), debRepositoryConfigurationFactory, debRepositoryConfigurationChangePersister);
+		ebeanDebRepositoryManager = new debrepo.teamcity.ebean.server.DebRepositoryManagerImpl(ebeanServerProvider.getEbeanServer(), debRepositoryConfigurationFactory, debRepositoryConfigurationChangePersister, releaseDescriptionBuilder);
 		debRepositoryConfigManager = (DebRepositoryConfigurationManager) ebeanDebRepositoryManager;
 		
 	}
@@ -94,7 +105,7 @@ public class JaxToEbeanMigratorTest {
 		c.setUuid(UUID.fromString("a187bd92-b22d-43ea-98ce-55ec2cedb942"));
 		debRepositoryConfigManager.addDebRepository(c);
 		jaxDebRepositoryManager.initialisePackageStore(c);
-		JaxToEbeanMigrator migrator = new JaxToEbeanMigrator(jaxDebRepositoryManager, ebeanDebRepositoryManager, jaxDbFileRenamer);
+		JaxToEbeanMigrator migrator = new JaxToEbeanMigrator(jaxDebRepositoryManager, ebeanDebRepositoryManager, (DebReleaseFileGenerator) ebeanDebRepositoryManager, jaxDbFileRenamer);
 		migrator.migrate(c);
 		verify(jaxDbFileRenamer, times(1)).renameToBackup(c);
 	}

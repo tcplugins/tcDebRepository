@@ -18,13 +18,17 @@
  *******************************************************************************/
 package debrepo.teamcity.entity.helper;
 
+import java.text.SimpleDateFormat;
 import java.util.Collection;
-import java.util.Map.Entry;
+import java.util.Date;
+import java.util.Set;
+import java.util.TimeZone;
+import java.util.TreeSet;
 
-import debrepo.teamcity.DebPackage;
-import debrepo.teamcity.RepositoryFile;
+import debrepo.teamcity.GenericRepositoryFile;
 import debrepo.teamcity.entity.DebRepositoryConfiguration;
-import jetbrains.buildServer.configs.FeatureBuilderImpl;
+import jetbrains.buildServer.serverSide.ProjectManager;
+import jetbrains.buildServer.serverSide.SProject;
 
 /**
  * <p>
@@ -76,9 +80,24 @@ import jetbrains.buildServer.configs.FeatureBuilderImpl;
  * </pre>
  */
 		
-public class DebRepositoryToReleaseDescriptionBuilder {
+public class DebRepositoryToReleaseDescriptionBuilder implements ReleaseDescriptionBuilder {
+	// Sat, 17 Sep 2016 11:38:03 UTC
+	private final SimpleDateFormat debianDateFormatter = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss z"); 
+	private final ProjectManager myProjectManager;
 	
-	public static String buildReleaseHeader(DebRepositoryConfiguration configuration) {
+	public DebRepositoryToReleaseDescriptionBuilder(ProjectManager projectManager) {
+		this.myProjectManager = projectManager;
+		debianDateFormatter.setTimeZone(TimeZone.getTimeZone("UTC"));  
+	}
+	
+	private static final int padnum = 16;
+	
+	@Override
+	public String buildReleaseHeader(DebRepositoryConfiguration configuration, 
+									String dist, 
+									Set<String> components, 
+									Set<String> archs,
+									Date modifiedTime) {
 		StringBuilder sb = new StringBuilder();
 		/*
 		 *    Origin: Debian
@@ -87,48 +106,84 @@ public class DebRepositoryToReleaseDescriptionBuilder {
 		 *    Version: 8.6
 		 *    Codename: jessie
 		 *    Date: Sat, 17 Sep 2016 11:38:03 UTC
+		 *    Acquire-By-Hash: yes
 		 *    Architectures: amd64 arm64 armel armhf i386 mips mipsel powerpc ppc64el s390x
 		 *    Components: main contrib non-free
 		 *    Description: Debian 8.6 Released 17 September 2016 */
 		
-//		sb.append("Origin: ").append(debPackageEntity.getPackageName()).append("\n");
-//		for (Entry<String,String> e : debPackageEntity.getParameters().entrySet()) {
-//			if (!e.getKey().equals("Package")) {
-//				sb.append(e.getKey()).append(": ").append(e.getValue()).append("\n");
-//			}
-//		}
+		SProject project = myProjectManager.findProjectById(configuration.getProjectId());
+		
+		sb.append("Origin: ").append(project.getExternalId()).append("\n")
+		  .append("Label: ").append(project.getDescription()).append("\n")
+		  .append("Suite: ").append(dist).append("\n")
+		  .append("Date: ").append(debianDateFormatter.format(modifiedTime)).append("\n")
+		  .append("Acquire-By-Hash: yes\n");
+
+		sb.append("Architectures:");
+		for (String arch : archs) {
+			sb.append(" ").append(arch);
+		}
+		
+		sb.append("\n")
+		  .append("Components:");
+		for (String component : components) {
+			sb.append(" ").append(component);
+		}
+		sb.append("\n");
 		return sb.toString();
 	}
 	
-	public static String buildPackageDescriptionList(DebRepositoryConfiguration configuration, Collection<? extends RepositoryFile> repositoryFiles) {
+	@Override
+	public String buildPackageDescriptionList(DebRepositoryConfiguration configuration, Collection<? extends GenericRepositoryFile> repositoryFiles, String dist, Date modifiedTime) {
 		StringBuilder sb = new StringBuilder();
-		sb.append(buildReleaseHeader(configuration));
+		
+		Set<String> components = new TreeSet<>();
+		Set<String> archs = new TreeSet<>();
 		
 		sb.append("MD5Sum:\n");
-		for (RepositoryFile file : repositoryFiles) {
-			sb.append(file.getMD5Sum());
-			sb.append(" ");
-			file.getSizeInKbAndFilename();
-			sb.append("\n");
+		for (GenericRepositoryFile file : repositoryFiles) {
+			sb.append(" ")
+			  .append(file.getMd5())
+			  .append(" ");
+			padSize(sb,file.getSizeInBytes());
+			sb.append(" ")
+			  .append(file.getFilePath())
+			  .append("\n");
 		}
 		
 		sb.append("SHA1:\n");
-		for (RepositoryFile file : repositoryFiles) {
-			sb.append(file.getSHA1());
-			sb.append(" ");
-			file.getSizeInKbAndFilename();
-			sb.append("\n");
+		for (GenericRepositoryFile file : repositoryFiles) {
+			sb.append(" ")
+			  .append(file.getSha1())
+			  .append(" ");
+			padSize(sb,file.getSizeInBytes());
+			sb.append(" ")
+			  .append(file.getFilePath())
+			  .append("\n");
 		}
 		
 		sb.append("SHA256:\n");
-		for (RepositoryFile file : repositoryFiles) {
-			sb.append(file.getSHA256());
-			sb.append(" ");
-			file.getSizeInKbAndFilename();
-			sb.append("\n");
+		for (GenericRepositoryFile file : repositoryFiles) {
+			sb.append(" ")
+			  .append(file.getSha256())
+			  .append(" ");
+			padSize(sb,file.getSizeInBytes());
+			sb.append(" ")
+			  .append(file.getFilePath())
+			  .append("\n");
+			components.add(file.getComponent());
+			archs.add(file.getArch());
 		}
-		return sb.toString();
+		return buildReleaseHeader(configuration, dist, components, archs, modifiedTime) + sb.toString();
 	}
 	
+	private static void padSize(StringBuilder stringBuilder, String fileSize) {
+		int rest = padnum - fileSize.length();
+		for(int i = 1; i < rest; i++)
+		    {
+			stringBuilder.append(" ");
+		    }
+		stringBuilder.append(fileSize);
+	}
 
 }

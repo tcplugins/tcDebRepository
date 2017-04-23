@@ -48,6 +48,7 @@ import debrepo.teamcity.entity.helper.DebRepositoryConfigurationJaxHelperImpl;
 import debrepo.teamcity.entity.helper.JaxHelper;
 import debrepo.teamcity.entity.helper.PluginDataResolver;
 import debrepo.teamcity.entity.helper.PluginDataResolverImpl;
+import debrepo.teamcity.entity.helper.ReleaseDescriptionBuilder;
 import debrepo.teamcity.service.DebRepositoryManager.DebPackageRemovalBean;
 import debrepo.teamcity.settings.DebRepositoryConfigurationChangePersister;
 import jetbrains.buildServer.serverSide.ProjectManager;
@@ -78,6 +79,7 @@ public abstract class DebRepositoryManagerTest {
 	@Mock protected SBuildType bt03;
 	@Mock protected SBuild build03;
 	@Mock protected DebRepositoryConfigurationChangePersister debRepositoryConfigurationChangePersister;
+	@Mock protected ReleaseDescriptionBuilder releaseDescriptionBuilder;
 	@Mock ServerPaths serverPaths;
 	
 	PluginDataResolver pathResolver;

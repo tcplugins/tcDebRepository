@@ -18,16 +18,16 @@
  *******************************************************************************/
 package debrepo.teamcity.ebean;
 
-import java.util.List;
+import java.util.Date;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
+import javax.persistence.Lob;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
 import com.avaje.ebean.Model;
 
@@ -35,39 +35,40 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Entity
-@Table(name = "o_repository")
+@Table(name = "o_deb_release_file",
+	uniqueConstraints =
+		@UniqueConstraint( columnNames={ "repository_id", "dist" } )
+	)
 @Getter
 @Setter
-public class DebRepositoryModel extends Model {
+public class DebReleaseFileModel extends Model {
 
 
-	public static Find<Long, DebRepositoryModel> getFind() {
+	public static Find<Long, DebReleaseFileModel> getFind() {
 		return find;
 	}
 
-	public static final Find<Long, DebRepositoryModel> find = new Find<Long, DebRepositoryModel>() {};
+	public static final Find<Long, DebReleaseFileModel> find = new Find<Long, DebReleaseFileModel>() {};
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	Long id;
 	
-	String name;
+	@ManyToOne
+	private DebRepositoryModel repository;
 	
-	String uuid;
+	String dist;
 	
-	String projectId;
+	Date modifiedTime;
 	
-	@OneToMany(mappedBy = "repository", cascade=CascadeType.REMOVE)
-	List<DebPackageModel> debpackages;
+	@Lob
+	String releaseFile;
 	
-	@OneToMany(mappedBy = "repository", cascade=CascadeType.REMOVE)
-	List<DebPackagesFileModel> debpackagesFile;
+	@Lob
+	String inReleaseFile;
 	
-	@OneToMany(mappedBy = "repository", cascade=CascadeType.REMOVE)
-	DebReleaseFileModel releaseFile;
-	
-	@OneToMany(mappedBy = "repository", cascade=CascadeType.REMOVE)
-	DebReleaseFileSimpleModel releaseFileSimple;
+	@Lob
+	String releaseFileGpg;
 	
 }
 

@@ -33,6 +33,7 @@ import debrepo.teamcity.entity.DebPackageStore;
 import debrepo.teamcity.entity.DebRepositoryConfiguration;
 import debrepo.teamcity.entity.helper.PluginDataResolver;
 import debrepo.teamcity.entity.helper.PluginDataResolverImpl;
+import debrepo.teamcity.entity.helper.ReleaseDescriptionBuilder;
 import debrepo.teamcity.entity.helper.XmlPersister;
 import debrepo.teamcity.service.DebRepositoryConfigurationManager;
 import debrepo.teamcity.service.DebRepositoryManager;
@@ -62,7 +63,8 @@ public class DebRepositoryManagerEbeanTests extends DebRepositoryManagerTest {
 		debRepositoryManagerImpl = new DebRepositoryManagerImpl(
 				ebeanServerProvider.getEbeanServer(),
 				debRepositoryConfigurationFactory, 
-				debRepositoryConfigurationChangePersister);
+				debRepositoryConfigurationChangePersister,
+				releaseDescriptionBuilder);
 	}
 
 	@Override

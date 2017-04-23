@@ -15,10 +15,13 @@
  *******************************************************************************/
 package debrepo.teamcity;
 
-public interface RepositoryFile {
-	public String getSizeInKbAndFilename(); 
-	public String getMD5Sum(); 
-	public String getSHA1(); 
-	public String getSHA256();
+public interface GenericRepositoryFile {
+	public String getSizeInBytes();
+	public String getFilePath();
+	public String getMd5(); 
+	public String getSha1(); 
+	public String getSha256();
+	public String getComponent();
+	public String getArch();
 
 }

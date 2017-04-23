@@ -64,6 +64,10 @@
      	class="debrepo.teamcity.web.action.DeleteArtifactFilterAction" 
      	/>
      	
+       <bean id="releaseDescriptionBuilder"
+     	class="debrepo.teamcity.entity.helper.DebRepositoryToReleaseDescriptionBuilder" 
+     	/>
+     	
      	<!-- This impl of debRepositoryManager uses a map backed in-memory cache
      	     Uncomment the following commented out classes to use it
      		 (and make sure the ebean backed one below is commented out). -->

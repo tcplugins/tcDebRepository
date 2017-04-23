@@ -40,11 +40,14 @@ import debrepo.teamcity.entity.DebRepositoryConfigurationJaxImpl;
 import debrepo.teamcity.entity.DebRepositoryConfigurations;
 import debrepo.teamcity.entity.helper.DebRepositoryConfigurationJaxHelperImpl;
 import debrepo.teamcity.entity.helper.DebRepositoryDatabaseJaxHelperImpl;
+import debrepo.teamcity.entity.helper.DebRepositoryToReleaseDescriptionBuilder;
 import debrepo.teamcity.entity.helper.JaxDbFileRenamer;
 import debrepo.teamcity.entity.helper.JaxHelper;
 import debrepo.teamcity.entity.helper.PluginDataResolver;
 import debrepo.teamcity.entity.helper.PluginDataResolverImpl;
+import debrepo.teamcity.entity.helper.ReleaseDescriptionBuilder;
 import debrepo.teamcity.entity.helper.XmlPersister;
+import debrepo.teamcity.service.DebReleaseFileGenerator;
 import debrepo.teamcity.service.DebRepositoryConfigurationFactory;
 import debrepo.teamcity.service.DebRepositoryConfigurationFactoryImpl;
 import debrepo.teamcity.service.DebRepositoryConfigurationManager;
@@ -52,6 +55,7 @@ import debrepo.teamcity.service.DebRepositoryManager;
 import debrepo.teamcity.settings.DebRepositoryConfigurationChangePersister;
 import debrepo.teamcity.settings.DebRepositoryConfigurationChangePersisterImpl;
 import jetbrains.buildServer.serverSide.ProjectManager;
+import jetbrains.buildServer.serverSide.SProject;
 import jetbrains.buildServer.serverSide.ServerPaths;
 
 public class JaxToEbeanMigrationManagerTest {
@@ -59,6 +63,8 @@ public class JaxToEbeanMigrationManagerTest {
 	@Mock ServerPaths jaxServerPaths, ebeanServerPaths;
 	PluginDataResolver jaxPluginDataResolver, ebeanPluginDataResolver;
 	@Mock protected ProjectManager projectManager;
+	ReleaseDescriptionBuilder releaseDescriptionBuilder;
+	@Mock SProject project;
 	
 	//JaxHelper<DebPackageStoreEntity> jaxHelper = new DebRepositoryDatabaseJaxHelperImpl();
 	XmlPersister<DebPackageStore, DebRepositoryConfiguration> debRepositoryDatabaseXmlPersister;
@@ -80,15 +86,20 @@ public class JaxToEbeanMigrationManagerTest {
 		when(jaxServerPaths.getPluginDataDirectory()).thenReturn(new File("src/test/resources/testplugindata"));
 		when(jaxServerPaths.getConfigDir()).thenReturn("src/test/resources/testplugindata/config");
 		when(ebeanServerPaths.getPluginDataDirectory()).thenReturn(new File("target"));
+		when(projectManager.findProjectById("project01")).thenReturn(project);
+		when(project.getExternalId()).thenReturn("My_Project_Name");
+		when(project.getDescription()).thenReturn("My Project Name - Long description");
 		
 		jaxPluginDataResolver = new PluginDataResolverImpl(jaxServerPaths);
 		ebeanPluginDataResolver = new PluginDataResolverImpl(ebeanServerPaths);
 		ebeanServerProvider = new EbeanServerProvider(ebeanPluginDataResolver);
+		releaseDescriptionBuilder = new DebRepositoryToReleaseDescriptionBuilder(projectManager);
 		
 		DebRepositoryManager ebeanDebRepositoryManager = new DebRepositoryManagerImpl(
 				ebeanServerProvider.getEbeanServer(), 
 				debRepositoryConfigurationFactory, 
-				debRepositoryConfigurationChangePersister);
+				debRepositoryConfigurationChangePersister,
+				releaseDescriptionBuilder);
 		
 		
 		
@@ -99,6 +110,7 @@ public class JaxToEbeanMigrationManagerTest {
 		
 		JaxToEbeanMigrationManager m = new JaxToEbeanMigrationManager(
 				ebeanDebRepositoryManager, 
+				(DebReleaseFileGenerator) ebeanDebRepositoryManager, 
 				projectManager, 
 				jaxPluginDataResolver, 
 				noOpChangePersister, 

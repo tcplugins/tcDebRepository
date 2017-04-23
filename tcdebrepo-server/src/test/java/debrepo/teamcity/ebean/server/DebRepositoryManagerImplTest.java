@@ -35,6 +35,7 @@ import debrepo.teamcity.Loggers;
 import debrepo.teamcity.entity.DebRepositoryConfiguration;
 import debrepo.teamcity.entity.helper.PluginDataResolver;
 import debrepo.teamcity.entity.helper.PluginDataResolverImpl;
+import debrepo.teamcity.entity.helper.ReleaseDescriptionBuilder;
 import debrepo.teamcity.service.DebRepositoryBaseTest;
 import debrepo.teamcity.service.DebRepositoryConfigurationManager;
 import debrepo.teamcity.service.DebRepositoryManager;
@@ -56,7 +57,7 @@ public class DebRepositoryManagerImplTest extends DebRepositoryBaseTest {
 		
 		pluginDataResolver = new PluginDataResolverImpl(serverPaths);
 		ebeanServerProvider = new EbeanServerProvider(pluginDataResolver);
-		debRepositoryManager = new DebRepositoryManagerImpl(ebeanServerProvider.getEbeanServer(), debRepositoryConfigurationFactory, debRepositoryConfigurationChangePersister);
+		debRepositoryManager = new DebRepositoryManagerImpl(ebeanServerProvider.getEbeanServer(), debRepositoryConfigurationFactory, debRepositoryConfigurationChangePersister, releaseDescriptionBuilder);
 		debRepositoryConfigManager = (DebRepositoryConfigurationManager) debRepositoryManager;
 		
 		DebRepositoryConfiguration c = getDebRepoConfig1();
@@ -146,7 +147,7 @@ public class DebRepositoryManagerImplTest extends DebRepositoryBaseTest {
 	@Override
 	public DebRepositoryManager getDebRepositoryManager() throws NonExistantRepositoryException, IOException {
 		setuplocal();
-		return new DebRepositoryManagerImpl(ebeanServerProvider.getEbeanServer(), debRepositoryConfigurationFactory, debRepositoryConfigurationChangePersister);
+		return new DebRepositoryManagerImpl(ebeanServerProvider.getEbeanServer(), debRepositoryConfigurationFactory, debRepositoryConfigurationChangePersister, releaseDescriptionBuilder);
 	}
 
 }

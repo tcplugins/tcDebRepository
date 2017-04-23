@@ -15,19 +15,22 @@
  *******************************************************************************/
 package debrepo.teamcity.entity.helper;
 
-import debrepo.teamcity.RepositoryFile;
+import debrepo.teamcity.GenericRepositoryFile;
 import lombok.Builder;
 import lombok.Value;
 
 @Value @Builder
-public class RepositoryFileImpl implements RepositoryFile {
+public class ReleaseFileImpl implements GenericRepositoryFile {
 	
 	private static final int padnum = 16;
 	
-	private String sizeInKbAndFilename;
-	private String MD5Sum;
-	private String SHA1;
-	private String SHA256;
+	private String sizeInBytes;
+	private String path;
+	private String md5;
+	private String sha1;
+	private String sha256;
+	private String component;
+	private String arch;
 
 	private static void padSize(StringBuilder stringBuilder, String fileSize) {
 		int rest = padnum - fileSize.length();
@@ -36,6 +39,12 @@ public class RepositoryFileImpl implements RepositoryFile {
 			stringBuilder.append(" ");
 		    }
 		stringBuilder.append(fileSize);
+	}
+
+
+	@Override
+	public String getFilePath() {
+		return path;
 	}
 	
 }

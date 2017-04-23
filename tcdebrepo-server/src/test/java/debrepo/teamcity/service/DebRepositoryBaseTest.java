@@ -36,6 +36,7 @@ import debrepo.teamcity.entity.DebRepositoryConfigurationJaxImpl;
 import debrepo.teamcity.entity.DebRepositoryConfigurations;
 import debrepo.teamcity.entity.helper.PluginDataResolver;
 import debrepo.teamcity.entity.helper.PluginDataResolverImpl;
+import debrepo.teamcity.entity.helper.ReleaseDescriptionBuilder;
 import debrepo.teamcity.entity.helper.XmlPersister;
 import debrepo.teamcity.settings.DebRepositoryConfigurationChangePersister;
 import jetbrains.buildServer.serverSide.ProjectManager;
@@ -52,6 +53,7 @@ public abstract class DebRepositoryBaseTest {
 	protected DebRepositoryManager debRepositoryManager;
 	protected DebRepositoryConfigurationManager debRepositoryConfigManager;
 	@Mock protected DebRepositoryConfigurationChangePersister debRepositoryConfigurationChangePersister;
+	@Mock protected ReleaseDescriptionBuilder releaseDescriptionBuilder;
 	@Mock protected ProjectManager projectManager;
 	@Mock protected XmlPersister<DebPackageStore, DebRepositoryConfiguration> debRepositoryDatabaseXmlPersister;
 	protected DebRepositoryConfigurationFactory debRepositoryConfigurationFactory = new DebRepositoryConfigurationFactoryImpl();

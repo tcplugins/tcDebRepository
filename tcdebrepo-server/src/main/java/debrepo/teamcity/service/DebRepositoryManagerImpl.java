@@ -279,6 +279,11 @@ public class DebRepositoryManagerImpl extends  DebRepositoryConfigurationManager
 		}
 		persist(store.getUuid());
 	}
+	
+	@Override
+	public void bulkAddBuildPackages(DebRepositoryConfiguration debRepositoryConfiguration, List<DebPackage> newPackages) throws NonExistantRepositoryException {
+		addBuildPackages(debRepositoryConfiguration, newPackages);
+	}
 
 	@Override
 	public void removeBuildPackages(DebPackageRemovalBean packageRemovalBean) {

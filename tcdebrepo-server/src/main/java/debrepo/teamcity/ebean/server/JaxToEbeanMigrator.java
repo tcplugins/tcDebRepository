@@ -23,6 +23,7 @@ import debrepo.teamcity.DebPackage;
 import debrepo.teamcity.Loggers;
 import debrepo.teamcity.entity.DebRepositoryConfiguration;
 import debrepo.teamcity.entity.helper.JaxDbFileRenamer;
+import debrepo.teamcity.service.DebReleaseFileGenerator;
 import debrepo.teamcity.service.DebRepositoryManager;
 import debrepo.teamcity.service.NonExistantRepositoryException;
 
@@ -30,14 +31,17 @@ public class JaxToEbeanMigrator {
 	
 	private DebRepositoryManager myJaxDebRepositoryManager;
 	private DebRepositoryManager myEbeanDebRepositoryManager;
+	private DebReleaseFileGenerator myDebReleaseFileGenerator;
 	private JaxDbFileRenamer myJaxDbFileRenamer;
 
 	public JaxToEbeanMigrator(
 						DebRepositoryManager jaxDebRepositoryManager, 
 						DebRepositoryManager ebeanDebRepositoryManager,
+						DebReleaseFileGenerator debReleaseFileGenerator,
 						JaxDbFileRenamer jaxDbFileRenamer) {
 		myJaxDebRepositoryManager = jaxDebRepositoryManager;
 		myEbeanDebRepositoryManager = ebeanDebRepositoryManager;
+		myDebReleaseFileGenerator = debReleaseFileGenerator;
 		myJaxDbFileRenamer = jaxDbFileRenamer;
 		
 	}
@@ -56,7 +60,8 @@ public class JaxToEbeanMigrator {
 			filenames.add(filename);
 			List<DebPackage> packages = (List<DebPackage>) myJaxDebRepositoryManager.findAllByFilenames(config.getRepoName(), filenames);
 			Loggers.SERVER.debug("JaxToEbeanMigrator :: Migrating all packages in repo \"" + config.getRepoName() + "\" of filename: " + filename);
-			myEbeanDebRepositoryManager.addBuildPackages(config, packages);
+			myEbeanDebRepositoryManager.bulkAddBuildPackages(config, packages);
+			//myEbeanDebRepositoryManager.addBuildPackages(config, packages);
 			packageMigrationCount += packages.size();
 		}
 		Loggers.SERVER.info("JaxToEbeanMigrator :: " + packageMigrationCount + " of " + packagesToMigrateCount + " packages migrated from JAX to eBean. Removing repository items from JAX cache...");
@@ -65,6 +70,9 @@ public class JaxToEbeanMigrator {
 		if (myJaxDbFileRenamer.renameToBackup(config)) {
 			Loggers.SERVER.info("JaxToEbeanMigrator :: XML database file renamed for " + config.getRepoName() + "(" + config.getUuid().toString() + ")");
 		}
+		Loggers.SERVER.info("JaxToEbeanMigrator :: Requesting Release file generation for " + config.getRepoName() + "(" + config.getUuid().toString() + ")");
+		this.myDebReleaseFileGenerator.updateAllReleaseFiles(config);
+		Loggers.SERVER.info("JaxToEbeanMigrator :: Completed Release file generation for " + config.getRepoName() + "(" + config.getUuid().toString() + ")");
 	}
 
 }

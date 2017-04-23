@@ -83,6 +83,8 @@ public interface DebRepositoryManager {
 	public boolean isRestrictedRepository(String repoName) throws NonExistantRepositoryException;
 	
 	void addBuildPackages(DebRepositoryConfiguration debRepositoryConfiguration, List<DebPackage> newPackages) throws NonExistantRepositoryException;
+	public abstract void bulkAddBuildPackages(DebRepositoryConfiguration debRepositoryConfiguration, List<DebPackage> newPackages)
+			throws NonExistantRepositoryException;
 	public void removeBuildPackages(DebPackageRemovalBean packageRemovalBean);
 	
 	@Value

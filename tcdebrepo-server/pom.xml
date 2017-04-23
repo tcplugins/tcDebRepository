@@ -125,12 +125,12 @@
 			<version>8.4.1</version>
 		</dependency>
 
-		<dependency>
+		<!-- <dependency>
 			<groupId>org.avaje.ebean</groupId>
 			<artifactId>querybean-generator</artifactId>
 			<version>8.1.4</version>
 			<scope>provided</scope>
-		</dependency>
+		</dependency> -->
 
 		<!-- https://mvnrepository.com/artifact/org.avaje/avaje-datasource -->
 		<dependency>

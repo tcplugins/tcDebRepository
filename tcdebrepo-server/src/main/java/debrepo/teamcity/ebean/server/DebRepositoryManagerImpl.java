@@ -18,46 +18,73 @@
  *******************************************************************************/
 package debrepo.teamcity.ebean.server;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
+import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.UUID;
+import java.util.zip.GZIPOutputStream;
 
+import org.apache.commons.codec.digest.DigestUtils;
+
+import com.avaje.ebean.Ebean;
 import com.avaje.ebean.EbeanServer;
+import com.avaje.ebean.Query;
 import com.avaje.ebean.RawSql;
 import com.avaje.ebean.RawSqlBuilder;
 import com.avaje.ebean.SqlUpdate;
 
 import debrepo.teamcity.DebPackage;
 import debrepo.teamcity.Loggers;
+import debrepo.teamcity.ebean.DebDistCompArchModel;
 import debrepo.teamcity.ebean.DebFileModel;
 import debrepo.teamcity.ebean.DebPackageModel;
+import debrepo.teamcity.ebean.DebPackagesFileModel;
+import debrepo.teamcity.ebean.DebReleaseFileModel;
+import debrepo.teamcity.ebean.DebReleaseFileSimpleModel;
 import debrepo.teamcity.ebean.DebRepositoryModel;
 import debrepo.teamcity.entity.DebPackageNotFoundInStoreException;
 import debrepo.teamcity.entity.DebPackageStore;
 import debrepo.teamcity.entity.DebRepositoryBuildTypeConfig;
 import debrepo.teamcity.entity.DebRepositoryConfiguration;
 import debrepo.teamcity.entity.DebRepositoryStatistics;
+import debrepo.teamcity.entity.helper.DebPackageToPackageDescriptionBuilder;
+import debrepo.teamcity.entity.helper.ReleaseDescriptionBuilder;
+import debrepo.teamcity.service.DebReleaseFileGenerator;
+import debrepo.teamcity.service.DebReleaseFileLocator;
 import debrepo.teamcity.service.DebRepositoryConfigurationFactory;
 import debrepo.teamcity.service.DebRepositoryConfigurationManager;
 import debrepo.teamcity.service.DebRepositoryConfigurationManagerImpl;
+import debrepo.teamcity.service.DebRepositoryDatabaseItemNotFoundException;
 import debrepo.teamcity.service.DebRepositoryMaintenanceManager;
 import debrepo.teamcity.service.DebRepositoryManager;
 import debrepo.teamcity.service.DebRepositoryPersistanceException;
 import debrepo.teamcity.service.NonExistantRepositoryException;
 import debrepo.teamcity.settings.DebRepositoryConfigurationChangePersister;
+import lombok.AllArgsConstructor;
+import lombok.Value;
 
-public class DebRepositoryManagerImpl extends DebRepositoryConfigurationManagerImpl implements DebRepositoryManager, DebRepositoryConfigurationManager, DebRepositoryMaintenanceManager {
+public class DebRepositoryManagerImpl extends DebRepositoryConfigurationManagerImpl 
+								   implements DebRepositoryManager, DebRepositoryConfigurationManager, 
+											  DebRepositoryMaintenanceManager, DebReleaseFileGenerator,
+											  DebReleaseFileLocator {
 
 	private EbeanServer myEbeanServer;
+	private ReleaseDescriptionBuilder myReleaseDescriptionBuilder;
 
 	public DebRepositoryManagerImpl(
 			EbeanServer ebeanServer,
 			DebRepositoryConfigurationFactory debRepositoryConfigurationFactory,
-			DebRepositoryConfigurationChangePersister debRepositoryConfigurationChangePersister) {
+			DebRepositoryConfigurationChangePersister debRepositoryConfigurationChangePersister,
+			ReleaseDescriptionBuilder debRepositoryToReleaseDescriptionBuilder) {
 		super(debRepositoryConfigurationFactory, debRepositoryConfigurationChangePersister);
 		this.myEbeanServer = ebeanServer;
+		this.myReleaseDescriptionBuilder = debRepositoryToReleaseDescriptionBuilder;
 	}
 
 	/**
@@ -308,7 +335,14 @@ public class DebRepositoryManagerImpl extends DebRepositoryConfigurationManagerI
 		return DebRepositoryModel.find.where().eq("uuid", uuid.toString()).findCount() > 0;
 	}
 
-
+	public DebRepositoryModel findRepository(UUID uuid) throws NonExistantRepositoryException {
+		DebRepositoryModel repo = DebRepositoryModel.find.where().eq("uuid", uuid.toString()).findUnique();
+		if (repo == null) {
+			throw new NonExistantRepositoryException();
+		}
+		return repo;
+	}
+	
 	@Override
 	public void removeRepository(UUID uuid) {
 		
@@ -322,10 +356,57 @@ public class DebRepositoryManagerImpl extends DebRepositoryConfigurationManagerI
 	@Override
 	public void addBuildPackages(DebRepositoryConfiguration debRepositoryConfiguration, List<DebPackage> newPackages)
 			throws NonExistantRepositoryException {
+		Set<DistComponentArchitecture> packageFileToRegenerate = new HashSet<>();
+		
+		//DebPackageModel.db().beginTransaction();
+		for (DebPackage debPackage : newPackages) {
+			addBuildPackage(debRepositoryConfiguration, debPackage);
+			packageFileToRegenerate.add(new DistComponentArchImpl(debPackage.getDist(), debPackage.getComponent(), debPackage.getArch()));
+		}
+		updateReleaseFiles(debRepositoryConfiguration, packageFileToRegenerate);
+		//DebPackageModel.db().endTransaction();
+	}
+	
+	@Override
+	public void bulkAddBuildPackages(DebRepositoryConfiguration debRepositoryConfiguration, List<DebPackage> newPackages)
+			throws NonExistantRepositoryException {
 		for (DebPackage debPackage : newPackages) {
 			addBuildPackage(debRepositoryConfiguration, debPackage);
 		}
+	}
+	
+	private Set<? extends DistComponentArchitecture> getDistinctDistComponentArch(DebRepositoryConfiguration config) throws NonExistantRepositoryException {
 		
+		if (! isExistingRepository(config.getRepoName())){
+			throw new NonExistantRepositoryException();
+		}
+				
+		String sql = " select distinct DIST, COMPONENT, ARCH "
+		 		+ " FROM O_DEBPACKAGE "
+		 		+ " JOIN O_DEBFILE"
+		 		+ " JOIN O_REPOSITORY "
+		 		+ "   on O_DEBFILE.ID = O_DEBPACKAGE.DEB_FILE_ID "
+		 		+ "   AND O_DEBPACKAGE.REPOSITORY_ID = O_REPOSITORY.ID "
+		 		+ "where O_REPOSITORY.NAME = :repoName ";
+
+		RawSql rawSql = RawSqlBuilder.parse(sql)
+				  					 .columnMapping("DIST", "dist")
+				  					 .columnMapping("COMPONENT", "component")
+				  					 .columnMapping("ARCH", "arch")				
+				  					 .create();
+
+		Query<DebDistCompArchModel> query = Ebean.find(DebDistCompArchModel.class);
+		
+		return query.setRawSql(rawSql)
+				    .setParameter("repoName", config.getRepoName())
+				  			  .findSet();
+		
+	}
+	
+	@Override
+	@SuppressWarnings("unchecked")
+	public void updateAllReleaseFiles(DebRepositoryConfiguration config) throws NonExistantRepositoryException {
+		updateReleaseFiles(config, (Set<DistComponentArchitecture>) getDistinctDistComponentArch(config));
 	}
 
 	@Override
@@ -342,11 +423,20 @@ public class DebRepositoryManagerImpl extends DebRepositoryConfigurationManagerI
 			for (DebPackageModel m : packagesForDeletion) {
 				m.delete();
 			}
+			if (packagesForDeletion.size() > 0) {
+				Set<DistComponentArchitecture> distComps = new HashSet<>();
+				for (DebPackageModel m : packagesForDeletion) {
+					distComps.add(new DistComponentArchImpl(m.getDist(), m.getComponent(), m.getArch()));
+				}
+				
+			}
 			DebPackageModel.db().commitTransaction();
 		} finally {
 			DebPackageModel.db().endTransaction();
 		}
 	}
+	
+	
 	
 	private Set<String> extractFileNames(List<DebPackage> packages) {
 		final Set<String> filenames = new TreeSet<>(); 
@@ -458,6 +548,200 @@ public class DebRepositoryManagerImpl extends DebRepositoryConfigurationManagerI
 		  RawSql rawSql = RawSqlBuilder.parse(sql).create();
 
 		  return DebFileModel.getFind().setRawSql(rawSql).findCount();
+	}
+
+	@Override
+	public void updateReleaseFiles(DebRepositoryConfiguration config, Set<DistComponentArchitecture> distComponentsToUpdate) throws NonExistantRepositoryException {
+		Set<String> distsToUpdate = new HashSet<>();
+		for (DistComponentArchitecture dca : distComponentsToUpdate) {
+			updatePackagesFiles(config, dca);
+			distsToUpdate.add(dca.getDist());
+		}
+		
+		DebRepositoryModel repositoryModel = findRepository(config.getUuid());
+		
+		for (String dist : distsToUpdate) {
+			updateReleaseFile(config, repositoryModel, dist);
+		}
+	}
+
+	private void updateReleaseFile(DebRepositoryConfiguration config, DebRepositoryModel repositoryModel, String dist)
+			throws NonExistantRepositoryException {
+		String sql = " SELECT id, PACKAGES_FILE from O_DEB_PACKAGES_FILE where ID IN "
+		 		    + " ( SELECT ID FROM O_DEB_PACKAGES_FILE T1"
+		 		    + "   WHERE MODIFIED_TIME = "
+		 		    + "   ( SELECT max(MODIFIED_TIME) "
+		 		    + "     FROM O_DEB_PACKAGES_FILE "
+		 		    + "		WHERE O_DEB_PACKAGES_FILE.REPOSITORY_ID = :repoId"
+		 		    + "      AND O_DEB_PACKAGES_FILE.DIST = :dist"
+		 		    + "		 AND T1.PATH = O_DEB_PACKAGES_FILE.PATH"
+		 		    + "	  ) "
+		 		    + " ) ORDER BY PATH";
+
+		 RawSql rawSql = RawSqlBuilder.parse(sql).create();
+
+		 List<DebPackagesFileModel> packagesFiles = DebPackagesFileModel.getFind()
+				  														 .setRawSql(rawSql)
+				  														 .setParameter("repoId", repositoryModel.getId())
+				  														 .setParameter("dist", dist)
+				  														 .fetch("debPackagesHashes")
+				  														 .findList();
+		
+		Date modifiedTime = new Date();
+		String releaseFileContent = myReleaseDescriptionBuilder.buildPackageDescriptionList(config, packagesFiles, dist, modifiedTime);
+		
+		DebReleaseFileModel releaseFile = DebReleaseFileModel.find
+				.where()
+				.eq("repository.uuid", config.getUuid().toString())
+				.eq("dist", dist)
+				.findUnique();
+
+		if (releaseFile == null) {
+			releaseFile = new DebReleaseFileModel();
+			releaseFile.setRepository(findRepository(config.getUuid()));
+			releaseFile.setDist(dist);
+		}
+		releaseFile.setReleaseFile(releaseFileContent);
+		releaseFile.setModifiedTime(modifiedTime);
+		releaseFile.save();
+	}
+	
+	@Override
+	public void updatePackagesFiles(DebRepositoryConfiguration config, DistComponentArchitecture distCompArch) throws NonExistantRepositoryException {
+		List<? extends DebPackage> packages = this.findAllByDistComponentArchIncludingAll(config.getRepoName(), distCompArch.getDist(), distCompArch.getComponent(), distCompArch.getArch());
+		String packageFileContents = DebPackageToPackageDescriptionBuilder.buildPackageDescriptionList(packages);
+		
+		//DebPackagesFileModel.db().beginTransaction();
+		
+		
+		updatePackagesFile(config, distCompArch, 
+				packageFileContents.getBytes(StandardCharsets.UTF_8),
+				"Packages");
+		
+
+		try {
+			ByteArrayOutputStream out = new ByteArrayOutputStream(packageFileContents.length());
+			GZIPOutputStream gzip = new GZIPOutputStream(out);
+			gzip.write(packageFileContents.getBytes());
+			gzip.close();
+	
+			updatePackagesFile(config, distCompArch, 
+					out.toByteArray(),
+					"Packages.gz");
+		} catch (IOException e) {
+			Loggers.SERVER.warn("DebRepositoryManagerImpl::updatePackagesFiles - Could not create GZ packages file");
+		}
+		//DebPackagesFileModel.db().commitTransaction();
+	}
+
+	private void updatePackagesFile(DebRepositoryConfiguration config, DistComponentArchitecture distCompArch,
+			byte[] packageFileContents, String filename) throws NonExistantRepositoryException {
+		
+		/*
+		DebPackagesFileModel packagesFile = DebPackagesFileModel.find
+															.fetch("debPackagesHashes")
+															.where()
+															.eq("repository.uuid", config.getUuid().toString())
+															.eq("dist", distCompArch.getDist())
+															.eq("component", distCompArch.getComponent())
+															.eq("arch", distCompArch.getArch())
+															.eq("packagesFileName", filename)
+															.findUnique();
+		*/													
+		DebPackagesFileModel packagesFile = new DebPackagesFileModel();
+		packagesFile.setRepository(findRepository(config.getUuid()));
+		packagesFile.setDist(distCompArch.getDist());
+		packagesFile.setComponent(distCompArch.getComponent());
+		packagesFile.setArch(distCompArch.getArch());
+		packagesFile.setPackagesFileName(filename);
+		packagesFile.setPath(distCompArch.getDist() 
+								+ "/" + distCompArch.getComponent() 
+								+ "/binary-" + distCompArch.getArch() 
+								+ "/" + filename);
+		
+		packagesFile.setPackagesFile(packageFileContents);
+		packagesFile.setMd5(DigestUtils.md5Hex(packageFileContents));
+		packagesFile.setSha1(DigestUtils.sha1Hex(packageFileContents));
+		packagesFile.setSha256(DigestUtils.sha256Hex(packageFileContents));
+		
+		packagesFile.save();
+	}
+	
+	
+	
+	@AllArgsConstructor @Value
+	public static class DistComponentArchImpl implements DistComponentArchitecture {
+		String dist;
+		String component;
+		String arch;
+	}
+
+	@Override
+	public String findReleaseFile(String reponame, String dist, ReleaseFileType releaseFileType)
+			throws NonExistantRepositoryException, DebRepositoryDatabaseItemNotFoundException {
+		if (!isExistingRepository(reponame)) {
+			throw new NonExistantRepositoryException();
+		}
+		
+		DebReleaseFileModel releaseFile = DebReleaseFileModel.find.where()
+																  .eq("repository.name", reponame)
+																  .eq("dist", dist)
+																  .findUnique();
+		if (releaseFile == null) {
+			throw new DebRepositoryDatabaseItemNotFoundException("Unable to find Release file " + releaseFileType.toString() + " for Repo " + reponame);
+		}
+		
+		switch (releaseFileType) {
+		case ReleaseGpg:
+			return releaseFile.getReleaseFileGpg();
+		case InRelease:
+			return releaseFile.getInReleaseFile();
+		case Release:
+		default: 
+			return releaseFile.getReleaseFile();
+		}
+	}
+
+	@Override
+	public String findReleaseFile(String reponame, String dist, String component, String architecture, ReleaseFileType releaseFileType)
+			throws NonExistantRepositoryException, DebRepositoryDatabaseItemNotFoundException {
+		if (!isExistingRepository(reponame)) {
+			throw new NonExistantRepositoryException();
+		}
+		
+		DebReleaseFileSimpleModel releaseFile = DebReleaseFileSimpleModel.find.where()
+																  .eq("repository.name", reponame)
+																  .eq("dist", dist)
+																  .eq("component", component)
+																  .eq("arch", architecture)
+																  .findUnique();
+		if (releaseFile == null) {
+			throw new DebRepositoryDatabaseItemNotFoundException("Unable to find Release file " + releaseFileType.toString() + " for Repo " + reponame);
+		}
+		
+		return releaseFile.getReleaseFile();
+	}
+
+	@Override
+	public byte[] findPackagesFile(String reponame, PackagesFileType packagesFileType, String dist,
+			String component, String architecture) throws NonExistantRepositoryException, DebRepositoryDatabaseItemNotFoundException {
+		
+		if (!isExistingRepository(reponame)) {
+			throw new NonExistantRepositoryException();
+		}
+
+		DebPackagesFileModel packagesFile = DebPackagesFileModel.find.where()
+																	 .eq("repository.name", reponame)
+																	 .eq("dist", dist)
+																	 .eq("component", component)
+																	 .eq("arch", architecture)
+																	 .eq("packagesFileName", packagesFileType.getFilename())
+																	 .findUnique();
+		if (packagesFile == null) {
+			throw new DebRepositoryDatabaseItemNotFoundException("Unable to find packagesFile file " + packagesFileType.toString() + " for Repo " + reponame);
+		}
+		
+		return packagesFile.getPackagesFile();
 	}
 	
 }

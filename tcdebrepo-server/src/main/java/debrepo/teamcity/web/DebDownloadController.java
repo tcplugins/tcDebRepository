@@ -19,6 +19,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
@@ -41,6 +42,10 @@ import debrepo.teamcity.DebPackage;
 import debrepo.teamcity.Loggers;
 import debrepo.teamcity.entity.DebPackageNotFoundInStoreException;
 import debrepo.teamcity.entity.helper.DebPackageToPackageDescriptionBuilder;
+import debrepo.teamcity.service.DebReleaseFileLocator;
+import debrepo.teamcity.service.DebReleaseFileLocator.PackagesFileType;
+import debrepo.teamcity.service.DebReleaseFileLocator.ReleaseFileType;
+import debrepo.teamcity.service.DebRepositoryDatabaseItemNotFoundException;
 import debrepo.teamcity.service.DebRepositoryManager;
 import debrepo.teamcity.service.NonExistantRepositoryException;
 import debrepo.teamcity.util.StringUtils;
@@ -74,15 +79,20 @@ public abstract class DebDownloadController extends BaseController {
 	/**                                                             /debrepo/{RepoName}/dists/{Distribution}/{Component}/binary-{Arch}/Packages.gz		*/
 	final private Pattern packagesGzPattern      = Pattern.compile("^" + getDebRepoUrlPart() + "/(\\S+)/dists/(\\S+?)/(\\S+?)/binary-(\\S+?)/[Pp]ackages.gz");
 	
-	/**                                                             /debrepo/{RepoName}/dists/{Distribution}/{Component}/{Arch}/Packages.bz2		    */
-	@SuppressWarnings("unused")
+	/**                                                             /debrepo/{RepoName}/dists/{Distribution}/{Component}/binary-{Arch}/Packages.bz2		*/
 	final private Pattern packagesBz2Pattern     = Pattern.compile("^" + getDebRepoUrlPart() + "/(\\S+?)/dists/(\\S+?)/(\\S+?)/(\\S+?)/[Pp]ackages.bz2");
 	
-	/**                                                             /debrepo/{RepoName}/dists/{Distribution}/{Component}/{Arch}/Packages		        */
+	/**                                                             /debrepo/{RepoName}/dists/{Distribution}/{Component}/binary-{Arch}/Packages			*/
 	final private Pattern packagesPattern        = Pattern.compile("^" + getDebRepoUrlPart() + "/(\\S+?)/dists/(\\S+?)/(\\S+?)/binary-(\\S+?)/[Pp]ackages");
+	
+	/**                                                             /debrepo/{RepoName}/dists/{Distribution}/{Component}/binary-{Arch}/Release			*/
+	final private Pattern releaseFileSmallPattern= Pattern.compile("^" + getDebRepoUrlPart() + "/(\\S+?)/dists/(\\S+?)/(\\S+?)/binary-(\\S+?)/Release");
 	
 	/**                                                             /debrepo/{RepoName}/dists/{Distribution}/{Component}/binary-{Arch}/		            */
 	final private Pattern browseArchPattern      = Pattern.compile("^" + getDebRepoUrlPart() + "/(\\S+?)/dists/(\\S+?)/(\\S+?)/binary-(\\S+?)/$");
+	
+	/**                                                             /debrepo/{RepoName}/dists/{Distribution}/Release or InRelease or Release.gpg       	*/
+	final private Pattern releaseFilePattern 	 = Pattern.compile("^" + getDebRepoUrlPart() + "/(\\S+?)/dists/(\\S+?)/(Release|InRelease|Release\\.gpg)$");
 	
 	/**                                                             /debrepo/{RepoName}/dists/{Distribution}/{Component}/		                        */
 	final private Pattern browseComponentPattern = Pattern.compile("^" + getDebRepoUrlPart() + "/(\\S+?)/dists/(\\S+?)/(\\S+?)/$");
@@ -108,16 +118,19 @@ public abstract class DebDownloadController extends BaseController {
     /**                                                             /debrepo/{RepoName}                    		                                        */
     final private Pattern infoPattern            = Pattern.compile("^" + getDebRepoUrlPart() + "/(\\S+?)/$");
     
-    protected final DebRepositoryManager myDebRepositoryManager;
+    private final DebRepositoryManager myDebRepositoryManager;
+    private final DebReleaseFileLocator myDebReleaseFileLocator;
     private final PluginDescriptor myPluginDescriptor;
 
 	public DebDownloadController(SBuildServer sBuildServer, WebControllerManager webControllerManager, 
 								 @NotNull PluginDescriptor descriptor,
 								 AuthorizationInterceptor authorizationInterceptor, 
-								 DebRepositoryManager debRepositoryManager) {
+								 DebRepositoryManager debRepositoryManager,
+								 DebReleaseFileLocator debReleaseFileLocator) {
 		super(sBuildServer);
 		configureUrlAndAuthorisation(webControllerManager, authorizationInterceptor);
 		this.myDebRepositoryManager = debRepositoryManager;
+		this.myDebReleaseFileLocator = debReleaseFileLocator;
 		this.myPluginDescriptor = descriptor;
 	}
 	
@@ -166,7 +179,7 @@ public abstract class DebDownloadController extends BaseController {
 		params.put("pluginVersion", this.myPluginDescriptor.getPluginVersion());
 		params.put("jspHome", this.myPluginDescriptor.getPluginResourcesPath());
 		
-		/* /debrepo/{RepoName}/dists/{Distribution}/{Component}/{Arch}/Packages.gz */
+		/* /debrepo/{RepoName}/dists/{Distribution}/{Component}/binary-{Arch}/Packages.gz */
 		Matcher matcher = packagesGzPattern.matcher(uriPath);
 		if (matcher.matches()) {
 			String repoName = matcher.group(1);
@@ -175,7 +188,8 @@ public abstract class DebDownloadController extends BaseController {
 			String archName = matcher.group(4);
 			try {
 				checkRepoIsRestricted(repoName);
-				return servePackagesGzFile(request, response, myDebRepositoryManager.findAllByDistComponentArchIncludingAll(repoName, distName, component, archName));
+				return servePackagesGzFile(request, response, repoName, distName, component, archName);
+				//return servePackagesGzFile(request, response, myDebRepositoryManager.findAllByDistComponentArchIncludingAll(repoName, distName, component, archName));
 			} catch (DebRepositoryPermissionDeniedException ex){
 				response.sendError(HttpServletResponse.SC_FORBIDDEN);
 				Loggers.SERVER.info("DebDownloadController:: Returning 403 : Deb Repository is restricted and user is not permissioned on project: " + request.getPathInfo());
@@ -184,13 +198,38 @@ public abstract class DebDownloadController extends BaseController {
 				response.sendRedirect(buildRedirectToRestrictedUrl(request, uriPath));
 				Loggers.SERVER.info("DebDownloadController:: Returning 302 : Deb Repository is restricted: " + request.getPathInfo());
 				return null;
+			} catch (DebRepositoryDatabaseItemNotFoundException ex){
+				response.sendError(HttpServletResponse.SC_NOT_FOUND);
+				Loggers.SERVER.info("DebDownloadController:: Returning 404 : Not Found: No Packages file found for: " + request.getPathInfo());
+				return null;			
 			} catch (NonExistantRepositoryException ex){
 				response.sendError(HttpServletResponse.SC_NOT_FOUND);
 				Loggers.SERVER.info("DebDownloadController:: Returning 404 : Not Found: No Deb Repository exists with the name: " + request.getPathInfo());
 				return null;
 			}
 		}
-		/* /debrepo/{RepoName}/dists/{Distribution}/{Component}/{Arch}/Packages */
+		
+		/* /debrepo/{RepoName}/dists/{Distribution}/{Component}/binary-{Arch}/Release */
+		matcher = packagesPattern.matcher(uriPath);
+		if (matcher.matches()) {
+			String repoName = matcher.group(1);
+			String distName = matcher.group(2);
+			String component= matcher.group(3);
+			String archName = matcher.group(4);
+			try {
+				return serveReleaseFile(request, response, repoName, distName, component, archName, ReleaseFileType.Release);
+			} catch (NonExistantRepositoryException ex){
+				response.sendError(HttpServletResponse.SC_NOT_FOUND);
+				Loggers.SERVER.info("DebDownloadController:: Returning 404 : Not Found: No Deb Repository exists with the name: " + request.getPathInfo());
+				return null;
+			} catch (DebRepositoryDatabaseItemNotFoundException ex){
+				response.sendError(HttpServletResponse.SC_NOT_FOUND);
+				Loggers.SERVER.info("DebDownloadController:: Returning 404 : Not Found: No Deb Repository Release file exists with the name: " + request.getPathInfo());
+				return null;
+			}
+		}
+		
+		/* /debrepo/{RepoName}/dists/{Distribution}/{Component}/binary-{Arch}/Packages */
 		matcher = packagesPattern.matcher(uriPath);
 		if (matcher.matches()) {
 			String repoName = matcher.group(1);
@@ -259,6 +298,26 @@ public abstract class DebDownloadController extends BaseController {
 			} catch (NonExistantRepositoryException ex){
 				response.sendError(HttpServletResponse.SC_NOT_FOUND);
 				Loggers.SERVER.info("DebDownloadController:: Returning 404 : Not Found: No Deb Repository exists with the name: " + request.getPathInfo());
+				return null;
+			}
+		}
+		
+		/* /debrepo/{RepoName}/dists/{Distribution}/{Release} */
+		matcher = releaseFilePattern.matcher(uriPath);
+		if (matcher.matches()) {
+			String repoName = matcher.group(1);
+			String distName = matcher.group(2);
+			String releaseFileName= matcher.group(3);
+			try {
+				ReleaseFileType releaseFileType = ReleaseFileType.valueOf(releaseFileName);
+				return serveReleaseFile(request, response, repoName, distName, releaseFileType);
+			} catch (NonExistantRepositoryException ex){
+				response.sendError(HttpServletResponse.SC_NOT_FOUND);
+				Loggers.SERVER.info("DebDownloadController:: Returning 404 : Not Found: No Deb Repository exists with the name: " + request.getPathInfo());
+				return null;
+			} catch (DebRepositoryDatabaseItemNotFoundException ex){
+				response.sendError(HttpServletResponse.SC_NOT_FOUND);
+				Loggers.SERVER.info("DebDownloadController:: Returning 404 : Not Found: No Deb Repository Release file exists with the name: " + request.getPathInfo());
 				return null;
 			}
 		}
@@ -625,6 +684,38 @@ public abstract class DebDownloadController extends BaseController {
 		Loggers.SERVER.info("DebDownloadController:: Returning 200 : Packages.gz file exists with the name: " + request.getPathInfo());
 		return null;
 	}
+	
+	private ModelAndView servePackagesGzFile(HttpServletRequest request, HttpServletResponse response, String reponame, String dist, String component, String architecture) throws IOException, NonExistantRepositoryException, DebRepositoryDatabaseItemNotFoundException {
+		response.setContentType("application/x-gzip");
+		response.getOutputStream().write(myDebReleaseFileLocator.findPackagesFile(reponame, PackagesFileType.PackagesGz, dist, component, architecture));
+		Loggers.SERVER.info("DebDownloadController:: Returning 200 : Packages.gz file exists with the name: " + request.getPathInfo());
+		return null;
+	}
+	
+	/**
+	 * Requests the "Simple" Release file from the Repository Store.
+	 * @param request - The {@link HttpServletRequest} object the page was requested with. For use in 304 handling and similar.
+	 * @param response -  The {@link HttpServletResponse} object the response it written to. 
+	 * @param reponame - Repo name to request Release file for.
+	 * @param dist - Distribution to request Release file for.
+	 * @param component - Component to request Release file for.
+	 * @param architecture - Architecture to request Release file for.
+	 * @return null - The actual output it written directly to the response, so the ModelAndView returned is just null.
+	 * @throws IOException - If the output stream can't be written to.
+	 * @throws NonExistantRepositoryException - If the reponame passed in is not a valid repo.
+	 * @throws DebRepositoryDatabaseItemNotFoundException - If the query to find the release file returns nothing.
+	 */
+	private ModelAndView serveReleaseFile(HttpServletRequest request, HttpServletResponse response, String reponame, String dist, String component, String architecture, ReleaseFileType releaseFileType) throws IOException, NonExistantRepositoryException, DebRepositoryDatabaseItemNotFoundException {
+		response.getOutputStream().write(myDebReleaseFileLocator.findReleaseFile(reponame, dist, component, architecture, releaseFileType).getBytes(StandardCharsets.UTF_8));
+		Loggers.SERVER.info("DebDownloadController:: Returning 200 : Release file exists with the name: " + request.getPathInfo());
+		return null;
+	}
+	
+	private ModelAndView serveReleaseFile(HttpServletRequest request, HttpServletResponse response, String reponame, String dist, ReleaseFileType releaseFileType) throws IOException, NonExistantRepositoryException, DebRepositoryDatabaseItemNotFoundException {
+		response.getOutputStream().write(myDebReleaseFileLocator.findReleaseFile(reponame, dist, releaseFileType).getBytes(StandardCharsets.UTF_8));
+		Loggers.SERVER.info("DebDownloadController:: Returning 200 : Release file exists with the name: " + request.getPathInfo());
+		return null;
+	}	
 	
 	private ModelAndView servePackagesFile(HttpServletRequest request, HttpServletResponse response, List<? extends DebPackage> packages) {
 		response.setContentType("text/plain");
