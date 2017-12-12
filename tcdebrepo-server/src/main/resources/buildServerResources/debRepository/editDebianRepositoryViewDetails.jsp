@@ -1,5 +1,5 @@
 <%@ include file="/include.jsp" %>
-<%@ taglib prefix="myt" uri="/plugins/tcDebRepository/debRepository/tag-lib/mytaglib.tld" %>
+<%@ taglib prefix="util" uri="/WEB-INF/functions/util" %>
 
 <c:set var="filtersNum" value="${fn:length(debRepoBean.filtersAndBuildTypes)}"/>
 <bs:refreshable containerId="repoBuildTypesContainer" pageUrl="${pageUrl}">
@@ -40,8 +40,8 @@
 	      		<c:set var="buildTypeId" value="${filterAndBuild.buildTypeId}"/>
 	      		<tr>
 	      			<td>${filter.regex}</td><td>${filter.dist}</td><td>${filter.component}</td>
-	      			<td><a id="editDebFilter" href="#" onclick="DebRepoFilterPlugin.editFilter({ uuid: '${debRepoBean.uuid}', name: '${debRepoBean.name}', id: '${filter.id}', build: '${buildTypeId}', regex: '${myt:escapeJS(filter.regex)}', dist:'${filter.dist}', component:'${filter.component}' }); return false">edit</a></td>
-	      			<td><a id="copyDebFilter" href="#" onclick="DebRepoFilterPlugin.copyFilter({ uuid: '${debRepoBean.uuid}', name: '${debRepoBean.name}', id: '_copy', build: '${buildTypeId}', regex: '${myt:escapeJS(filter.regex)}', dist:'${filter.dist}', component:'${filter.component}' }); return false">copy</a></td>
+	      			<td><a id="editDebFilter" href="#" onclick="DebRepoFilterPlugin.editFilter({ uuid: '${debRepoBean.uuid}', name: '${debRepoBean.name}', id: '${filter.id}', build: '${buildTypeId}', regex: '${util:forJS(filter.regex, false, false)}', dist:'${filter.dist}', component:'${filter.component}' }); return false">edit</a></td>
+	      			<td><a id="copyDebFilter" href="#" onclick="DebRepoFilterPlugin.copyFilter({ uuid: '${debRepoBean.uuid}', name: '${debRepoBean.name}', id: '_copy', build: '${buildTypeId}', regex: '${util:forJS(filter.regex, false, false)}', dist:'${filter.dist}', component:'${filter.component}' }); return false">copy</a></td>
 	      			<td><a id="deleteDebFilter" href="#" onclick="DebRepoFilterPlugin.deleteFilter({ uuid: '${debRepoBean.uuid}', name: '${debRepoBean.name}', id: '${filter.id}', build: '${buildTypeId}' }); return false">delete</a></td>
 	      		</tr>     
 	      	</c:forEach>
