@@ -65,9 +65,10 @@ public class DebPackagesFileModel extends Model implements GenericRepositoryFile
 	@ManyToOne
 	private DebRepositoryModel repository;
 	
+	/*
 	@OneToMany(mappedBy = "packagesFile", cascade=CascadeType.ALL)
 	@MapKey(name="hashType")
-	Map<String,DebPackagesFileHashModel> debPackagesHashes;
+	Map<String,DebPackagesFileHashModel> debPackagesHashes; */
 	
 	String packagesFileName;
 	
@@ -82,8 +83,12 @@ public class DebPackagesFileModel extends Model implements GenericRepositoryFile
 	String arch;
 	
 	String path;
+	
+	String md5;
+	String sha1;
+	String sha256;
 
-	public void setMd5(String md5Hex) {
+/*	public void setMd5(String md5Hex) {
 		updateHash(MD5, md5Hex);
 	}
 	
@@ -106,14 +111,17 @@ public class DebPackagesFileModel extends Model implements GenericRepositoryFile
 		newHash.setHashType(hashType);
 		newHash.setHashValue(hashValue);
 		this.debPackagesHashes.put(hashType, newHash);
-	}
+	}*/
 
 	@Override
-	public String getSizeInBytes() {
-		return String.valueOf(packagesFile.length);
+	public int getSizeInBytes() {
+		if (packagesFile == null) {
+			return 0;
+		}
+		return packagesFile.length;
 	}
 
-	@Override
+/*	@Override
 	public String getMd5() {
 		return debPackagesHashes.get(MD5).getHashValue();
 	}
@@ -127,7 +135,7 @@ public class DebPackagesFileModel extends Model implements GenericRepositoryFile
 	public String getSha256() {
 		return debPackagesHashes.get(SHA256).getHashValue();
 	}
-
+*/
 	@Override
 	public String getFilePath() {
 		return path;

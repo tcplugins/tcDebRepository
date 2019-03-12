@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<migration xmlns="http://ebean-orm.github.io/xml/ns/dbmigration">
+    <changeSet type="apply">
+        <createTable name="o_packages_file_hash" identityType="identity" pkName="pk_o_packages_file_hash">
+            <column name="id" type="bigint" primaryKey="true"/>
+            <column name="packages_file_id" type="bigint" references="o_deb_packages_file.id" foreignKeyName="fk_o_packages_file_hash_packages_file_id" foreignKeyIndex="ix_o_packages_file_hash_packages_file_id"/>
+            <column name="hash_type" type="varchar"/>
+            <column name="hash_value" type="varchar"/>
+        </createTable>
+        <createTable name="o_deb_packages_file" identityType="identity" pkName="pk_o_deb_packages_file">
+            <column name="id" type="bigint" primaryKey="true"/>
+            <column name="repository_id" type="bigint" references="o_repository.id" foreignKeyName="fk_o_deb_packages_file_repository_id" foreignKeyIndex="ix_o_deb_packages_file_repository_id"/>
+            <column name="packages_file_name" type="varchar"/>
+            <column name="packages_file" type="blob"/>
+            <column name="dist" type="varchar"/>
+            <column name="component" type="varchar"/>
+            <column name="arch" type="varchar"/>
+            <column name="path" type="varchar"/>
+            <column name="modified_time" type="timestamp" notnull="true"/>
+        </createTable>
+        <createTable name="o_deb_release_file" identityType="identity" pkName="pk_o_deb_release_file">
+            <column name="id" type="bigint" primaryKey="true"/>
+            <column name="repository_id" type="bigint" references="o_repository.id" foreignKeyName="fk_o_deb_release_file_repository_id" foreignKeyIndex="ix_o_deb_release_file_repository_id"/>
+            <column name="dist" type="varchar"/>
+            <column name="modified_time" type="timestamp"/>
+            <column name="release_file" type="clob"/>
+            <column name="in_release_file" type="clob"/>
+            <column name="release_file_gpg" type="clob"/>
+            <uniqueConstraint name="uq_o_deb_release_file_repository_id_dist" columnNames="repository_id,dist"/>
+        </createTable>
+        <createTable name="o_release_file_simple_hash" identityType="identity" pkName="pk_o_release_file_simple_hash">
+            <column name="id" type="bigint" primaryKey="true"/>
+            <column name="release_file_simple_id" type="bigint" references="o_deb_release_file_simple.id" foreignKeyName="fk_o_release_file_simple_hash_release_file_simple_id" foreignKeyIndex="ix_o_release_file_simple_hash_release_file_simple_id"/>
+            <column name="hash_type" type="varchar"/>
+            <column name="hash_value" type="varchar"/>
+        </createTable>
+        <createTable name="o_deb_release_file_simple" identityType="identity" pkName="pk_o_deb_release_file_simple">
+            <column name="id" type="bigint" primaryKey="true"/>
+            <column name="repository_id" type="bigint" references="o_repository.id" foreignKeyName="fk_o_deb_release_file_simple_repository_id" foreignKeyIndex="ix_o_deb_release_file_simple_repository_id"/>
+            <column name="release_file_name" type="varchar"/>
+            <column name="release_file" type="clob"/>
+            <column name="dist" type="varchar"/>
+            <column name="component" type="varchar"/>
+            <column name="arch" type="varchar"/>
+            <column name="path" type="varchar"/>
+            <column name="modified_time" type="timestamp" notnull="true"/>
+        </createTable>
+    </changeSet>
+</migration>

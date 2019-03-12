@@ -15,6 +15,9 @@ public interface ReleaseDescriptionBuilder {
 	String buildReleaseHeader(DebRepositoryConfiguration configuration, String dist, Set<String> components,
 			Set<String> archs, Date modifiedTime);
 
+	String buildSimpleReleaseFile(DebRepositoryConfiguration configuration, String dist, String component,
+			String arch);
+	
 
 
 }

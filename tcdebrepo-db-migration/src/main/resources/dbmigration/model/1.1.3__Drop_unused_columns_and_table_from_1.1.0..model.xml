@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<migration xmlns="http://ebean-orm.github.io/xml/ns/dbmigration">
+    <changeSet type="apply" dropsFor="1.1.0">
+        <dropColumn columnName="package_name" tableName="o_debpackage"/>
+        <dropColumn columnName="version" tableName="o_debpackage"/>
+        <dropColumn columnName="arch" tableName="o_debpackage"/>
+        <dropColumn columnName="build_id" tableName="o_debpackage"/>
+        <dropColumn columnName="build_type_id" tableName="o_debpackage"/>
+        <dropColumn columnName="filename" tableName="o_debpackage"/>
+        <dropTable name="o_debpackage_parameter"/>
+    </changeSet>
+</migration>

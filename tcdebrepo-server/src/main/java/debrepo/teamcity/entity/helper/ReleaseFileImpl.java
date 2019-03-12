@@ -24,7 +24,7 @@ public class ReleaseFileImpl implements GenericRepositoryFile {
 	
 	private static final int padnum = 16;
 	
-	private String sizeInBytes;
+	private int sizeInBytes;
 	private String path;
 	private String md5;
 	private String sha1;

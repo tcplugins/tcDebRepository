@@ -297,5 +297,12 @@ public class DebRepositoryManagerImpl extends  DebRepositoryConfigurationManager
 			// If the repo does not exist, don't worry about removing stuff.
 		}
 	}
+
+	@Override
+	public void updateRepositoryMetaData(DebRepositoryConfiguration config)
+			throws NonExistantRepositoryException, DebRepositoryPersistanceException {
+		// TODO Auto-generated method stub
+		
+	}
 	
 }

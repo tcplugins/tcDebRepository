@@ -49,6 +49,7 @@ import debrepo.teamcity.entity.DebRepositoryConfiguration;
 import debrepo.teamcity.entity.DebRepositoryConfigurationJaxImpl;
 import debrepo.teamcity.entity.helper.DebRepositoryDatabaseJaxHelperImpl;
 import debrepo.teamcity.entity.helper.DebRepositoryDatabaseXmlPersisterImpl;
+import debrepo.teamcity.entity.helper.DebRepositoryToReleaseDescriptionBuilder;
 import debrepo.teamcity.entity.helper.JaxDbFileRenamer;
 import debrepo.teamcity.entity.helper.JaxHelper;
 import debrepo.teamcity.entity.helper.PluginDataResolver;
@@ -75,6 +76,7 @@ import debrepo.teamcity.settings.DebRepositoryConfigurationChangePersister;
 import jetbrains.buildServer.serverSide.ProjectManager;
 import jetbrains.buildServer.serverSide.SBuild;
 import jetbrains.buildServer.serverSide.SBuildType;
+import jetbrains.buildServer.serverSide.SProject;
 import jetbrains.buildServer.serverSide.ServerPaths;
 import jetbrains.buildServer.serverSide.artifacts.BuildArtifact;
 import jetbrains.buildServer.serverSide.artifacts.BuildArtifacts;
@@ -86,6 +88,7 @@ public class EbeanRecordTests {
 	@Mock ServerPaths jaxServerPaths, ebeanServerPaths;
 	PluginDataResolver jaxPluginDataResolver, ebeanPluginDataResolver;
 	@Mock protected ProjectManager projectManager;
+	@Mock protected SProject project01, project02;
 	
 	JaxHelper<DebPackageStoreEntity> jaxHelper = new DebRepositoryDatabaseJaxHelperImpl();
 	XmlPersister<DebPackageStore, DebRepositoryConfiguration> debRepositoryDatabaseXmlPersister;
@@ -100,7 +103,7 @@ public class EbeanRecordTests {
 	@Mock SBuildType sBuildType;
 	@Mock BuildArtifact buildArtifact;
 	@Mock BuildArtifacts buildArtifacts;
-	@Mock ReleaseDescriptionBuilder releaseDescriptionBuilder;
+	ReleaseDescriptionBuilder releaseDescriptionBuilder;
 	
 	
 	protected DebRepositoryMaintenanceManager debRepositoryMaintenanceManager;
@@ -113,6 +116,15 @@ public class EbeanRecordTests {
 		MockitoAnnotations.initMocks(this);
 		when(jaxServerPaths.getPluginDataDirectory()).thenReturn(new File("src/test/resources/testplugindata"));
 		when(ebeanServerPaths.getPluginDataDirectory()).thenReturn(new File("target"));
+		when(projectManager.findProjectById("project01")).thenReturn(project01);
+		when(projectManager.findProjectById("project02")).thenReturn(project02);
+		when(project01.getExternalId()).thenReturn("My_Project_Name");
+		when(project01.getDescription()).thenReturn("My Project Name - Long description");
+		
+		when(project02.getExternalId()).thenReturn("My_Project_Name_2");
+		when(project02.getDescription()).thenReturn("My Project Name 2 - Long description");
+		
+		releaseDescriptionBuilder = new DebRepositoryToReleaseDescriptionBuilder(projectManager);
 		
 		jaxPluginDataResolver = new PluginDataResolverImpl(jaxServerPaths);
 		ebeanPluginDataResolver = new PluginDataResolverImpl(ebeanServerPaths);

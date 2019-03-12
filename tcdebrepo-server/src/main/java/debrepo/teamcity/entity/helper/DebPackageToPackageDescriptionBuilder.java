@@ -67,6 +67,7 @@ public class DebPackageToPackageDescriptionBuilder {
 	
 	public static String buildPackageDescriptionList(Collection<? extends DebPackage> debPackageEntities) {
 		StringBuilder sb = new StringBuilder();
+		sb.append("");
 		for (DebPackage entity : debPackageEntities) {
 			sb.append(buildPackageDescription(entity));
 			sb.append("\n\n");

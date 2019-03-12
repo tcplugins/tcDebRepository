@@ -19,6 +19,7 @@ package debrepo.teamcity.ebean.server;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.mock;
 
 import java.io.File;
 import java.io.IOException;
@@ -31,6 +32,7 @@ import org.mockito.Mock;
 
 import debrepo.teamcity.entity.DebPackageStore;
 import debrepo.teamcity.entity.DebRepositoryConfiguration;
+import debrepo.teamcity.entity.helper.DebRepositoryToReleaseDescriptionBuilder;
 import debrepo.teamcity.entity.helper.PluginDataResolver;
 import debrepo.teamcity.entity.helper.PluginDataResolverImpl;
 import debrepo.teamcity.entity.helper.ReleaseDescriptionBuilder;
@@ -38,11 +40,14 @@ import debrepo.teamcity.entity.helper.XmlPersister;
 import debrepo.teamcity.service.DebRepositoryConfigurationManager;
 import debrepo.teamcity.service.DebRepositoryManager;
 import debrepo.teamcity.service.DebRepositoryManagerTest;
+import jetbrains.buildServer.serverSide.ProjectManager;
+import jetbrains.buildServer.serverSide.SProject;
 import jetbrains.buildServer.serverSide.ServerPaths;
 
 public class DebRepositoryManagerEbeanTests extends DebRepositoryManagerTest {
 
 	@Mock ServerPaths serverPaths;
+	@Mock SProject project01, project02;
 	PluginDataResolver pluginDataResolver;
 	
 	EbeanServerProvider ebeanServerProvider;
@@ -55,7 +60,17 @@ public class DebRepositoryManagerEbeanTests extends DebRepositoryManagerTest {
 	
 	private void initialiseDebRepositoryManager() {
 		
+		projectManager = mock(ProjectManager.class);
 		when(serverPaths.getPluginDataDirectory()).thenReturn(new File("target"));
+		when(projectManager.findProjectById("project01")).thenReturn(project01);
+		when(projectManager.findProjectById("project02")).thenReturn(project02);
+		when(project01.getExternalId()).thenReturn("My_Project_Name");
+		when(project01.getDescription()).thenReturn("My Project Name - Long description");
+		
+		when(project02.getExternalId()).thenReturn("My_Project_Name_2");
+		when(project02.getDescription()).thenReturn("My Project Name 2 - Long description");
+		
+		releaseDescriptionBuilder = new DebRepositoryToReleaseDescriptionBuilder(projectManager);
 		
 		pluginDataResolver = new PluginDataResolverImpl(serverPaths);
 		ebeanServerProvider = new EbeanServerProvider(pluginDataResolver);
@@ -65,6 +80,7 @@ public class DebRepositoryManagerEbeanTests extends DebRepositoryManagerTest {
 				debRepositoryConfigurationFactory, 
 				debRepositoryConfigurationChangePersister,
 				releaseDescriptionBuilder);
+		
 	}
 
 	@Override

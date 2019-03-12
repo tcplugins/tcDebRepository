@@ -36,6 +36,14 @@ public interface DebRepositoryManager {
 	public DebRepositoryStatistics getRepositoryStatistics(String uuid, String repoUrl);
 	public DebRepositoryStatistics getRepositoryStatistics(DebRepositoryConfiguration projectConfig, String repoUrl);
 	public void addBuildPackage(DebRepositoryConfiguration config, DebPackage newEntity);
+	/**
+	 * Updates any data that should be updated after a repository save.
+	 * 
+	 * Intended to be used for updating a dist/component/arch/Release file or similar.
+	 * These things only need to happen when configuration of a repository changes.
+	 * @param config
+	 */
+	public void updateRepositoryMetaData(DebRepositoryConfiguration config) throws NonExistantRepositoryException, DebRepositoryPersistanceException;
 	
 	/**
 	 * Returns all the architectures found in the repository for a dist/component combination.

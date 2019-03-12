@@ -45,10 +45,10 @@ import lombok.Setter;
 @Setter
 public class DebReleaseFileSimpleModel extends Model implements GenericRepositoryFile {
 
-
+/*
 	private static final String MD5 = "md5";
 	private static final String SHA1 = "sha1";
-	private static final String SHA256 = "sha256";
+	private static final String SHA256 = "sha256";*/
 
 	public static Find<Long, DebReleaseFileSimpleModel> getFind() {
 		return find;
@@ -63,9 +63,10 @@ public class DebReleaseFileSimpleModel extends Model implements GenericRepositor
 	@ManyToOne
 	private DebRepositoryModel repository;
 	
+	/*
 	@OneToMany(mappedBy = "releaseFileSimple", cascade=CascadeType.ALL)
 	@MapKey(name="hashType")
-	Map<String,DebReleaseFileSimpleHashModel> releaseFileHashes;
+	Map<String,DebReleaseFileSimpleHashModel> releaseFileHashes; */
 	
 	String releaseFileName;
 	
@@ -80,8 +81,12 @@ public class DebReleaseFileSimpleModel extends Model implements GenericRepositor
 	String arch;
 	
 	String path;
+	
+	String md5;
+	String sha1;
+	String sha256;
 
-	public void setMd5(String md5Hex) {
+/*	public void setMd5(String md5Hex) {
 		updateHash(MD5, md5Hex);
 	}
 	
@@ -104,14 +109,14 @@ public class DebReleaseFileSimpleModel extends Model implements GenericRepositor
 		newHash.setHashType(hashType);
 		newHash.setHashValue(hashValue);
 		this.releaseFileHashes.put(hashType, newHash);
-	}
+	}*/
 
 	@Override
-	public String getSizeInBytes() {
-		return String.valueOf(releaseFile.length());
+	public int getSizeInBytes() {
+		return releaseFile.length();
 	}
 
-	@Override
+/*	@Override
 	public String getMd5() {
 		return releaseFileHashes.get(MD5).getHashValue();
 	}
@@ -124,7 +129,7 @@ public class DebReleaseFileSimpleModel extends Model implements GenericRepositor
 	@Override
 	public String getSha256() {
 		return releaseFileHashes.get(SHA256).getHashValue();
-	}
+	}*/
 
 	@Override
 	public String getFilePath() {

@@ -1,9 +1,9 @@
 package debrepo.teamcity.service;
 
 public interface DebReleaseFileLocator {
-	public abstract String findReleaseFile(String reponame, String dist, ReleaseFileType releaseFileType) throws NonExistantRepositoryException, DebRepositoryDatabaseItemNotFoundException;
-	public abstract String findReleaseFile(String reponame, String dist, String component, String architecture, ReleaseFileType releaseFileType) throws NonExistantRepositoryException, DebRepositoryDatabaseItemNotFoundException;
-	public abstract byte[] findPackagesFile(String reponame, PackagesFileType packagesFileType, String dist, String component, String architecture) throws NonExistantRepositoryException, DebRepositoryDatabaseItemNotFoundException;
+	public abstract String findReleaseFile(String reponame, String dist, ReleaseFileType releaseFileType) throws NonExistantRepositoryException, DebRepositoryItemNotFoundException;
+	public abstract String findReleaseFile(String reponame, String dist, String component, String architecture, ReleaseFileType releaseFileType) throws NonExistantRepositoryException, DebRepositoryItemNotFoundException;
+	public abstract byte[] findPackagesFile(String reponame, PackagesFileType packagesFileType, String dist, String component, String architecture) throws NonExistantRepositoryException, DebRepositoryItemNotFoundException;
 	
 	public static enum ReleaseFileType {
 		Release ("Release"),
@@ -22,19 +22,25 @@ public interface DebReleaseFileLocator {
 	}
 	
 	public static enum PackagesFileType {
-		Packages ("Packages"), 
-		PackagesGz ("Packages.gz"), 
-		PackagesXz ("Packages.xz"), 
-		PackagesBz2 ("Packages.bz2");
+		Packages ("Packages", "text/plain"), 
+		PackagesGz ("Packages.gz", "application/x-gzip"), 
+		PackagesXz ("Packages.xz", "application/x-xz"), 
+		PackagesBz2 ("Packages.bz2", "application/x-bzip2");
 		
 		String filename;
+		String contentType;
 		
-		private PackagesFileType(String filename) {
+		private PackagesFileType(String filename, String contentType) {
 			this.filename = filename;
+			this.contentType = contentType;
 		}
 		
 		public String getFilename() {
 			return this.filename;
+		}
+		
+		public String getContentType() {
+			return contentType;
 		}
 	}
 

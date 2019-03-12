@@ -142,10 +142,14 @@ public class DebRepositoryToReleaseDescriptionBuilder implements ReleaseDescript
 		
 		sb.append("MD5Sum:\n");
 		for (GenericRepositoryFile file : repositoryFiles) {
+			if (file.getSizeInBytes() == 0) {
+				continue;
+			}
 			sb.append(" ")
 			  .append(file.getMd5())
 			  .append(" ");
-			padSize(sb,file.getSizeInBytes());
+			System.out.println(file.getFilePath());
+			padSize(sb,String.valueOf(file.getSizeInBytes()));
 			sb.append(" ")
 			  .append(file.getFilePath())
 			  .append("\n");
@@ -153,10 +157,13 @@ public class DebRepositoryToReleaseDescriptionBuilder implements ReleaseDescript
 		
 		sb.append("SHA1:\n");
 		for (GenericRepositoryFile file : repositoryFiles) {
+			if (file.getSizeInBytes() == 0) {
+				continue;
+			}
 			sb.append(" ")
 			  .append(file.getSha1())
 			  .append(" ");
-			padSize(sb,file.getSizeInBytes());
+			padSize(sb,String.valueOf(file.getSizeInBytes()));
 			sb.append(" ")
 			  .append(file.getFilePath())
 			  .append("\n");
@@ -164,10 +171,13 @@ public class DebRepositoryToReleaseDescriptionBuilder implements ReleaseDescript
 		
 		sb.append("SHA256:\n");
 		for (GenericRepositoryFile file : repositoryFiles) {
+			if (file.getSizeInBytes() == 0) {
+				continue;
+			}
 			sb.append(" ")
 			  .append(file.getSha256())
 			  .append(" ");
-			padSize(sb,file.getSizeInBytes());
+			padSize(sb,String.valueOf(file.getSizeInBytes()));
 			sb.append(" ")
 			  .append(file.getFilePath())
 			  .append("\n");
@@ -184,6 +194,33 @@ public class DebRepositoryToReleaseDescriptionBuilder implements ReleaseDescript
 			stringBuilder.append(" ");
 		    }
 		stringBuilder.append(fileSize);
+	}
+
+	@Override
+	public String buildSimpleReleaseFile(DebRepositoryConfiguration configuration, String dist, String component,
+			String arch) {
+		
+		/*
+		    Archive: unstable
+			Origin: Debian
+			Label: Debian
+			Acquire-By-Hash: yes
+			Component: main
+			Architecture: amd64
+		 */
+		StringBuilder sb = new StringBuilder();
+
+		
+		SProject project = myProjectManager.findProjectById(configuration.getProjectId());
+		
+		sb.append("Archive: ").append(dist).append("\n")
+		  .append("Origin: ").append(project.getExternalId()).append("\n")
+		  .append("Label: ").append(project.getDescription()).append("\n")
+		  .append("Acquire-By-Hash: yes\n")
+		  .append("Component: ").append(component).append("\n")
+		  .append("Architecture: ").append(arch).append("\n");
+		
+		return sb.toString();
 	}
 
 }

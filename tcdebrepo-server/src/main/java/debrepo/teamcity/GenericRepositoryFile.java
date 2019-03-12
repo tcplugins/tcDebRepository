@@ -16,7 +16,7 @@
 package debrepo.teamcity;
 
 public interface GenericRepositoryFile {
-	public String getSizeInBytes();
+	public int getSizeInBytes();
 	public String getFilePath();
 	public String getMd5(); 
 	public String getSha1(); 

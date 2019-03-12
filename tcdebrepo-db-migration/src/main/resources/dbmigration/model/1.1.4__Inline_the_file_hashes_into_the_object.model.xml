@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<migration xmlns="http://ebean-orm.github.io/xml/ns/dbmigration">
+    <changeSet type="apply">
+        <addColumn tableName="o_deb_packages_file">
+            <column name="md5" type="varchar"/>
+            <column name="sha1" type="varchar"/>
+            <column name="sha256" type="varchar"/>
+        </addColumn>
+        <addColumn tableName="o_deb_release_file_simple">
+            <column name="md5" type="varchar"/>
+            <column name="sha1" type="varchar"/>
+            <column name="sha256" type="varchar"/>
+        </addColumn>
+    </changeSet>
+    <changeSet type="pendingDrops">
+        <dropTable name="o_packages_file_hash"/>
+        <dropTable name="o_release_file_simple_hash"/>
+    </changeSet>
+</migration>

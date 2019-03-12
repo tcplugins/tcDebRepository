@@ -26,7 +26,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 import com.avaje.ebean.Model;
@@ -64,10 +63,10 @@ public class DebRepositoryModel extends Model {
 	List<DebPackagesFileModel> debpackagesFile;
 	
 	@OneToMany(mappedBy = "repository", cascade=CascadeType.REMOVE)
-	DebReleaseFileModel releaseFile;
+	List<DebReleaseFileModel> releaseFile;
 	
 	@OneToMany(mappedBy = "repository", cascade=CascadeType.REMOVE)
-	DebReleaseFileSimpleModel releaseFileSimple;
+	List<DebReleaseFileSimpleModel> releaseFileSimple;
 	
 }
 

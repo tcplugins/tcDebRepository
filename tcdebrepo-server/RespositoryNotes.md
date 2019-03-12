@@ -15,7 +15,7 @@ Examples:<br>
 There are two types Release files.
  1. The Release file at the root of the repository
      This is a full list of the Release and Packages files in the repo, including path and checksums.
- 2. A release file in each architecture directory of each component (eg, main/binary-amd64)
+ 2. A release file in each architecture directory of each component (eg, jessie/main/binary-amd64)
      This is a simple description file containing just meta-data about that part of the repository
      eg, 
      
