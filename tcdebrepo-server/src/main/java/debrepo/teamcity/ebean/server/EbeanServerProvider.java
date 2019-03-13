@@ -21,12 +21,12 @@ package debrepo.teamcity.ebean.server;
 import java.io.File;
 import java.io.IOException;
 
-import org.avaje.datasource.DataSourceConfig;
+import io.ebean.datasource.DataSourceConfig;
 import org.springframework.beans.factory.FactoryBean;
 
-import com.avaje.ebean.EbeanServer;
-import com.avaje.ebean.EbeanServerFactory;
-import com.avaje.ebean.config.ServerConfig;
+import io.ebean.EbeanServer;
+import io.ebean.EbeanServerFactory;
+import io.ebean.config.ServerConfig;
 
 import debrepo.teamcity.Loggers;
 import debrepo.teamcity.entity.helper.PluginDataResolver;

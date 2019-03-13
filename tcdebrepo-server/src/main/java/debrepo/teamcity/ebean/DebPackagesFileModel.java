@@ -19,25 +19,19 @@
 package debrepo.teamcity.ebean;
 
 import java.util.Date;
-import java.util.List;
-import java.util.Map;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
-import javax.persistence.MapKey;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
-
-import com.avaje.ebean.Model;
-import com.avaje.ebean.annotation.WhenModified;
 
 import debrepo.teamcity.GenericRepositoryFile;
+import io.ebean.Finder;
+import io.ebean.Model;
+import io.ebean.annotation.WhenModified;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -52,12 +46,8 @@ public class DebPackagesFileModel extends Model implements GenericRepositoryFile
 	private static final String SHA1 = "sha1";
 	private static final String SHA256 = "sha256";
 
-	public static Find<Long, DebPackagesFileModel> getFind() {
-		return find;
-	}
-
-	public static final Find<Long, DebPackagesFileModel> find = new Find<Long, DebPackagesFileModel>() {};
-
+	public static final MyFinder find = new MyFinder();
+	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	Long id;
@@ -139,6 +129,17 @@ public class DebPackagesFileModel extends Model implements GenericRepositoryFile
 	@Override
 	public String getFilePath() {
 		return path;
+	}
+	
+	public static class MyFinder extends Finder<Long, DebPackagesFileModel> {
+
+		/**
+		 * Construct using the default EbeanServer.
+		 */
+		public MyFinder() {
+			super(DebPackagesFileModel.class);
+		}
+
 	}
 
 }

@@ -29,13 +29,14 @@ import org.jetbrains.annotations.NotNull;
 
 import debrepo.teamcity.DebPackage;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /* Use the XmlAttributes on the fields rather than the getters
  * and setters provided by Lombok */
 @XmlAccessorType(XmlAccessType.FIELD)
 
 @Data  // Let Lombok generate the getters and setters.
-
+@NoArgsConstructor
 @XmlRootElement
 public class DebPackageEntity implements DebPackage, Cloneable {
 	

@@ -23,7 +23,8 @@ import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-import com.avaje.ebean.Model;
+import io.ebean.Finder;
+import io.ebean.Model;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -32,25 +33,32 @@ import lombok.Setter;
 @Entity
 @Table(name = "o_debfile_parameter")
 @Getter
-@Setter @AllArgsConstructor
+@Setter
+@AllArgsConstructor
 public class DebPackageParameterModel extends Model {
 
+	public static final MyFinder find = new MyFinder();
 
-		public static Find<Long, DebPackageParameterModel> getFind() {
-			return find;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	Long id;
+
+	@ManyToOne
+	@Column(name = "file")
+	private DebFileModel debFile;
+
+	private String name;
+	private String value;
+
+	public static class MyFinder extends Finder<Long, DebPackageParameterModel> {
+
+		/**
+		 * Construct using the default EbeanServer.
+		 */
+		public MyFinder() {
+			super(DebPackageParameterModel.class);
 		}
 
-		public static final Find<Long, DebPackageParameterModel> find = new Find<Long, DebPackageParameterModel>() {};
-
-		@Id
-		@GeneratedValue(strategy = GenerationType.IDENTITY)
-		Long id;
-		
-		@ManyToOne @Column(name="file")
-		private DebFileModel debFile;
-
-
-		private String name;
-		private String value;
+	}
 
 }

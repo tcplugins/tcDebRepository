@@ -33,12 +33,12 @@ import java.util.zip.GZIPOutputStream;
 
 import org.apache.commons.codec.digest.DigestUtils;
 
-import com.avaje.ebean.Ebean;
-import com.avaje.ebean.EbeanServer;
-import com.avaje.ebean.Query;
-import com.avaje.ebean.RawSql;
-import com.avaje.ebean.RawSqlBuilder;
-import com.avaje.ebean.SqlUpdate;
+import io.ebean.Ebean;
+import io.ebean.EbeanServer;
+import io.ebean.Query;
+import io.ebean.RawSql;
+import io.ebean.RawSqlBuilder;
+import io.ebean.SqlUpdate;
 
 import debrepo.teamcity.DebPackage;
 import debrepo.teamcity.GenericRepositoryFile;
@@ -100,7 +100,7 @@ public class DebRepositoryManagerImpl extends DebRepositoryConfigurationManagerI
 	
 	@Override
 	public DebPackageStore initialisePackageStore(DebRepositoryConfiguration conf) {
-		DebRepositoryModel repo = DebRepositoryModel.find.where().eq("uuid", conf.getUuid().toString()).findUnique();
+		DebRepositoryModel repo = DebRepositoryModel.find.query().where().eq("uuid", conf.getUuid().toString()).findOne();
 		if (repo == null) {
 			repo = new DebRepositoryModel();
 			Loggers.SERVER.info("DebRepositoryManagerImpl:initialisePackageStore :: Repository '" + conf.getRepoName() + "' not found in DB. Initialising...");
@@ -132,7 +132,7 @@ public class DebRepositoryManagerImpl extends DebRepositoryConfigurationManagerI
 
 	@Override
 	public DebRepositoryStatistics getRepositoryStatistics(String uuid, String repoUrl) {
-		int count = DebPackageModel.find.where().eq("repository.uuid", uuid).findCount();
+		int count = DebPackageModel.find.query().where().eq("repository.uuid", uuid).findCount();
 		DebRepositoryConfiguration config = getDebRepositoryConfiguration(uuid);
 		int filterCount = 0;
 		for (DebRepositoryBuildTypeConfig btConfig : config.getBuildTypes()) {
@@ -149,7 +149,7 @@ public class DebRepositoryManagerImpl extends DebRepositoryConfigurationManagerI
 	@Override
 	public void addBuildPackage(DebRepositoryConfiguration config, DebPackage newEntity) {
 		DebPackageModel m = DebPackageModel.copy(newEntity);
-		DebRepositoryModel repo = DebRepositoryModel.find.where().eq("uuid", config.getUuid().toString()).findUnique();
+		DebRepositoryModel repo = DebRepositoryModel.find.query().where().eq("uuid", config.getUuid().toString()).findOne();
 		m.setRepository(repo);
 		m.save();
 	}
@@ -171,7 +171,7 @@ public class DebRepositoryManagerImpl extends DebRepositoryConfigurationManagerI
 //				.dist.eq(distName)
 //				.component.eq(component)
 //				.findSingleAttributeList();
-		List<String> archs = DebFileModel.find.select("arch")
+		List<String> archs = DebFileModel.find.query().select("arch")
 				  .setDistinct(true)
 				  .where()
 				  .eq("debpackages.repository.name", repoName)
@@ -194,7 +194,7 @@ public class DebRepositoryManagerImpl extends DebRepositoryConfigurationManagerI
 //				.repository.name.eq(repoName)
 //				.dist.eq(distName)
 //				.findSingleAttributeList();
-		List<String> components = DebPackageModel.find.select("component")
+		List<String> components = DebPackageModel.find.query().select("component")
 				  .setDistinct(false)
 				  .where().eq("repository.name", repoName)
 				  .and().eq("dist", distName)
@@ -211,7 +211,7 @@ public class DebRepositoryManagerImpl extends DebRepositoryConfigurationManagerI
 //				.setDistinct(false)
 //				.repository.name.eq(repoName)
 //				.findSingleAttributeList();
-		List<String> dists = DebPackageModel.find.select("dist")
+		List<String> dists = DebPackageModel.find.query().select("dist")
 				  .setDistinct(false)
 				  .where().eq("repository.name", repoName)
 				  .findSingleAttributeList();
@@ -220,7 +220,7 @@ public class DebRepositoryManagerImpl extends DebRepositoryConfigurationManagerI
 	
 	@Override
 	public Set<String> findUniqueFilenames(String repoName) throws NonExistantRepositoryException {
-		List<String> files = DebPackageModel.find.select("filename")
+		List<String> files = DebPackageModel.find.query().select("filename")
 				  .setDistinct(false)
 				  .where().eq("repository.name", repoName)
 				  .findSingleAttributeList();
@@ -229,7 +229,7 @@ public class DebRepositoryManagerImpl extends DebRepositoryConfigurationManagerI
 	
 	@Override
 	public List<? extends DebPackage>  findAllByFilenames(String repoName, Collection<String> filenames) {
-		return DebPackageModel.find.where().in("filename", filenames).findList();
+		return DebPackageModel.find.query().where().in("filename", filenames).findList();
 	}
 
 
@@ -242,7 +242,7 @@ public class DebRepositoryManagerImpl extends DebRepositoryConfigurationManagerI
 //				  .setDistinct(false)
 //				  .repository.name.eq(repoName)
 //				  .findSingleAttributeList();
-		List<String> components = DebPackageModel.find.select("component")
+		List<String> components = DebPackageModel.find.query().select("component")
 				.setDistinct(false)
 				.where().eq("repository.name", repoName)
 				.findSingleAttributeList();
@@ -262,7 +262,7 @@ public class DebRepositoryManagerImpl extends DebRepositoryConfigurationManagerI
 //				 					  .component.eq(component)
 //				 					  .findSingleAttributeList();
 		
-		List<String> packages = DebFileModel.find.select("packageName")
+		List<String> packages = DebFileModel.find.query().select("packageName")
 				.setDistinct(true)
 				.where().eq("debpackages.repository.name", repoName)
 				.and().eq("debpackages.component", component)
@@ -295,7 +295,7 @@ public class DebRepositoryManagerImpl extends DebRepositoryConfigurationManagerI
 				  					 .columnMapping("O_DEBPACKAGE.URI", "uri")				
 				  					 .create();
 
-		return DebPackageModel.getFind()
+		return DebPackageModel.find.query()
 				  			  .setRawSql(rawSql)
 				  			  .setParameter("repoName", repoName)
 				  			  .setParameter("component", component)
@@ -306,14 +306,14 @@ public class DebRepositoryManagerImpl extends DebRepositoryConfigurationManagerI
 
 	@Override
 	public List<? extends DebPackage> findAllByDistComponentArch(String repoName, String distName, String component, String archName) throws NonExistantRepositoryException {
-		return DebPackageModel.find.where().eq("repository.name", repoName).eq("dist", distName).eq("component", component).eq("debFile.arch", archName).findList(); 
+		return DebPackageModel.find.query().where().eq("repository.name", repoName).eq("dist", distName).eq("component", component).eq("debFile.arch", archName).findList(); 
 	}
 	
 
 	@Override
 	public List<? extends DebPackage> findAllByDistComponentArchIncludingAll(String repoName, String distName,
 			String component, String archName) throws NonExistantRepositoryException {
-		return DebPackageModel.find.where().or()
+		return DebPackageModel.find.query().where().or()
 											   .and().eq("repository.name", repoName).eq("dist", distName).eq("component", component).eq("debFile.arch", archName).endAnd()
 											   .and().eq("repository.name", repoName).eq("dist", distName).eq("component", component).ieq("debFile.arch", "all").endAnd()
 											   .findList();
@@ -323,7 +323,7 @@ public class DebRepositoryManagerImpl extends DebRepositoryConfigurationManagerI
 	public DebPackage findByUri(String repoName, String uri)
 			throws NonExistantRepositoryException, DebPackageNotFoundInStoreException {
 		try {
-			return DebPackageModel.find.where().eq("repository.name", repoName).eq("uri", uri).findList().get(0);
+			return DebPackageModel.find.query().where().eq("repository.name", repoName).eq("uri", uri).findList().get(0);
 		} catch (IndexOutOfBoundsException e) {
 			throw new DebPackageNotFoundInStoreException(uri);
 		}
@@ -331,18 +331,18 @@ public class DebRepositoryManagerImpl extends DebRepositoryConfigurationManagerI
 
 	@Override
 	public boolean isExistingRepository(String repoName) {
-		return DebRepositoryModel.find.where().eq("name",repoName).findCount()  > 0;
+		return DebRepositoryModel.find.query().where().eq("name",repoName).findCount()  > 0;
 	}
 
 	@Override
 	public boolean isExistingRepository(UUID uuid) {
 		//return new QDebRepositoryModel().findCount() > 0;
 		//return new QDebRepositoryModel().uuid.eq(uuid.toString()).findCount() > 0;
-		return DebRepositoryModel.find.where().eq("uuid", uuid.toString()).findCount() > 0;
+		return DebRepositoryModel.find.query().where().eq("uuid", uuid.toString()).findCount() > 0;
 	}
 
 	public DebRepositoryModel findRepository(UUID uuid) throws NonExistantRepositoryException {
-		DebRepositoryModel repo = DebRepositoryModel.find.where().eq("uuid", uuid.toString()).findUnique();
+		DebRepositoryModel repo = DebRepositoryModel.find.query().where().eq("uuid", uuid.toString()).findOne();
 		if (repo == null) {
 			throw new NonExistantRepositoryException();
 		}
@@ -355,7 +355,7 @@ public class DebRepositoryManagerImpl extends DebRepositoryConfigurationManagerI
 		//DebPackageModel.db().createUpdate(DebPackageModel.class, "delete from orderDetail").execute();
 		
 		//DebPackageModel.find.where().eq("repository.uuid", uuid.toString()).delete();
-		DebRepositoryModel repo = DebRepositoryModel.find.where().eq("uuid", uuid.toString()).findUnique();
+		DebRepositoryModel repo = DebRepositoryModel.find.query().where().eq("uuid", uuid.toString()).findOne();
 		repo.delete();
 	}
 
@@ -431,7 +431,7 @@ public class DebRepositoryManagerImpl extends DebRepositoryConfigurationManagerI
 	@Override
 	public void removeBuildPackages(DebPackageRemovalBean packageRemovalBean) {
 		
-		List<DebPackageModel> packagesForDeletion = DebPackageModel.find.where()
+		List<DebPackageModel> packagesForDeletion = DebPackageModel.find.query().where()
 									.eq("repository.uuid", packageRemovalBean.getDebRepositoryConfiguration().getUuid().toString())
 									.eq("debFile.buildTypeId", packageRemovalBean.getBuildTypeId())
 									.eq("debFile.buildId", packageRemovalBean.getBuildId())
@@ -467,17 +467,17 @@ public class DebRepositoryManagerImpl extends DebRepositoryConfigurationManagerI
 
 	@Override
 	public int getTotalPackageCount() {
-		return DebPackageModel.find.findCount();
+		return DebPackageModel.find.query().findCount();
 	}
 
 	@Override
 	public int getTotalFileCount() {
-		return DebFileModel.find.findCount();
+		return DebFileModel.find.query().findCount();
 	}
 
 	@Override
 	public int getTotalRepositoryCount() {
-		return DebRepositoryModel.find.findCount();
+		return DebRepositoryModel.find.query().findCount();
 	}
 
 	@Override
@@ -490,7 +490,7 @@ public class DebRepositoryManagerImpl extends DebRepositoryConfigurationManagerI
 
 		  RawSql rawSql = RawSqlBuilder.parse(sql).create();
 
-		  return DebFileModel.getFind().setRawSql(rawSql).findCount();
+		  return DebFileModel.find.query().setRawSql(rawSql).findCount();
 	}
 
 	@Override
@@ -502,7 +502,7 @@ public class DebRepositoryManagerImpl extends DebRepositoryConfigurationManagerI
 
 		  RawSql rawSql = RawSqlBuilder.parse(sql).create();
 
-		  return DebFileModel.getFind().setRawSql(rawSql).findList();
+		  return DebFileModel.find.query().setRawSql(rawSql).findList();
 	}
 
 	@Override
@@ -566,7 +566,7 @@ public class DebRepositoryManagerImpl extends DebRepositoryConfigurationManagerI
 
 		  RawSql rawSql = RawSqlBuilder.parse(sql).create();
 
-		  return DebFileModel.getFind().setRawSql(rawSql).findCount();
+		  return DebFileModel.find.query().setRawSql(rawSql).findCount();
 	}
 	
 	@Override
@@ -640,13 +640,13 @@ public class DebRepositoryManagerImpl extends DebRepositoryConfigurationManagerI
 		
 		RawSql releasesRawSql = RawSqlBuilder.parse(releasesSql).create();
 
-		List<DebPackagesFileModel> packagesFiles = DebPackagesFileModel.getFind()
+		List<DebPackagesFileModel> packagesFiles = DebPackagesFileModel.find.query()
 					 .setRawSql(packagesRawSql)
 					 .setParameter("repoId", repositoryModel.getId())
 					 .setParameter("dist", dist)
 					 .findList();
 		
-		List<DebReleaseFileSimpleModel> releaseFilesSimple = DebReleaseFileSimpleModel.getFind()
+		List<DebReleaseFileSimpleModel> releaseFilesSimple = DebReleaseFileSimpleModel.find.query()
 					 .setRawSql(releasesRawSql)
 					 .setParameter("repoId", repositoryModel.getId())
 					 .setParameter("dist", dist)
@@ -659,11 +659,11 @@ public class DebRepositoryManagerImpl extends DebRepositoryConfigurationManagerI
 		Date modifiedTime = new Date();
 		String releaseFileContent = myReleaseDescriptionBuilder.buildPackageDescriptionList(config, repoFiles, dist, modifiedTime);
 		
-		DebReleaseFileModel releaseFile = DebReleaseFileModel.find
+		DebReleaseFileModel releaseFile = DebReleaseFileModel.find.query()
 				.where()
 				.eq("repository.uuid", config.getUuid().toString())
 				.eq("dist", dist)
-				.findUnique();
+				.findOne();
 
 		if (releaseFile == null) {
 			releaseFile = new DebReleaseFileModel();
@@ -752,10 +752,10 @@ public class DebRepositoryManagerImpl extends DebRepositoryConfigurationManagerI
 			throw new NonExistantRepositoryException();
 		}
 		
-		DebReleaseFileModel releaseFile = DebReleaseFileModel.find.where()
+		DebReleaseFileModel releaseFile = DebReleaseFileModel.find.query().where()
 																  .eq("repository.name", reponame)
 																  .eq("dist", dist)
-																  .findUnique();
+																  .findOne();
 		if (releaseFile == null) {
 			throw new DebRepositoryItemNotFoundException("Unable to find Release file " + releaseFileType.toString() + " for Repo " + reponame);
 		}
@@ -778,14 +778,14 @@ public class DebRepositoryManagerImpl extends DebRepositoryConfigurationManagerI
 			throw new NonExistantRepositoryException();
 		}
 		
-		DebReleaseFileSimpleModel releaseFile = DebReleaseFileSimpleModel.find.where()
+		DebReleaseFileSimpleModel releaseFile = DebReleaseFileSimpleModel.find.query().where()
 																  .eq("repository.name", reponame)
 																  .eq("dist", dist)
 																  .eq("component", component)
 																  .eq("arch", architecture)
 																  .order("modifiedTime desc")
 																  .setMaxRows(1)
-																  .findUnique();
+																  .findOne();
 		if (releaseFile == null) {
 			throw new DebRepositoryItemNotFoundException("Unable to find Release file " + releaseFileType.toString() + " for Repo " + reponame);
 		}
@@ -801,7 +801,7 @@ public class DebRepositoryManagerImpl extends DebRepositoryConfigurationManagerI
 			throw new NonExistantRepositoryException();
 		}
 
-		DebPackagesFileModel packagesFile = DebPackagesFileModel.find.where()
+		DebPackagesFileModel packagesFile = DebPackagesFileModel.find.query().where()
 																	 .eq("repository.name", reponame)
 																	 .eq("dist", dist)
 																	 .eq("component", component)
@@ -809,7 +809,7 @@ public class DebRepositoryManagerImpl extends DebRepositoryConfigurationManagerI
 																	 .eq("packagesFileName", packagesFileType.getFilename())
 																	 .order("modifiedTime desc")
 																	 .setMaxRows(1)
-																	 .findUnique();
+																	 .findOne();
 		if (packagesFile == null) {
 			throw new DebRepositoryItemNotFoundException("Unable to find packagesFile file " + packagesFileType.toString() + " for Repo " + reponame);
 		}

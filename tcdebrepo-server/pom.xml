@@ -12,30 +12,35 @@
 
 	<properties>
 		<ebean-maven-plugin.args>debug=2</ebean-maven-plugin.args>
-		<ebean-version>8.8.1</ebean-version>
-		<ebean-query-bean-version>8.1.4</ebean-query-bean-version>
-		<ebean-maven-plugin-version>8.2.1</ebean-maven-plugin-version>
+        <java.version>1.8</java.version>
 	</properties>
 	
 	<build>
 		<plugins>
-			<plugin>
-				<groupId>org.avaje.ebean</groupId>
-				<artifactId>ebean-maven-plugin</artifactId>
-				<version>${ebean-maven-plugin-version}</version>
-				<executions>
-					<execution>
-						<id>main</id>
-						<phase>process-classes</phase>
-						<configuration>
-							<transformArgs>debug=1</transformArgs>
-						</configuration>
-						<goals>
-							<goal>enhance</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.7.0</version>
+        <configuration>
+          <source>${java.version}</source>
+          <target>${java.version}</target>
+          <showWarnings>true</showWarnings>
+          <showDeprecation>true</showDeprecation>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>io.repaint.maven</groupId>
+        <artifactId>tiles-maven-plugin</artifactId>
+        <version>2.12</version>
+        <extensions>true</extensions>
+        <configuration>
+          <tiles>
+            <tile>org.avaje.tile:java-compile:1.1</tile>
+            <tile>io.ebean.tile:enhancement:7.4</tile>
+          </tiles>
+        </configuration>
+      </plugin>
 		</plugins>
 	</build>			
 			
@@ -92,8 +97,7 @@
 	<dependency>
 	  <groupId>org.rauschig</groupId>
 	  <artifactId>jarchivelib</artifactId>
-	  <!-- <version>0.7.1</version> -->
-	  <version>0.8.0-SNAPSHOT</version>
+	  <version>0.7.1</version>
 	</dependency>
 	
 	<!-- https://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->
@@ -112,25 +116,26 @@
 	    <version>4.2.6.RELEASE</version>
 	    <scope>test</scope>
 	</dependency>
-	
-		<dependency>
-			<groupId>org.avaje.ebean</groupId>
-			<artifactId>ebean</artifactId>
-			<version>${ebean-version}</version>
-		</dependency>
+    <dependency>
+      <groupId>io.ebean</groupId>
+      <artifactId>ebean</artifactId>
+      <version>11.31.1</version>
+    </dependency>
 
-		<dependency>
-			<groupId>org.avaje.ebean</groupId>
-			<artifactId>ebean-querybean</artifactId>
-			<version>8.4.1</version>
-		</dependency>
+    <!-- support for query beans -->
+    <dependency>
+      <groupId>io.ebean</groupId>
+      <artifactId>ebean-querybean</artifactId>
+      <version>11.30.1</version>
+    </dependency>
 
-		<!-- <dependency>
-			<groupId>org.avaje.ebean</groupId>
-			<artifactId>querybean-generator</artifactId>
-			<version>8.1.4</version>
-			<scope>provided</scope>
-		</dependency> -->
+    <!-- java annotation processor to generate query beans -->
+    <dependency>
+      <groupId>io.ebean</groupId>
+      <artifactId>querybean-generator</artifactId>
+      <version>11.27.1</version>
+      <scope>provided</scope>
+    </dependency>
 
 		<!-- https://mvnrepository.com/artifact/org.avaje/avaje-datasource -->
 		<dependency>

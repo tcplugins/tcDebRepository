@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<migration xmlns="http://ebean-orm.github.io/xml/ns/dbmigration">
+    <changeSet type="apply">
+        <addUniqueConstraint constraintName="uq_o_deb_release_file_repository_id_dist" tableName="o_deb_release_file" columnNames="DROP CONSTRAINT" nullableColumns=""/>
+        <addUniqueConstraint constraintName="uq_o_deb_release_file_repository_id_dist" tableName="o_deb_release_file" columnNames="repository_id,dist" oneToOne="false" nullableColumns="repository_id,dist"/>
+    </changeSet>
+</migration>

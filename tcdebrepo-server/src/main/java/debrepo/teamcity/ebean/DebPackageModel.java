@@ -31,7 +31,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
-import com.avaje.ebean.Model;
+import io.ebean.Finder;
+import io.ebean.Model;
 
 import debrepo.teamcity.DebPackage;
 import lombok.Getter;
@@ -43,12 +44,7 @@ import lombok.Setter;
 @Setter
 public class DebPackageModel extends Model implements DebPackage {
 
-
-	public static Find<Long, DebPackageModel> getFind() {
-		return find;
-	}
-
-	public static final Find<Long, DebPackageModel> find = new Find<Long, DebPackageModel>() {};
+	public static final MyFinder find = new MyFinder();
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -70,7 +66,7 @@ public class DebPackageModel extends Model implements DebPackage {
 	
 	public static DebPackageModel copy(DebPackage deb) {
 		
-		DebFileModel f = DebFileModel.find.where().eq("buildId", deb.getBuildId()).eq("filename", deb.getFilename()).findUnique();
+		DebFileModel f = DebFileModel.find.query().where().eq("buildId", deb.getBuildId()).eq("filename", deb.getFilename()).findOne();
 		if (f == null) {
 			f = new DebFileModel();
 			f.setArch(deb.getArch());
@@ -199,5 +195,15 @@ public class DebPackageModel extends Model implements DebPackage {
 		debFile.populateMetadata(metaDataFromPackage);
 	}
 
+	public static class MyFinder extends Finder<Long, DebPackageModel> {
 
+		/**
+		 * Construct using the default EbeanServer.
+		 */
+		public MyFinder() {
+			super(DebPackageModel.class);
+		}
+
+	}
+	
 }

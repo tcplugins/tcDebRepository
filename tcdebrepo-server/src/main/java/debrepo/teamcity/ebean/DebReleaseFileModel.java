@@ -29,7 +29,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
-import com.avaje.ebean.Model;
+import io.ebean.Finder;
+import io.ebean.Model;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -43,13 +44,8 @@ import lombok.Setter;
 @Setter
 public class DebReleaseFileModel extends Model {
 
-
-	public static Find<Long, DebReleaseFileModel> getFind() {
-		return find;
-	}
-
-	public static final Find<Long, DebReleaseFileModel> find = new Find<Long, DebReleaseFileModel>() {};
-
+	public static final MyFinder find = new MyFinder();
+	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	Long id;
@@ -69,6 +65,17 @@ public class DebReleaseFileModel extends Model {
 	
 	@Lob
 	String releaseFileGpg;
+	
+	public static class MyFinder extends Finder<Long, DebReleaseFileModel> {
+
+		/**
+		 * Construct using the default EbeanServer.
+		 */
+		public MyFinder() {
+			super(DebReleaseFileModel.class);
+		}
+
+	}
 	
 }
 

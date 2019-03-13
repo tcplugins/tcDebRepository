@@ -29,9 +29,10 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
-import com.avaje.ebean.Model;
-import com.avaje.ebean.annotation.Index;
+import io.ebean.Model;
+import io.ebean.annotation.Index;
 
+import io.ebean.Finder;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -42,12 +43,7 @@ import lombok.Setter;
 @Index(columnNames = {"build_id", "filename"})
 public class DebFileModel extends Model {
 
-	public static Find<Long, DebFileModel> getFind() {
-		return find;
-	}
-
-	public static final Find<Long, DebFileModel> find = new Find<Long, DebFileModel>() {
-	};
+	public static final MyFinder find = new MyFinder();
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -125,5 +121,16 @@ public class DebFileModel extends Model {
 		if (itemToRemove != null) {
 			getPackageParameters().remove(itemToRemove);
 		}
+	}
+	
+	public static class MyFinder extends Finder<Long, DebFileModel> {
+
+		/**
+		 * Construct using the default EbeanServer.
+		 */
+		public MyFinder() {
+			super(DebFileModel.class);
+		}
+
 	}
 }

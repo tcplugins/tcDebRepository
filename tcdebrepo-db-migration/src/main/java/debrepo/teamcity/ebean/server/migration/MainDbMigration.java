@@ -17,8 +17,8 @@ package debrepo.teamcity.ebean.server.migration;
 
 import java.io.IOException;
 
-import com.avaje.ebean.config.Platform;
-import com.avaje.ebean.dbmigration.DbMigration;
+import io.ebean.annotation.Platform;
+import io.ebean.dbmigration.DbMigration;
 
 /**
  * Generate the DB Migration.
@@ -40,21 +40,21 @@ public class MainDbMigration {
   
   public void generateMigrationFiles() throws IOException {
 	    // optionally specify the version and name
-	    System.setProperty("ddl.migration.version", "1.1.4");
-	    System.setProperty("ddl.migration.name", "Inline the file hashes into the object");
+	    System.setProperty("ddl.migration.version", "1.1.5");
+	    System.setProperty("ddl.migration.name", "Migrate to latest ebean version");
 
 	    // generate a migration using drops from a prior version
 	    //System.setProperty("ddl.migration.pendingDropsFor", "1.1.0");
 	    
 	    System.setProperty("disableTestProperties", "true");
 	    
-	    DbMigration migration = new DbMigration();
+	    DbMigration migration = DbMigration.create();
 	    migration.setPathToResources("src/main/resources");
 	    
 	    //migration.addPlatform(Platform.POSTGRES, "pg");
 	    migration.addPlatform(Platform.H2, "h2");
 	    migration.addPlatform(Platform.MYSQL, "mysql");
-	    migration.addPlatform(Platform.SQLSERVER, "sqlserver");
+	    migration.addPlatform(Platform.SQLSERVER17, "sqlserver");
 	    migration.addPlatform(Platform.ORACLE, "oracle");
 	    
 	    migration.generateMigration();

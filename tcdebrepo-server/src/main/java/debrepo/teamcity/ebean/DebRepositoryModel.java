@@ -28,7 +28,8 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
-import com.avaje.ebean.Model;
+import io.ebean.Finder;
+import io.ebean.Model;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -38,13 +39,8 @@ import lombok.Setter;
 @Getter
 @Setter
 public class DebRepositoryModel extends Model {
-
-
-	public static Find<Long, DebRepositoryModel> getFind() {
-		return find;
-	}
-
-	public static final Find<Long, DebRepositoryModel> find = new Find<Long, DebRepositoryModel>() {};
+	
+	public static final MyFinder find = new MyFinder();
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -67,6 +63,17 @@ public class DebRepositoryModel extends Model {
 	
 	@OneToMany(mappedBy = "repository", cascade=CascadeType.REMOVE)
 	List<DebReleaseFileSimpleModel> releaseFileSimple;
+	
+	public static class MyFinder extends Finder<Long, DebRepositoryModel> {
+
+		/**
+		 * Construct using the default EbeanServer.
+		 */
+		public MyFinder() {
+			super(DebRepositoryModel.class);
+		}
+
+	}
 	
 }
 

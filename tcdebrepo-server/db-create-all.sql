@@ -80,21 +80,21 @@ create table o_repository (
 );
 
 create index ix_o_debfile_build_id_filename on o_debfile (build_id,filename);
-alter table o_debpackage add constraint fk_o_debpackage_repository_id foreign key (repository_id) references o_repository (id) on delete restrict on update restrict;
 create index ix_o_debpackage_repository_id on o_debpackage (repository_id);
+alter table o_debpackage add constraint fk_o_debpackage_repository_id foreign key (repository_id) references o_repository (id) on delete restrict on update restrict;
 
-alter table o_debpackage add constraint fk_o_debpackage_deb_file_id foreign key (deb_file_id) references o_debfile (id) on delete restrict on update restrict;
 create index ix_o_debpackage_deb_file_id on o_debpackage (deb_file_id);
+alter table o_debpackage add constraint fk_o_debpackage_deb_file_id foreign key (deb_file_id) references o_debfile (id) on delete restrict on update restrict;
 
-alter table o_debfile_parameter add constraint fk_o_debfile_parameter_deb_file_id foreign key (deb_file_id) references o_debfile (id) on delete restrict on update restrict;
 create index ix_o_debfile_parameter_deb_file_id on o_debfile_parameter (deb_file_id);
+alter table o_debfile_parameter add constraint fk_o_debfile_parameter_deb_file_id foreign key (deb_file_id) references o_debfile (id) on delete restrict on update restrict;
 
-alter table o_deb_packages_file add constraint fk_o_deb_packages_file_repository_id foreign key (repository_id) references o_repository (id) on delete restrict on update restrict;
 create index ix_o_deb_packages_file_repository_id on o_deb_packages_file (repository_id);
+alter table o_deb_packages_file add constraint fk_o_deb_packages_file_repository_id foreign key (repository_id) references o_repository (id) on delete restrict on update restrict;
 
-alter table o_deb_release_file add constraint fk_o_deb_release_file_repository_id foreign key (repository_id) references o_repository (id) on delete restrict on update restrict;
 create index ix_o_deb_release_file_repository_id on o_deb_release_file (repository_id);
+alter table o_deb_release_file add constraint fk_o_deb_release_file_repository_id foreign key (repository_id) references o_repository (id) on delete restrict on update restrict;
 
-alter table o_deb_release_file_simple add constraint fk_o_deb_release_file_simple_repository_id foreign key (repository_id) references o_repository (id) on delete restrict on update restrict;
 create index ix_o_deb_release_file_simple_repository_id on o_deb_release_file_simple (repository_id);
+alter table o_deb_release_file_simple add constraint fk_o_deb_release_file_simple_repository_id foreign key (repository_id) references o_repository (id) on delete restrict on update restrict;
 

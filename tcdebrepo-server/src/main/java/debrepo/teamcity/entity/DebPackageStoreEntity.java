@@ -29,13 +29,14 @@ import javax.xml.bind.annotation.XmlRootElement;
 import org.jetbrains.annotations.NotNull;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /* Use the XmlAttributes on the fields rather than the getters
  * and setters provided by Lombok */
 @XmlAccessorType(XmlAccessType.FIELD)
 
 @Data  // Let Lombok generate the getters and setters.
-
+@NoArgsConstructor
 @XmlRootElement
 public class DebPackageStoreEntity {
 	
