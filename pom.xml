@@ -7,6 +7,11 @@
   <packaging>pom</packaging>
   <properties>
       <teamcity-version>10.0</teamcity-version>
+      
+		<ebean-maven-plugin.args>debug=2</ebean-maven-plugin.args>
+		<ebean-version>11.35.3</ebean-version>
+		<ebean-query-bean-version>11.35.3</ebean-query-bean-version>
+		<ebean-maven-plugin-version>1.34.1</ebean-maven-plugin-version>
   </properties>
   <repositories>
     <repository>
