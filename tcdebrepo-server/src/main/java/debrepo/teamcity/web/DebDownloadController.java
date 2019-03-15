@@ -172,39 +172,6 @@ public abstract class DebDownloadController extends BaseController {
 		params.put("pluginVersion", this.myPluginDescriptor.getPluginVersion());
 		params.put("jspHome", this.myPluginDescriptor.getPluginResourcesPath());
 		
-<<<<<<< HEAD
-		/* /debrepo/{RepoName}/dists/{Distribution}/{Component}/binary-{Arch}/Packages.gz */
-		Matcher matcher = packagesGzPattern.matcher(uriPath);
-		if (matcher.matches()) {
-			String repoName = matcher.group(1);
-			String distName = matcher.group(2);
-			String component= matcher.group(3);
-			String archName = matcher.group(4);
-			try {
-				checkRepoIsRestricted(repoName);
-				return servePackagesGzFile(request, response, repoName, distName, component, archName);
-				//return servePackagesGzFile(request, response, myDebRepositoryManager.findAllByDistComponentArchIncludingAll(repoName, distName, component, archName));
-			} catch (DebRepositoryPermissionDeniedException ex){
-				response.sendError(HttpServletResponse.SC_FORBIDDEN);
-				Loggers.SERVER.info("DebDownloadController:: Returning 403 : Deb Repository is restricted and user is not permissioned on project: " + request.getPathInfo());
-				return null;			
-			} catch (DebRepositoryAccessIsRestrictedException ex){
-				response.sendRedirect(buildRedirectToRestrictedUrl(request, uriPath));
-				Loggers.SERVER.info("DebDownloadController:: Returning 302 : Deb Repository is restricted: " + request.getPathInfo());
-				return null;
-			} catch (DebRepositoryDatabaseItemNotFoundException ex){
-				response.sendError(HttpServletResponse.SC_NOT_FOUND);
-				Loggers.SERVER.info("DebDownloadController:: Returning 404 : Not Found: No Packages file found for: " + request.getPathInfo());
-				return null;			
-			} catch (NonExistantRepositoryException ex){
-				response.sendError(HttpServletResponse.SC_NOT_FOUND);
-				Loggers.SERVER.info("DebDownloadController:: Returning 404 : Not Found: No Deb Repository exists with the name: " + request.getPathInfo());
-				return null;
-			}
-		}
-		
-=======
->>>>>>> Commit a bunch of edits from months ago.
 		/* /debrepo/{RepoName}/dists/{Distribution}/{Component}/binary-{Arch}/Release */
 		Matcher matcher = releaseFileSmallPattern.matcher(uriPath);
 		if (matcher.matches()) {
@@ -235,7 +202,7 @@ public abstract class DebDownloadController extends BaseController {
 			String packagesFileName = matcher.group(5);
 			try {
 				checkRepoIsRestricted(repoName);
-				PackagesFileType packagesFileType = PackagesFileType.valueOf(packagesFileName);
+				PackagesFileType packagesFileType = PackagesFileType.findByName(packagesFileName);
 				return servePackagesFile(request, response, repoName, distName, component, archName, packagesFileType);
 				//return servePackagesFile(request, response, myDebRepositoryManager.findAllByDistComponentArchIncludingAll(repoName, distName, component, archName));
 			} catch (DebRepositoryPermissionDeniedException ex){

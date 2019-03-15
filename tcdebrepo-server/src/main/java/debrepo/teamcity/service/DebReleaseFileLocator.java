@@ -42,6 +42,21 @@ public interface DebReleaseFileLocator {
 		public String getContentType() {
 			return contentType;
 		}
+		
+		/** Finds the {@link PackagesFileType} with the matching filename.
+		 * If none found, returns the {@link Packages} file type.
+		 * 
+		 * @param packagesFileName
+		 * @return Relevant {@link PackagesFileType} or {@link Packages} if not found.
+		 */
+		public static PackagesFileType findByName(String packagesFileName) {
+			for (PackagesFileType type : values()) {
+				if (type.getFilename().equals(packagesFileName)) {
+					return type;
+				}
+			}
+			return Packages;
+		}
 	}
 
 }
