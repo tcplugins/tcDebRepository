@@ -68,7 +68,7 @@ public class EbeanServerProvider implements FactoryBean<EbeanServer> {
 					);
 		} catch (Exception e) {
 			Loggers.SERVER.error("EbeanServerProvider :: Could not create eBean instance!");
-			Loggers.SERVER.debug(e);
+			Loggers.SERVER.info(e);
 		}	
 	}
 	
