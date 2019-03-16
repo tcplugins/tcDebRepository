@@ -575,7 +575,7 @@ public class DebRepositoryManagerImpl extends DebRepositoryConfigurationManagerI
 		updateReleaseFiles(config, repositoryModel, dcas);
 	}	
 
-	public void updateReleaseFiles(DebRepositoryConfiguration config, DebRepositoryModel repositoryModel, Set<? extends DistComponentArchitecture> dcas) throws NonExistantRepositoryException {
+	private void updateReleaseFiles(DebRepositoryConfiguration config, DebRepositoryModel repositoryModel, Set<? extends DistComponentArchitecture> dcas) throws NonExistantRepositoryException {
 		Set<String> distsToUpdate = new HashSet<>();
 		
 		for (DistComponentArchitecture dca : dcas) {

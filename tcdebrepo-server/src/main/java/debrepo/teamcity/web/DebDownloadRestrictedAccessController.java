@@ -18,6 +18,7 @@
  *******************************************************************************/
 package debrepo.teamcity.web;
 
+import debrepo.teamcity.service.DebReleaseFileLocator;
 import debrepo.teamcity.service.DebRepositoryConfigurationManager;
 import debrepo.teamcity.service.DebRepositoryManager;
 import debrepo.teamcity.service.NonExistantRepositoryException;
@@ -39,8 +40,8 @@ public class DebDownloadRestrictedAccessController extends DebDownloadController
 	public DebDownloadRestrictedAccessController(SBuildServer sBuildServer, WebControllerManager webControllerManager,
 			PluginDescriptor descriptor, AuthorizationInterceptor authorizationInterceptor,
 			DebRepositoryManager debRepositoryManager, DebRepositoryConfigurationManager debRepositoryConfigurationManager, 
-			SecurityContext securityContext) {
-		super(sBuildServer, webControllerManager, descriptor, authorizationInterceptor, debRepositoryManager);
+			SecurityContext securityContext, DebReleaseFileLocator debReleaseFileLocator) {
+		super(sBuildServer, webControllerManager, descriptor, authorizationInterceptor, debRepositoryManager, debReleaseFileLocator);
 		mySecurityContext = securityContext;
 		myDebRepositoryConfigManager = debRepositoryConfigurationManager;
 	}

@@ -111,7 +111,7 @@ public abstract class DebDownloadController extends BaseController {
     /**                                                             /debrepo/{RepoName}                    		                                        */
     final private Pattern infoPattern            = Pattern.compile("^" + getDebRepoUrlPart() + "/(\\S+?)/$");
     
-    private final DebRepositoryManager myDebRepositoryManager;
+    protected final DebRepositoryManager myDebRepositoryManager;
     private final DebReleaseFileLocator myDebReleaseFileLocator;
     private final PluginDescriptor myPluginDescriptor;
 
@@ -278,8 +278,17 @@ public abstract class DebDownloadController extends BaseController {
 			String distName = matcher.group(2);
 			String releaseFileName= matcher.group(3);
 			try {
+				checkRepoIsRestricted(repoName);
 				ReleaseFileType releaseFileType = ReleaseFileType.valueOf(releaseFileName);
 				return serveReleaseFile(request, response, repoName, distName, releaseFileType);
+			} catch (DebRepositoryPermissionDeniedException ex){
+				response.sendError(HttpServletResponse.SC_FORBIDDEN);
+				Loggers.SERVER.info("DebDownloadController:: Returning 403 : Deb Repository is restricted and user is not permissioned on project: " + request.getPathInfo());
+				return null;			
+			} catch (DebRepositoryAccessIsRestrictedException ex){
+				response.sendRedirect(buildRedirectToRestrictedUrl(request, uriPath));
+				Loggers.SERVER.info("DebDownloadController:: Returning 302 : Deb Repository is restricted: " + request.getPathInfo());
+				return null;				
 			} catch (NonExistantRepositoryException ex){
 				response.sendError(HttpServletResponse.SC_NOT_FOUND);
 				Loggers.SERVER.info("DebDownloadController:: Returning 404 : Not Found: No Deb Repository exists with the name: " + request.getPathInfo());
