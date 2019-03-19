@@ -31,3 +31,7 @@ drop table if exists o_deb_release_file_simple;
 drop table if exists o_repository;
 
 drop index if exists ix_o_debfile_build_id_filename;
+drop index if exists ix_o_deb_packages_file_repository_id_dist_path_modified_t_1;
+drop index if exists ix_o_deb_packages_file_dist;
+drop index if exists ix_o_deb_packages_file_path;
+drop index if exists ix_o_deb_packages_file_modified_time;

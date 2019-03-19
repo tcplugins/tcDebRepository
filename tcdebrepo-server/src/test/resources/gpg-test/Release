@@ -1,0 +1,22 @@
+Origin: TcPlugins
+Label: 
+Suite: jessie
+Date: Thu, 14 Mar 2019 23:40:50 UTC
+Acquire-By-Hash: yes
+Architectures: amd64 i386
+Components: main
+MD5Sum:
+ eff8ba9ad203997844596e20f512ac30             840 jessie/main/binary-amd64/Packages
+ 072f7617de66359c84a7a1ada14ba351             428 jessie/main/binary-amd64/Packages.gz
+ f0c9eaf8da106fdf2339f45ad317f490             836 jessie/main/binary-i386/Packages
+ 98de4b87fa3e6aaefd8377989af63a7a             427 jessie/main/binary-i386/Packages.gz
+SHA1:
+ f6493187d9705879e101fc29120ff87e7efacce0             840 jessie/main/binary-amd64/Packages
+ 44702acf12b400c5dcfc1a913653f12388d48579             428 jessie/main/binary-amd64/Packages.gz
+ 227c34c681d8b85ec19717dc8e65341199c7d9e6             836 jessie/main/binary-i386/Packages
+ 0db2301cfd2bf15c58e07d8811490ee1cfaefe06             427 jessie/main/binary-i386/Packages.gz
+SHA256:
+ 52fdbba28d5d2bf41c81cf16e5e16a45256e7f791220536717db2d744e4aa206             840 jessie/main/binary-amd64/Packages
+ 79bf63a4e8403c02d41c587ecc5e0ce0b0eb5791e5ff199fdd78137f64d40804             428 jessie/main/binary-amd64/Packages.gz
+ 55476dbb52ee37d98271ccaee86c8c7151617e09d46cbaf599aa7c4eb93630f7             836 jessie/main/binary-i386/Packages
+ 84f305c4ba25f2f8e43f5401cb99f5f464e0d76f0b8fce42ffe320e91e9ad2bf             427 jessie/main/binary-i386/Packages.gz

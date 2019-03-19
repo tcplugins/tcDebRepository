@@ -107,7 +107,6 @@
      	      
 		<!-- Begin ebean backed DB impl  -->
 		
-		       
        <bean id="ebeanServerProvider"
      	class="debrepo.teamcity.ebean.server.EbeanServerProvider" 
      	init-method="init" 

@@ -34,7 +34,6 @@ public class DebReleaseFileGeneratorTest extends DebRepositoryBaseTest {
 	@Mock ServerPaths serverPaths;
 	PluginDataResolver pluginDataResolver;
 	
-	EbeanServerProvider ebeanServerProvider;
 	DebRepositoryManager debRepositoryManager;
 	ReleaseDescriptionBuilder realReleaseDescriptionBuilder;
 	
@@ -49,9 +48,8 @@ public class DebReleaseFileGeneratorTest extends DebRepositoryBaseTest {
 		when(project01.getDescription()).thenReturn("My Project Name - Long description");
 		
 		pluginDataResolver = new PluginDataResolverImpl(serverPaths);
-		ebeanServerProvider = new EbeanServerProvider(pluginDataResolver);
 		realReleaseDescriptionBuilder = new DebRepositoryToReleaseDescriptionBuilder(projectManager);
-		debRepositoryManager = new DebRepositoryManagerImpl(ebeanServerProvider.getEbeanServer(), debRepositoryConfigurationFactory, debRepositoryConfigurationChangePersister, realReleaseDescriptionBuilder);;
+		debRepositoryManager = new DebRepositoryManagerImpl(EbeanServerProvider.createEbeanServerInstance(pluginDataResolver), debRepositoryConfigurationFactory, debRepositoryConfigurationChangePersister, realReleaseDescriptionBuilder);;
 		debRepositoryConfigManager = (DebRepositoryConfigurationManager) debRepositoryManager;
 		
 		c = getDebRepoConfig1();

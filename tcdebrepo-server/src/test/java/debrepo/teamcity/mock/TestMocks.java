@@ -25,6 +25,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import jetbrains.buildServer.controllers.AuthorizationInterceptor;
+import jetbrains.buildServer.plugins.classLoaders.TeamCityPluginClassLoader;
 import jetbrains.buildServer.serverSide.ProjectManager;
 import jetbrains.buildServer.serverSide.SBuildServer;
 import jetbrains.buildServer.serverSide.ServerPaths;
@@ -98,6 +99,11 @@ public class TestMocks {
 	PagePlace pagePlace() {
 		PagePlace pagePlace = mock(PagePlace.class);
 		return pagePlace;
+	}
+	
+	@Bean
+	ClassLoader classLoader() {
+		return Thread.currentThread().getContextClassLoader();
 	}
 	
 }

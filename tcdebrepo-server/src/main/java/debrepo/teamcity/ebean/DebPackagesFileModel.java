@@ -31,10 +31,12 @@ import javax.persistence.Table;
 import debrepo.teamcity.GenericRepositoryFile;
 import io.ebean.Finder;
 import io.ebean.Model;
+import io.ebean.annotation.Index;
 import io.ebean.annotation.WhenModified;
 import lombok.Getter;
 import lombok.Setter;
 
+@Index(columnNames = {"repository_id", "dist", "path" ,"modified_time"})
 @Entity
 @Table(name = "o_deb_packages_file")
 @Getter
@@ -52,6 +54,7 @@ public class DebPackagesFileModel extends Model implements GenericRepositoryFile
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	Long id;
 	
+	@Index
 	@ManyToOne
 	private DebRepositoryModel repository;
 	
@@ -62,16 +65,19 @@ public class DebPackagesFileModel extends Model implements GenericRepositoryFile
 	
 	String packagesFileName;
 	
+	@Index
 	@WhenModified
 	Date modifiedTime;
 
 	@Lob
 	byte[] packagesFile;
 	
+	@Index
 	String dist;
 	String component;
 	String arch;
 	
+	@Index
 	String path;
 	
 	String md5;

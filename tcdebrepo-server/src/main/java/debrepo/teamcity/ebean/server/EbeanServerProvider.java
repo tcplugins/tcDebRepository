@@ -23,6 +23,8 @@ import java.io.IOException;
 
 import io.ebean.datasource.DataSourceConfig;
 import org.springframework.beans.factory.FactoryBean;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
 import io.ebean.EbeanServer;
 import io.ebean.EbeanServerFactory;
@@ -39,16 +41,6 @@ public class EbeanServerProvider implements FactoryBean<EbeanServer> {
 	private ClassLoader myTeamCityClassLoader;
 	private PluginDataResolver myPluginDataResolver;
 	
-	/**
-	 * EbeanServerProvider constructor for unit tests that does not need TeamCity running.
-	 * 
-	 * @param pluginDataResolver Used to find the directory to store the H2 files in.
-	 */
-	protected EbeanServerProvider(PluginDataResolver pluginDataResolver) {
-		Loggers.SERVER.info("EbeanServerProvider :: Getting EBeanServer via testing method.");
-		this.myEbeanServer = createEbeanServerInstance(pluginDataResolver);
-	}
-	
 	/** 
 	 * EbeanServerProvider
 	 * @param serverPaths The directory to store the H2 files in.
@@ -63,6 +55,11 @@ public class EbeanServerProvider implements FactoryBean<EbeanServer> {
 	public void init() {
 		Loggers.SERVER.info("EbeanServerProvider :: Initialising EBeanServer via TeamCity classpath method.");
 		try {
+			for (Resource r : Util.doUnderContextClassLoader(myTeamCityClassLoader,
+					new ClassLoaderPrinter(myTeamCityClassLoader)
+					)) {
+				Loggers.SERVER.info("Found resource " + r.getClass().getCanonicalName() );
+			}
 			this.myEbeanServer = Util.doUnderContextClassLoader(myTeamCityClassLoader,
 					new EbeanServerProviderInstantiationFunction(myPluginDataResolver)
 					);
@@ -86,8 +83,27 @@ public class EbeanServerProvider implements FactoryBean<EbeanServer> {
 		
 	}
 	
+	public class ClassLoaderPrinter implements FuncThrow<Resource[], Exception> {
+		final ClassLoader classLoader;
+		
+		public ClassLoaderPrinter(ClassLoader classLoader) {
+			this.classLoader = classLoader;
+		}
 
-	public EbeanServer createEbeanServerInstance(PluginDataResolver pluginDataResolver) {
+		@Override
+		public Resource[] apply() throws Exception {
+			PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver(this.classLoader);
+			return resolver.getResources("classpath:**");
+		}
+		
+	}
+	
+	/**
+	 * EbeanServer builder.
+	 * Called by EbeanServerProviderInstantiationFunction.apply() and also
+	 * is public so that it can be used by unit tests which don't have TeamCity running.
+	 */
+	public static EbeanServer createEbeanServerInstance(PluginDataResolver pluginDataResolver) {
 		File myDataDir;
 		try {
 			myDataDir = new File(pluginDataResolver.getPluginDatabaseDirectory());

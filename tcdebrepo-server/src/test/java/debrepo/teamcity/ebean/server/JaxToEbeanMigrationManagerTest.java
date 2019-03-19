@@ -92,11 +92,10 @@ public class JaxToEbeanMigrationManagerTest {
 		
 		jaxPluginDataResolver = new PluginDataResolverImpl(jaxServerPaths);
 		ebeanPluginDataResolver = new PluginDataResolverImpl(ebeanServerPaths);
-		ebeanServerProvider = new EbeanServerProvider(ebeanPluginDataResolver);
 		releaseDescriptionBuilder = new DebRepositoryToReleaseDescriptionBuilder(projectManager);
 		
 		DebRepositoryManager ebeanDebRepositoryManager = new DebRepositoryManagerImpl(
-				ebeanServerProvider.getEbeanServer(), 
+				EbeanServerProvider.createEbeanServerInstance(ebeanPluginDataResolver), 
 				debRepositoryConfigurationFactory, 
 				debRepositoryConfigurationChangePersister,
 				releaseDescriptionBuilder);

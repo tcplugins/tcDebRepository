@@ -43,6 +43,13 @@
       </plugin>
 		</plugins>
 	</build>			
+
+	<repositories>
+	  <repository>
+		<id>local-mvn-repo</id>
+		<url>file://${project.basedir}/local-mvn-repo</url>
+	  </repository>
+	</repositories>
 			
 	<dependencies>
 		<dependency>
@@ -57,6 +64,13 @@
 			<artifactId>server-web-api</artifactId>
 			<version>${teamcity-version}</version>
 			<type>war</type>
+			<scope>provided</scope>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.jetbrains.teamcity</groupId>
+			<artifactId>common-impl</artifactId>
+			<version>${teamcity-version}</version>
 			<scope>provided</scope>
 		</dependency>
 

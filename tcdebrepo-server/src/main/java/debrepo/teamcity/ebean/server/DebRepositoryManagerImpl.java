@@ -365,12 +365,16 @@ public class DebRepositoryManagerImpl extends DebRepositoryConfigurationManagerI
 		DebRepositoryModel repo = findRepository(debRepositoryConfiguration.getUuid());
 		Set<DistComponentArchitecture> packageFileToRegenerate = new HashSet<>();
 		
+		Loggers.SERVER.info("-DebRepositoryManagerImpl :: Adding new packages (" + newPackages.size() +")");
 		//DebPackageModel.db().beginTransaction();
 		for (DebPackage debPackage : newPackages) {
 			addBuildPackage(repo, debPackage);
 			packageFileToRegenerate.add(new DistComponentArchImpl(debPackage.getDist(), debPackage.getComponent(), debPackage.getArch()));
 		}
+		Loggers.SERVER.info("-DebRepositoryManagerImpl :: Done adding new packages (" + newPackages.size() +")");
+		Loggers.SERVER.info("-DebRepositoryManagerImpl :: Updating ReleaseFiles (" + packageFileToRegenerate.size() +")");
 		updateReleaseFiles(debRepositoryConfiguration, repo, packageFileToRegenerate);
+		Loggers.SERVER.info("-DebRepositoryManagerImpl :: Done updating ReleaseFiles (" + packageFileToRegenerate.size() +")");
 		//DebPackageModel.db().endTransaction();
 	}
 	
@@ -578,14 +582,18 @@ public class DebRepositoryManagerImpl extends DebRepositoryConfigurationManagerI
 	private void updateReleaseFiles(DebRepositoryConfiguration config, DebRepositoryModel repositoryModel, Set<? extends DistComponentArchitecture> dcas) throws NonExistantRepositoryException {
 		Set<String> distsToUpdate = new HashSet<>();
 		
+		Loggers.SERVER.info("--DebRepositoryManagerImpl :: Updating new packageFiles for dists (" + distsToUpdate.size() +")");
 		for (DistComponentArchitecture dca : dcas) {
 			updatePackagesFiles(config, dca);
 			distsToUpdate.add(dca.getDist());
 		}
+		Loggers.SERVER.info("--DebRepositoryManagerImpl :: Done updating new packageFiles for dists (" + distsToUpdate.size() +")");
 		
+		Loggers.SERVER.info("--DebRepositoryManagerImpl :: Updating new releaseFiles for dists (" + distsToUpdate.size() +")");
 		for (String dist : distsToUpdate) {
 			updateReleaseFile(config, repositoryModel, dist);
 		}
+		Loggers.SERVER.info("--DebRepositoryManagerImpl :: Done updating new releaseFiles for dists (" + distsToUpdate.size() +")");
 	}
 
 	private void updateSimpleRelaseFile(DebRepositoryConfiguration config, DebRepositoryModel repositoryModel,
@@ -640,17 +648,21 @@ public class DebRepositoryManagerImpl extends DebRepositoryConfigurationManagerI
 		
 		RawSql releasesRawSql = RawSqlBuilder.parse(releasesSql).create();
 
+		Loggers.SERVER.info("---DebRepositoryManagerImpl :: Find packages for releaseFile");
 		List<DebPackagesFileModel> packagesFiles = DebPackagesFileModel.find.query()
 					 .setRawSql(packagesRawSql)
 					 .setParameter("repoId", repositoryModel.getId())
 					 .setParameter("dist", dist)
 					 .findList();
+		Loggers.SERVER.info("---DebRepositoryManagerImpl :: Done find packages for releaseFile");
 		
+		Loggers.SERVER.info("---DebRepositoryManagerImpl :: Find releaseFilesSimples for releaseFile");
 		List<DebReleaseFileSimpleModel> releaseFilesSimple = DebReleaseFileSimpleModel.find.query()
 					 .setRawSql(releasesRawSql)
 					 .setParameter("repoId", repositoryModel.getId())
 					 .setParameter("dist", dist)
 					 .findList();
+		Loggers.SERVER.info("---DebRepositoryManagerImpl :: Done find releaseFilesSimples for releaseFile");
 		
 		List<GenericRepositoryFile> repoFiles = new ArrayList<>();
 		repoFiles.addAll(releaseFilesSimple);
@@ -659,12 +671,14 @@ public class DebRepositoryManagerImpl extends DebRepositoryConfigurationManagerI
 		Date modifiedTime = new Date();
 		String releaseFileContent = myReleaseDescriptionBuilder.buildPackageDescriptionList(config, repoFiles, dist, modifiedTime);
 		
+		Loggers.SERVER.info("---DebRepositoryManagerImpl :: Find existing releaseFile");
 		DebReleaseFileModel releaseFile = DebReleaseFileModel.find.query()
 				.where()
 				.eq("repository.uuid", config.getUuid().toString())
 				.eq("dist", dist)
 				.findOne();
-
+		Loggers.SERVER.info("---DebRepositoryManagerImpl :: Done find existing releaseFile");
+		
 		if (releaseFile == null) {
 			releaseFile = new DebReleaseFileModel();
 			releaseFile.setRepository(findRepository(config.getUuid()));
@@ -672,7 +686,9 @@ public class DebRepositoryManagerImpl extends DebRepositoryConfigurationManagerI
 		}
 		releaseFile.setReleaseFile(releaseFileContent);
 		releaseFile.setModifiedTime(modifiedTime);
+		Loggers.SERVER.info("---DebRepositoryManagerImpl :: Persist new releaseFile");
 		releaseFile.save();
+		Loggers.SERVER.info("---DebRepositoryManagerImpl :: Done persist new releaseFile");
 	}
 	
 	@Override

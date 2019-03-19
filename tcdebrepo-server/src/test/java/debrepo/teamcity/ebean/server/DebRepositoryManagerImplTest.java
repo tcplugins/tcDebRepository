@@ -47,7 +47,6 @@ public class DebRepositoryManagerImplTest extends DebRepositoryBaseTest {
 	@Mock ServerPaths serverPaths;
 	PluginDataResolver pluginDataResolver;
 	
-	EbeanServerProvider ebeanServerProvider;
 	DebRepositoryManager debRepositoryManager;
 	
 	@Before
@@ -56,8 +55,7 @@ public class DebRepositoryManagerImplTest extends DebRepositoryBaseTest {
 		when(serverPaths.getPluginDataDirectory()).thenReturn(new File("target"));
 		
 		pluginDataResolver = new PluginDataResolverImpl(serverPaths);
-		ebeanServerProvider = new EbeanServerProvider(pluginDataResolver);
-		debRepositoryManager = new DebRepositoryManagerImpl(ebeanServerProvider.getEbeanServer(), debRepositoryConfigurationFactory, debRepositoryConfigurationChangePersister, releaseDescriptionBuilder);
+		debRepositoryManager = new DebRepositoryManagerImpl(EbeanServerProvider.createEbeanServerInstance(pluginDataResolver), debRepositoryConfigurationFactory, debRepositoryConfigurationChangePersister, releaseDescriptionBuilder);
 		debRepositoryConfigManager = (DebRepositoryConfigurationManager) debRepositoryManager;
 		
 		DebRepositoryConfiguration c = getDebRepoConfig1();
@@ -147,7 +145,7 @@ public class DebRepositoryManagerImplTest extends DebRepositoryBaseTest {
 	@Override
 	public DebRepositoryManager getDebRepositoryManager() throws NonExistantRepositoryException, IOException {
 		setuplocal();
-		return new DebRepositoryManagerImpl(ebeanServerProvider.getEbeanServer(), debRepositoryConfigurationFactory, debRepositoryConfigurationChangePersister, releaseDescriptionBuilder);
+		return new DebRepositoryManagerImpl(EbeanServerProvider.createEbeanServerInstance(pluginDataResolver), debRepositoryConfigurationFactory, debRepositoryConfigurationChangePersister, releaseDescriptionBuilder);
 	}
 
 }

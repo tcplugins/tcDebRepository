@@ -50,7 +50,6 @@ public class DebRepositoryManagerEbeanTests extends DebRepositoryManagerTest {
 	@Mock SProject project01, project02;
 	PluginDataResolver pluginDataResolver;
 	
-	EbeanServerProvider ebeanServerProvider;
 	DebRepositoryManager debRepositoryManager;
 	DebRepositoryManagerImpl debRepositoryManagerImpl;
 	
@@ -73,10 +72,9 @@ public class DebRepositoryManagerEbeanTests extends DebRepositoryManagerTest {
 		releaseDescriptionBuilder = new DebRepositoryToReleaseDescriptionBuilder(projectManager);
 		
 		pluginDataResolver = new PluginDataResolverImpl(serverPaths);
-		ebeanServerProvider = new EbeanServerProvider(pluginDataResolver);
 		
 		debRepositoryManagerImpl = new DebRepositoryManagerImpl(
-				ebeanServerProvider.getEbeanServer(),
+				EbeanServerProvider.createEbeanServerInstance(pluginDataResolver),
 				debRepositoryConfigurationFactory, 
 				debRepositoryConfigurationChangePersister,
 				releaseDescriptionBuilder);

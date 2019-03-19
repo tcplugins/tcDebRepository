@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<migration xmlns="http://ebean-orm.github.io/xml/ns/dbmigration">
+    <changeSet type="apply">
+        <dropIndex indexName="ix_o_debfile_build_id_filename" tableName="o_debfile"/>
+    </changeSet>
+    <changeSet type="pendingDrops">
+        <dropTable name="o_debpackage" sequenceCol="id"/>
+        <dropTable name="o_repository" sequenceCol="id"/>
+        <dropTable name="o_debfile" sequenceCol="id"/>
+        <dropTable name="o_debfile_parameter" sequenceCol="id"/>
+        <dropTable name="o_deb_packages_file" sequenceCol="id"/>
+        <dropTable name="o_deb_release_file" sequenceCol="id"/>
+        <dropTable name="o_deb_release_file_simple" sequenceCol="id"/>
+    </changeSet>
+</migration>
