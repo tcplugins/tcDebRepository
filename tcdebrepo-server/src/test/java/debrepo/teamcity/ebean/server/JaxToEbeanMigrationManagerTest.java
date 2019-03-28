@@ -54,6 +54,7 @@ import debrepo.teamcity.service.DebRepositoryConfigurationManager;
 import debrepo.teamcity.service.DebRepositoryManager;
 import debrepo.teamcity.settings.DebRepositoryConfigurationChangePersister;
 import debrepo.teamcity.settings.DebRepositoryConfigurationChangePersisterImpl;
+import io.ebean.EbeanServer;
 import jetbrains.buildServer.serverSide.ProjectManager;
 import jetbrains.buildServer.serverSide.SProject;
 import jetbrains.buildServer.serverSide.ServerPaths;
@@ -71,7 +72,7 @@ public class JaxToEbeanMigrationManagerTest {
 	@Mock protected DebRepositoryConfigurationChangePersister debRepositoryConfigurationChangePersister;
 	@Mock JaxDbFileRenamer jaxDbFileRenamer;
 	
-	EbeanServerProvider ebeanServerProvider;
+	@Mock EbeanServerProvider ebeanServerProvider;
 	DebRepositoryManager jaxDebRepositoryManager, ebeanDebRepositoryManager;
 	DebRepositoryConfigurationJaxImpl config;
 	
@@ -94,8 +95,12 @@ public class JaxToEbeanMigrationManagerTest {
 		ebeanPluginDataResolver = new PluginDataResolverImpl(ebeanServerPaths);
 		releaseDescriptionBuilder = new DebRepositoryToReleaseDescriptionBuilder(projectManager);
 		
+		EbeanServer ebeanServer = EbeanServerProviderImpl.createEbeanServerInstance(ebeanPluginDataResolver);
+		when(ebeanServerProvider.getEbeanServer()).thenReturn(ebeanServer);
+
+		
 		DebRepositoryManager ebeanDebRepositoryManager = new DebRepositoryManagerImpl(
-				EbeanServerProvider.createEbeanServerInstance(ebeanPluginDataResolver), 
+				ebeanServerProvider, 
 				debRepositoryConfigurationFactory, 
 				debRepositoryConfigurationChangePersister,
 				releaseDescriptionBuilder);

@@ -18,8 +18,10 @@ package debrepo.teamcity.service;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotSame;
 
+import java.io.IOException;
 import java.util.List;
 
+import org.junit.Before;
 import org.junit.Test;
 
 import debrepo.teamcity.entity.DebPackageEntity;
@@ -29,7 +31,12 @@ import debrepo.teamcity.entity.DebRepositoryBuildTypeConfig.Filter;
 import debrepo.teamcity.entity.DebRepositoryConfigurationJaxImpl;
 
 public class DebRepositoryManagerImplTest extends DebRepositoryBaseTest {
-
+	
+	@Before
+	public void setup() throws NonExistantRepositoryException, IOException {
+		super.setup();
+	}
+ 
 	@Test
 	public void testGetPackageStore() throws NonExistantRepositoryException {
 		List<DebPackageStore> store = debRepositoryManager.getPackageStoresForBuildType(BUILD_TYPE_ID_BT01);

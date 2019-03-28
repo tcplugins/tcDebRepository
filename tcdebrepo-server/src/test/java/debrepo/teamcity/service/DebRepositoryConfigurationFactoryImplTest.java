@@ -17,6 +17,7 @@ package debrepo.teamcity.service;
 
 import static org.junit.Assert.*;
 
+import java.io.IOException;
 import java.util.UUID;
 
 import org.junit.Before;
@@ -28,8 +29,9 @@ public class DebRepositoryConfigurationFactoryImplTest extends DebRepositoryBase
 	DebRepositoryConfigurationFactory factory;
 	
 	@Before
-	public void setupLocal() {
+	public void setupLocal() throws NonExistantRepositoryException, IOException {
 		 factory = new DebRepositoryConfigurationFactoryImpl();
+		 super.setup();
 	}
 
 	@Test
@@ -67,7 +69,6 @@ public class DebRepositoryConfigurationFactoryImplTest extends DebRepositoryBase
 
 	@Override
 	public DebRepositoryManager getDebRepositoryManager() {
-		setupLocal();
 		return new DebRepositoryManagerImpl(projectManager, debRepositoryDatabaseXmlPersister, debRepositoryConfigurationFactory, debRepositoryConfigurationChangePersister);
 	}
 

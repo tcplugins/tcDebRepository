@@ -40,6 +40,7 @@ import debrepo.teamcity.entity.helper.XmlPersister;
 import debrepo.teamcity.service.DebRepositoryConfigurationManager;
 import debrepo.teamcity.service.DebRepositoryManager;
 import debrepo.teamcity.service.DebRepositoryManagerTest;
+import io.ebean.EbeanServer;
 import jetbrains.buildServer.serverSide.ProjectManager;
 import jetbrains.buildServer.serverSide.SProject;
 import jetbrains.buildServer.serverSide.ServerPaths;
@@ -48,6 +49,7 @@ public class DebRepositoryManagerEbeanTests extends DebRepositoryManagerTest {
 
 	@Mock ServerPaths serverPaths;
 	@Mock SProject project01, project02;
+	@Mock EbeanServerProvider ebeanServerProvider;
 	PluginDataResolver pluginDataResolver;
 	
 	DebRepositoryManager debRepositoryManager;
@@ -73,8 +75,11 @@ public class DebRepositoryManagerEbeanTests extends DebRepositoryManagerTest {
 		
 		pluginDataResolver = new PluginDataResolverImpl(serverPaths);
 		
+		EbeanServer ebeanServer = EbeanServerProviderImpl.createEbeanServerInstance(pluginDataResolver);
+		when(ebeanServerProvider.getEbeanServer()).thenReturn(ebeanServer);
+		
 		debRepositoryManagerImpl = new DebRepositoryManagerImpl(
-				EbeanServerProvider.createEbeanServerInstance(pluginDataResolver),
+				ebeanServerProvider,
 				debRepositoryConfigurationFactory, 
 				debRepositoryConfigurationChangePersister,
 				releaseDescriptionBuilder);

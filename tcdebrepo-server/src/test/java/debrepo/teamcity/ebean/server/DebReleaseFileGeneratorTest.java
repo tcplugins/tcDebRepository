@@ -2,6 +2,7 @@ package debrepo.teamcity.ebean.server;
 
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.mock;
 
 import java.io.File;
 import java.io.IOException;
@@ -23,34 +24,43 @@ import debrepo.teamcity.entity.helper.PluginDataResolverImpl;
 import debrepo.teamcity.entity.helper.ReleaseDescriptionBuilder;
 import debrepo.teamcity.service.DebReleaseFileGenerator;
 import debrepo.teamcity.service.DebReleaseFileGenerator.DistComponentArchitecture;
+import debrepo.teamcity.settings.DebRepositoryConfigurationChangePersister;
 import debrepo.teamcity.service.DebRepositoryBaseTest;
 import debrepo.teamcity.service.DebRepositoryConfigurationManager;
 import debrepo.teamcity.service.DebRepositoryManager;
 import debrepo.teamcity.service.NonExistantRepositoryException;
+import io.ebean.EbeanServer;
 import jetbrains.buildServer.serverSide.ServerPaths;
 
 public class DebReleaseFileGeneratorTest extends DebRepositoryBaseTest {
 	
-	@Mock ServerPaths serverPaths;
+	ServerPaths serverPaths;
 	PluginDataResolver pluginDataResolver;
+	EbeanServerProvider ebeanServerProvider;
 	
-	DebRepositoryManager debRepositoryManager;
+	//DebRepositoryManager debRepositoryManager;
 	ReleaseDescriptionBuilder realReleaseDescriptionBuilder;
 	
 	DebRepositoryConfiguration c;
 	
 	@Before
 	public void setuplocal() throws NonExistantRepositoryException, IOException {
-		MockitoAnnotations.initMocks(this);
+		//MockitoAnnotations.initMocks(this);
+		
+		serverPaths = mock(ServerPaths.class);
+		ebeanServerProvider = mock(EbeanServerProvider.class);
 		when(serverPaths.getPluginDataDirectory()).thenReturn(new File("target"));
+		
+		pluginDataResolver = new PluginDataResolverImpl(serverPaths);
+		debRepositoryConfigurationChangePersister = mock(DebRepositoryConfigurationChangePersister.class);
+		
+		EbeanServer ebeanServer = EbeanServerProviderImpl.createEbeanServerInstance(pluginDataResolver);
+		when(ebeanServerProvider.getEbeanServer()).thenReturn(ebeanServer);
+		super.setup();
+		debRepositoryConfigManager = (DebRepositoryConfigurationManager) debRepositoryManager;
 		when(projectManager.findProjectById("project01")).thenReturn(project01);
 		when(project01.getExternalId()).thenReturn("My_Project_Name");
 		when(project01.getDescription()).thenReturn("My Project Name - Long description");
-		
-		pluginDataResolver = new PluginDataResolverImpl(serverPaths);
-		realReleaseDescriptionBuilder = new DebRepositoryToReleaseDescriptionBuilder(projectManager);
-		debRepositoryManager = new DebRepositoryManagerImpl(EbeanServerProvider.createEbeanServerInstance(pluginDataResolver), debRepositoryConfigurationFactory, debRepositoryConfigurationChangePersister, realReleaseDescriptionBuilder);;
-		debRepositoryConfigManager = (DebRepositoryConfigurationManager) debRepositoryManager;
 		
 		c = getDebRepoConfig1();
 		c.setRepoName("blahBlah01");
@@ -63,12 +73,13 @@ public class DebReleaseFileGeneratorTest extends DebRepositoryBaseTest {
 		
 		System.out.println(debRepositoryManager.getRepositoryStatistics(c, "myUrl").getTotalPackageCount());
 		assertTrue(debRepositoryManager.getRepositoryStatistics(c, "myUrl").getTotalPackageCount() == 4);
+		//super.setup();
 	}
 	
 	@Override
 	public DebRepositoryManager getDebRepositoryManager() throws NonExistantRepositoryException, IOException {
-		setuplocal();
-		return debRepositoryManager;
+		realReleaseDescriptionBuilder = new DebRepositoryToReleaseDescriptionBuilder(projectManager);
+		return new DebRepositoryManagerImpl(ebeanServerProvider, debRepositoryConfigurationFactory, debRepositoryConfigurationChangePersister, realReleaseDescriptionBuilder);
 	}
 	
 	@Test

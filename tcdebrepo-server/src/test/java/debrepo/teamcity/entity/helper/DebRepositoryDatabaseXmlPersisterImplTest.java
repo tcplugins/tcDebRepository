@@ -18,6 +18,7 @@ package debrepo.teamcity.entity.helper;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotSame;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.mock;
 
 import java.io.File;
 import java.io.IOException;
@@ -25,7 +26,6 @@ import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
 
 import debrepo.teamcity.entity.DebPackageStore;
 import debrepo.teamcity.entity.DebPackageStoreEntity;
@@ -40,11 +40,10 @@ import jetbrains.buildServer.serverSide.ServerPaths;
 public class DebRepositoryDatabaseXmlPersisterImplTest extends DebRepositoryBaseTest {
 
 	XmlPersister<DebPackageStore,DebRepositoryConfiguration> debRepositoryDatabaseXmlPersister;
-	@Mock ServerPaths serverPaths;
 
 	@Before
 	public void setuplocal() throws IOException, NonExistantRepositoryException {
-		
+		ServerPaths serverPaths = mock(ServerPaths.class);
 		when(serverPaths.getPluginDataDirectory()).thenReturn(new File("target"));
 
 		PluginDataResolver pluginDataDirectoryResolver = new PluginDataResolverImpl(serverPaths);
@@ -52,11 +51,11 @@ public class DebRepositoryDatabaseXmlPersisterImplTest extends DebRepositoryBase
 		debRepositoryDatabaseXmlPersister = new DebRepositoryDatabaseXmlPersisterImpl(
 																	pluginDataDirectoryResolver, 
 																	debRepositoryDatabaseJaxHelper);
+		super.setup();
 	}
 	
 	@Override
 	public XmlPersister<DebPackageStore, DebRepositoryConfiguration> getDebRepositoryXmlPersister() throws IOException, NonExistantRepositoryException {
-		setuplocal();
 		return debRepositoryDatabaseXmlPersister;
 	}
 	
@@ -78,7 +77,6 @@ public class DebRepositoryDatabaseXmlPersisterImplTest extends DebRepositoryBase
 
 	@Override
 	public DebRepositoryManager getDebRepositoryManager() throws IOException, NonExistantRepositoryException {
-		setuplocal();
 		return new DebRepositoryManagerImpl(projectManager, debRepositoryDatabaseXmlPersister, debRepositoryConfigurationFactory, debRepositoryConfigurationChangePersister);
 	}
 

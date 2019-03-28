@@ -28,7 +28,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import debrepo.teamcity.entity.DebPackageEntity;
-import debrepo.teamcity.ebean.server.EbeanServerProvider;
+import debrepo.teamcity.ebean.server.EbeanServerProviderImpl;
 import debrepo.teamcity.entity.DebPackageStore;
 import debrepo.teamcity.entity.DebRepositoryBuildTypeConfig;
 import debrepo.teamcity.entity.DebRepositoryConfiguration;
@@ -80,7 +80,7 @@ public abstract class DebRepositoryBaseTest {
 	
 	public abstract DebRepositoryManager getDebRepositoryManager() throws NonExistantRepositoryException, IOException;
 	
-	@Before
+	//@Before
 	public void setup() throws NonExistantRepositoryException, IOException {
 		
 		MockitoAnnotations.initMocks(this);

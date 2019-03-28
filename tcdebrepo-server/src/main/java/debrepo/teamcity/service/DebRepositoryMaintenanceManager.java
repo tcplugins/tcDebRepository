@@ -3,8 +3,6 @@ package debrepo.teamcity.service;
 import java.util.List;
 
 import debrepo.teamcity.ebean.DebFileModel;
-import debrepo.teamcity.ebean.DebPackageModel;
-import debrepo.teamcity.ebean.DebPackageParameterModel;
 
 public interface DebRepositoryMaintenanceManager {
 	

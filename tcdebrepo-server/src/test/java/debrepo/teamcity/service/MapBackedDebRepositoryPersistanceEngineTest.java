@@ -17,6 +17,8 @@ package debrepo.teamcity.service;
 
 import static org.junit.Assert.assertEquals;
 
+import java.io.IOException;
+
 import org.junit.Before;
 import org.junit.Test;
 
@@ -27,7 +29,8 @@ public class MapBackedDebRepositoryPersistanceEngineTest extends DebRepositoryBa
 
 	
 	@Before
-	public void setupLocal() {
+	public void setupLocal() throws NonExistantRepositoryException, IOException {
+		super.setup();
 		engine = new MapBackedDebRepositoryDatabase(debRepositoryManager, debRepositoryConfigManager, projectManager);
 	}
 	

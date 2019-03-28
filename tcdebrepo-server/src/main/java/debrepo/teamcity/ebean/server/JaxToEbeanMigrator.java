@@ -70,9 +70,6 @@ public class JaxToEbeanMigrator {
 		if (myJaxDbFileRenamer.renameToBackup(config)) {
 			Loggers.SERVER.info("JaxToEbeanMigrator :: XML database file renamed for " + config.getRepoName() + "(" + config.getUuid().toString() + ")");
 		}
-		Loggers.SERVER.info("JaxToEbeanMigrator :: Requesting Release file generation for " + config.getRepoName() + "(" + config.getUuid().toString() + ")");
-		this.myDebReleaseFileGenerator.updateAllReleaseFiles(config);
-		Loggers.SERVER.info("JaxToEbeanMigrator :: Completed Release file generation for " + config.getRepoName() + "(" + config.getUuid().toString() + ")");
 	}
 
 }

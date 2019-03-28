@@ -80,12 +80,12 @@ public class DebRepositoryManagerImpl extends DebRepositoryConfigurationManagerI
 	private ReleaseDescriptionBuilder myReleaseDescriptionBuilder;
 
 	public DebRepositoryManagerImpl(
-			EbeanServer ebeanServer,
+			EbeanServerProvider ebeanServerProvider,
 			DebRepositoryConfigurationFactory debRepositoryConfigurationFactory,
 			DebRepositoryConfigurationChangePersister debRepositoryConfigurationChangePersister,
 			ReleaseDescriptionBuilder debRepositoryToReleaseDescriptionBuilder) {
 		super(debRepositoryConfigurationFactory, debRepositoryConfigurationChangePersister);
-		this.myEbeanServer = ebeanServer;
+		this.myEbeanServer = ebeanServerProvider.getEbeanServer();
 		this.myReleaseDescriptionBuilder = debRepositoryToReleaseDescriptionBuilder;
 	}
 
@@ -383,7 +383,7 @@ public class DebRepositoryManagerImpl extends DebRepositoryConfigurationManagerI
 			Set<? extends DistComponentArchitecture> dcasToUpdate) throws NonExistantRepositoryException {
 
 		for (DistComponentArchitecture dca : dcasToUpdate) {
-			updateSimpleRelaseFile(debRepositoryConfiguration, repositoryModel, dca);
+			updateSimpleReleaseFile(debRepositoryConfiguration, repositoryModel, dca);
 		}
 	}
 	
@@ -596,7 +596,7 @@ public class DebRepositoryManagerImpl extends DebRepositoryConfigurationManagerI
 		Loggers.SERVER.info("--DebRepositoryManagerImpl :: Done updating new releaseFiles for dists (" + distsToUpdate.size() +")");
 	}
 
-	private void updateSimpleRelaseFile(DebRepositoryConfiguration config, DebRepositoryModel repositoryModel,
+	private void updateSimpleReleaseFile(DebRepositoryConfiguration config, DebRepositoryModel repositoryModel,
 			DistComponentArchitecture distCompArch) throws NonExistantRepositoryException {
 		
 		String releaseFileContents = myReleaseDescriptionBuilder.buildSimpleReleaseFile(config, distCompArch.getDist(), distCompArch.getComponent(), distCompArch.getArch());
@@ -836,9 +836,9 @@ public class DebRepositoryManagerImpl extends DebRepositoryConfigurationManagerI
 	@Override
 	public void updateRepositoryMetaData(DebRepositoryConfiguration config)
 			throws NonExistantRepositoryException, DebRepositoryPersistanceException {
-		final DebRepositoryModel repositoryModel = findRepository(config.getUuid());
-		rebuildSimpleReleaseFiles(config, repositoryModel, getDistinctDistComponentArch(config));
-		
+		Loggers.SERVER.info("DebRepositoryManagerImpl :: Requesting Release file generation for " + config.getRepoName() + "(" + config.getUuid().toString() + ")");
+		updateAllReleaseFiles(config);
+		Loggers.SERVER.info("DebRepositoryManagerImpl :: Completed Release file generation for " + config.getRepoName() + "(" + config.getUuid().toString() + ")");
 	}
 	
 }

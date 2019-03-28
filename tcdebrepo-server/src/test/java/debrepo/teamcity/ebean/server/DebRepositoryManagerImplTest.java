@@ -40,22 +40,29 @@ import debrepo.teamcity.service.DebRepositoryBaseTest;
 import debrepo.teamcity.service.DebRepositoryConfigurationManager;
 import debrepo.teamcity.service.DebRepositoryManager;
 import debrepo.teamcity.service.NonExistantRepositoryException;
+import io.ebean.EbeanServer;
 import jetbrains.buildServer.serverSide.ServerPaths;
 
 public class DebRepositoryManagerImplTest extends DebRepositoryBaseTest {
 	
 	@Mock ServerPaths serverPaths;
+	@Mock EbeanServerProvider ebeanServerProvider;
 	PluginDataResolver pluginDataResolver;
 	
 	DebRepositoryManager debRepositoryManager;
 	
 	@Before
 	public void setuplocal() throws NonExistantRepositoryException, IOException {
-		MockitoAnnotations.initMocks(this);
+		super.setup(); // calls initMocks
 		when(serverPaths.getPluginDataDirectory()).thenReturn(new File("target"));
+		pluginDataResolver = new PluginDataResolverImpl(serverPaths);
+		
+		EbeanServer ebeanServer = EbeanServerProviderImpl.createEbeanServerInstance(pluginDataResolver);
+		when(ebeanServerProvider.getEbeanServer()).thenReturn(ebeanServer);
+
 		
 		pluginDataResolver = new PluginDataResolverImpl(serverPaths);
-		debRepositoryManager = new DebRepositoryManagerImpl(EbeanServerProvider.createEbeanServerInstance(pluginDataResolver), debRepositoryConfigurationFactory, debRepositoryConfigurationChangePersister, releaseDescriptionBuilder);
+		debRepositoryManager = new DebRepositoryManagerImpl(ebeanServerProvider, debRepositoryConfigurationFactory, debRepositoryConfigurationChangePersister, releaseDescriptionBuilder);
 		debRepositoryConfigManager = (DebRepositoryConfigurationManager) debRepositoryManager;
 		
 		DebRepositoryConfiguration c = getDebRepoConfig1();
@@ -144,8 +151,8 @@ public class DebRepositoryManagerImplTest extends DebRepositoryBaseTest {
 
 	@Override
 	public DebRepositoryManager getDebRepositoryManager() throws NonExistantRepositoryException, IOException {
-		setuplocal();
-		return new DebRepositoryManagerImpl(EbeanServerProvider.createEbeanServerInstance(pluginDataResolver), debRepositoryConfigurationFactory, debRepositoryConfigurationChangePersister, releaseDescriptionBuilder);
+		//setuplocal();
+		return new DebRepositoryManagerImpl(ebeanServerProvider, debRepositoryConfigurationFactory, debRepositoryConfigurationChangePersister, releaseDescriptionBuilder);
 	}
 
 }

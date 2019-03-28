@@ -31,7 +31,7 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.internal.matchers.Any;
 
 import debrepo.teamcity.Loggers;
-import debrepo.teamcity.ebean.server.EbeanServerProvider;
+import debrepo.teamcity.ebean.server.EbeanServerProviderImpl;
 import debrepo.teamcity.entity.DebPackageStore;
 import debrepo.teamcity.entity.DebPackageStoreEntity;
 import debrepo.teamcity.entity.DebRepositoryConfiguration;
@@ -53,6 +53,7 @@ import debrepo.teamcity.service.DebRepositoryConfigurationManager;
 import debrepo.teamcity.service.DebRepositoryManager;
 import debrepo.teamcity.service.NonExistantRepositoryException;
 import debrepo.teamcity.settings.DebRepositoryConfigurationChangePersister;
+import io.ebean.EbeanServer;
 import jetbrains.buildServer.serverSide.ProjectManager;
 import jetbrains.buildServer.serverSide.SProject;
 import jetbrains.buildServer.serverSide.ServerPaths;
@@ -71,7 +72,7 @@ public class JaxToEbeanMigratorTest {
 	@Mock protected DebRepositoryConfigurationChangePersister debRepositoryConfigurationChangePersister;
 	@Mock JaxDbFileRenamer jaxDbFileRenamer;
 	
-	EbeanServerProvider ebeanServerProvider;
+	@Mock EbeanServerProvider ebeanServerProvider;
 	DebRepositoryManager jaxDebRepositoryManager, ebeanDebRepositoryManager;
 	
 	protected DebRepositoryConfigurationManager debRepositoryConfigManager;
@@ -90,9 +91,13 @@ public class JaxToEbeanMigratorTest {
 		ebeanPluginDataResolver = new PluginDataResolverImpl(ebeanServerPaths);
 		releaseDescriptionBuilder = new DebRepositoryToReleaseDescriptionBuilder(projectManager);
 		
+		EbeanServer ebeanServer = EbeanServerProviderImpl.createEbeanServerInstance(ebeanPluginDataResolver);
+		when(ebeanServerProvider.getEbeanServer()).thenReturn(ebeanServer);
+
+		
 		debRepositoryDatabaseXmlPersister = new DebRepositoryDatabaseXmlPersisterImpl(jaxPluginDataResolver, jaxHelper);
 		jaxDebRepositoryManager = new debrepo.teamcity.service.DebRepositoryManagerImpl(projectManager, debRepositoryDatabaseXmlPersister, debRepositoryConfigurationFactory, debRepositoryConfigurationChangePersister);
-		ebeanDebRepositoryManager = new debrepo.teamcity.ebean.server.DebRepositoryManagerImpl(EbeanServerProvider.createEbeanServerInstance(ebeanPluginDataResolver), debRepositoryConfigurationFactory, debRepositoryConfigurationChangePersister, releaseDescriptionBuilder);
+		ebeanDebRepositoryManager = new debrepo.teamcity.ebean.server.DebRepositoryManagerImpl(ebeanServerProvider, debRepositoryConfigurationFactory, debRepositoryConfigurationChangePersister, releaseDescriptionBuilder);
 		debRepositoryConfigManager = (DebRepositoryConfigurationManager) ebeanDebRepositoryManager;
 		
 	}
