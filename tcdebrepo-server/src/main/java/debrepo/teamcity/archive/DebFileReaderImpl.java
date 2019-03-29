@@ -59,10 +59,10 @@ public class DebFileReaderImpl implements DebFileReader {
 	public Map<String,String> getMetaDataFromPackage(String filename) throws IOException {
 		Path ephemeralTempDir = Files.createTempDirectory(Paths.get(this.myTempDirectory), "deb-temp-", new FileAttribute<?>[] {});
 		File debFile = new File(this.myArtifactsBaseDirectory + File.separator + filename);
-		File controlTarGz = this.getControlTarGzFromDeb(debFile, ephemeralTempDir.toFile());
-		String controlFileContents = this.getControlFromControlTarGz(controlTarGz);
+		DebFileControlFile compressedControlFile = this.getCompressedControlFileFromDeb(debFile, ephemeralTempDir.toFile());
+		String controlFileContents = this.getControlFromCompressedControlFile(compressedControlFile);
 		Map<String,String> debItems = this.getDebItemsFromControl(debFile,controlFileContents);
-		controlTarGz.delete();
+		compressedControlFile.delete();
 		ephemeralTempDir.toFile().delete();
 		return debItems;
 	}
@@ -72,27 +72,37 @@ public class DebFileReaderImpl implements DebFileReader {
 		return new File(this.myArtifactsBaseDirectory + File.separator + filename).exists();
 	}
 	
-	protected File getControlTarGzFromDeb(File debFile, File ephemeralTempDir) throws IOException {
+	protected DebFileControlFile getCompressedControlFileFromDeb(File debFile, File ephemeralTempDir) throws IOException {
 		
 		Archiver archiver = ArchiverFactory.createArchiver(ArchiveFormat.AR);
 		ArchiveStream stream = archiver.stream(debFile);
 		ArchiveEntry entry;
+		CompressionType compressionType = null;
 		
-		File controlTarGzFile = null;
+		File compressedControlFile = null;
 
 		while((entry = stream.getNextEntry()) != null) {
 			if ("control.tar.gz".equals(entry.getName())){
-				controlTarGzFile = entry.extract(ephemeralTempDir);
+				compressedControlFile = entry.extract(ephemeralTempDir);
+				compressionType = CompressionType.GZIP;
+			}
+			if ("control.tar.xz".equals(entry.getName())){
+				compressedControlFile = entry.extract(ephemeralTempDir);
+				compressionType = CompressionType.XZ;
 			}
 		}
 		stream.close();
 		
-		return controlTarGzFile;
+		if (compressionType == null) {
+			//throw new De
+		}
+		
+		return new DebFileControlFile(compressionType, compressedControlFile);
 	}
 	
-	protected String getControlFromControlTarGz(File controlTarGzFile) throws IOException {
-		Archiver archivertgz = ArchiverFactory.createArchiver(ArchiveFormat.TAR, CompressionType.GZIP);
-		ArchiveStream stream = archivertgz.stream(controlTarGzFile);
+	protected String getControlFromCompressedControlFile(DebFileControlFile compressedControlFile) throws IOException {
+
+		ArchiveStream stream = compressedControlFile.stream();
 		ArchiveEntry entry;
 		ByteArrayOutputStream baos= new ByteArrayOutputStream();
 		

@@ -15,12 +15,10 @@
  *******************************************************************************/
 package debrepo.teamcity.archive;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -31,13 +29,10 @@ import org.apache.commons.compress.archivers.ar.ArArchiveEntry;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
-import org.rauschig.jarchivelib.ArchiveEntry;
 import org.rauschig.jarchivelib.ArchiveFormat;
 import org.rauschig.jarchivelib.ArchiveStream;
 import org.rauschig.jarchivelib.Archiver;
 import org.rauschig.jarchivelib.ArchiverFactory;
-import org.rauschig.jarchivelib.CompressionType;
-import org.rauschig.jarchivelib.IOUtils;
 
 public class ArStreamerTest {
 	
@@ -78,8 +73,8 @@ public class ArStreamerTest {
 		Path ephemeralTempDir = Files.createTempDirectory(Paths.get("target"), "deb-temp-", new FileAttribute<?>[] {});
 		File debFile = new File("src/test/resources/build-essential_11.6ubuntu6_amd64.deb");
 		DebFileReaderImpl reader = new DebFileReaderImpl(new File("src/test/resources"), "target");
-		File controlTarGz = reader.getControlTarGzFromDeb(debFile, ephemeralTempDir.toFile());
-		String controlFileContents = reader.getControlFromControlTarGz(controlTarGz);
+		DebFileControlFile controlTarGz = reader.getCompressedControlFileFromDeb(debFile, ephemeralTempDir.toFile());
+		String controlFileContents = reader.getControlFromCompressedControlFile(controlTarGz);
 		System.out.println(controlFileContents);
 		Map<String,String> params = reader.getDebItemsFromControl(debFile, controlFileContents);
 		
@@ -94,8 +89,8 @@ public class ArStreamerTest {
 		Path ephemeralTempDir = Files.createTempDirectory(Paths.get("target"), "deb-temp-", new FileAttribute<?>[] {});
 		File debFile = new File("src/test/resources/packages_for_testing/debhelper_9.20120909_all.deb");
 		DebFileReaderImpl reader = new DebFileReaderImpl(new File("src/test/resources/packages_for_testing"), "target");
-		File controlTarGz = reader.getControlTarGzFromDeb(debFile, ephemeralTempDir.toFile());
-		String controlFileContents = reader.getControlFromControlTarGz(controlTarGz);
+		DebFileControlFile controlTarGz = reader.getCompressedControlFileFromDeb(debFile, ephemeralTempDir.toFile());
+		String controlFileContents = reader.getControlFromCompressedControlFile(controlTarGz);
 		System.out.println(controlFileContents);
 		Map<String,String> params = reader.getDebItemsFromControl(debFile, controlFileContents);
 		
@@ -110,8 +105,8 @@ public class ArStreamerTest {
 		Path ephemeralTempDir = Files.createTempDirectory(Paths.get("target"), "deb-temp-", new FileAttribute<?>[] {});
 		File debFile = new File("src/test/resources/packages_for_testing/autoconf_2.69-8_all.deb");
 		DebFileReaderImpl reader = new DebFileReaderImpl(new File("src/test/resources/packages_for_testing"), "target");
-		File controlTarGz = reader.getControlTarGzFromDeb(debFile, ephemeralTempDir.toFile());
-		String controlFileContents = reader.getControlFromControlTarGz(controlTarGz);
+		DebFileControlFile controlTarGz = reader.getCompressedControlFileFromDeb(debFile, ephemeralTempDir.toFile());
+		String controlFileContents = reader.getControlFromCompressedControlFile(controlTarGz);
 		System.out.println(controlFileContents);
 		Map<String,String> params = reader.getDebItemsFromControl(debFile, controlFileContents);
 		
@@ -126,8 +121,8 @@ public class ArStreamerTest {
 		Path ephemeralTempDir = Files.createTempDirectory(Paths.get("target"), "deb-temp-", new FileAttribute<?>[] {});
 		File debFile = new File("src/test/resources/packages_for_testing/e3_2.71-1_amd64.deb");
 		DebFileReaderImpl reader = new DebFileReaderImpl(new File("src/test/resources/packages_for_testing"), "target");
-		File controlTarGz = reader.getControlTarGzFromDeb(debFile, ephemeralTempDir.toFile());
-		String controlFileContents = reader.getControlFromControlTarGz(controlTarGz);
+		DebFileControlFile controlTarGz = reader.getCompressedControlFileFromDeb(debFile, ephemeralTempDir.toFile());
+		String controlFileContents = reader.getControlFromCompressedControlFile(controlTarGz);
 		System.out.println(controlFileContents);
 		Map<String,String> params = reader.getDebItemsFromControl(debFile, controlFileContents);
 		
@@ -137,30 +132,36 @@ public class ArStreamerTest {
 		}
 	}
 	
-	
-	public String getControlStringFromArFile(File arFile) throws IOException {
-		Archiver archiverAr = ArchiverFactory.createArchiver(ArchiveFormat.AR);
-		Archiver archivertgz = ArchiverFactory.createArchiver(ArchiveFormat.TAR, CompressionType.GZIP);
-		ArchiveStream stream = archiverAr.stream(arFile);
-		ArchiveEntry entry, entry2;
-		ByteArrayOutputStream baos= new ByteArrayOutputStream();
+	@Test
+	public void getControlFileAsStringTest_tcDummyDeb_amd64_1_0_5667() throws IOException {
+		Path ephemeralTempDir = Files.createTempDirectory(Paths.get("target"), "deb-temp-", new FileAttribute<?>[] {});
+		File debFile = new File("src/test/resources/packages_for_testing/tcDummyDeb_amd64_1.0.5667.deb");
+		DebFileReaderImpl reader = new DebFileReaderImpl(new File("src/test/resources/packages_for_testing"), "target");
+		DebFileControlFile controlTarGz = reader.getCompressedControlFileFromDeb(debFile, ephemeralTempDir.toFile());
+		String controlFileContents = reader.getControlFromCompressedControlFile(controlTarGz);
+		System.out.println(controlFileContents);
+		Map<String,String> params = reader.getDebItemsFromControl(debFile, controlFileContents);
 		
-		while((entry = stream.getNextEntry()) != null) {
-			// The ar contains a tgz file named control.tar.gz
-			if (entry.getName().equals("control.tar.gz")) {
-				ArchiveStream stream2 = null; //archivertgz.stream(entry);
-				while((entry2 = stream2.getNextEntry()) != null) {
-					//The control.tar.gz contains a text file named control 
-					if (entry2.getName().equals("./control")){
-						IOUtils.copy(stream2, baos);
-					}
-				}
-			}
+		assertTrue(params.size() > 0);
+		for (String key: params.keySet()){
+			System.out.println("##" + key + "##:??" + params.get(key) + "??");
 		}
-		
-		return baos.toString( StandardCharsets.UTF_8.toString() );
 	}
 	
-	
+	@Test
+	public void getControlFileAsStringTest_tcDummyDeb_amd64_2_0_14() throws IOException {
+		Path ephemeralTempDir = Files.createTempDirectory(Paths.get("target"), "deb-temp-", new FileAttribute<?>[] {});
+		File debFile = new File("src/test/resources/packages_for_testing/tcDummyDeb_amd64_2.0.14.deb");
+		DebFileReaderImpl reader = new DebFileReaderImpl(new File("src/test/resources/packages_for_testing"), "target");
+		DebFileControlFile controlTarGz = reader.getCompressedControlFileFromDeb(debFile, ephemeralTempDir.toFile());
+		String controlFileContents = reader.getControlFromCompressedControlFile(controlTarGz);
+		System.out.println(controlFileContents);
+		Map<String,String> params = reader.getDebItemsFromControl(debFile, controlFileContents);
+		
+		assertTrue(params.size() > 0);
+		for (String key: params.keySet()){
+			System.out.println("##" + key + "##:??" + params.get(key) + "??");
+		}
+	}
 
 }
