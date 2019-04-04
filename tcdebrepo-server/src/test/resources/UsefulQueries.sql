@@ -224,4 +224,27 @@ WHERE MODIFIED_TIME = (
         AND T1.PATH = O_DEB_PACKAGES_FILE.PATH
     )
 ORDER BY PATH;
-		
+
+
+select count(id), REPOSITORY_ID, DIST,COMPONENT, ARCH, PATH 
+from O_DEB_PACKAGES_FILE group by REPOSITORY_ID,DIST,COMPONENT,ARCH,PATH;
+
+select ID, REPOSITORY_ID, DIST,COMPONENT, ARCH, PACKAGES_FILE_NAME  
+from O_DEB_PACKAGES_FILE where repository_id =1 AND dist = 'jessie' 
+	AND component = 'main' AND arch = 'amd64' AND PACKAGES_FILE_NAME  = 'Packages' 
+order by MODIFIED_TIME desc limit 5;
+
+select count(ID) from O_DEB_PACKAGES_FILE 
+where repository_id =1 AND dist = 'jessie' AND component = 'main' 
+AND arch = 'amd64' AND PACKAGES_FILE_NAME  = 'Packages'  AND ID NOT IN
+ (SELECT ID from O_DEB_PACKAGES_FILE where repository_id =1 AND dist = 'jessie' 
+   AND component = 'main' AND arch = 'amd64' AND PACKAGES_FILE_NAME  = 'Packages' 
+	order by MODIFIED_TIME desc limit 5
+ );
+
+delete from O_DEB_PACKAGES_FILE where repository_id =1 AND dist = 'jessie' 
+AND component = 'main' AND arch = 'amd64' AND PACKAGES_FILE_NAME  = 'Packages'  AND ID NOT IN
+ (SELECT ID from O_DEB_PACKAGES_FILE where repository_id =1 AND dist = 'jessie' 
+   AND component = 'main' AND arch = 'amd64' AND PACKAGES_FILE_NAME  = 'Packages' 
+	order by MODIFIED_TIME desc limit 5
+ );
