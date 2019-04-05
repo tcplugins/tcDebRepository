@@ -25,6 +25,7 @@ import debrepo.teamcity.entity.DebPackageNotFoundInStoreException;
 import debrepo.teamcity.entity.DebPackageStore;
 import debrepo.teamcity.entity.DebRepositoryConfiguration;
 import debrepo.teamcity.entity.DebRepositoryStatistics;
+import debrepo.teamcity.entity.DistComponentArchitecture;
 import lombok.Value;
 
 public interface DebRepositoryManager {
@@ -94,6 +95,15 @@ public interface DebRepositoryManager {
 	public abstract void bulkAddBuildPackages(DebRepositoryConfiguration debRepositoryConfiguration, List<DebPackage> newPackages)
 			throws NonExistantRepositoryException;
 	public void removeBuildPackages(DebPackageRemovalBean packageRemovalBean);
+	
+	/**
+	 * Removes all but the most recent 5 packages files for all packages file types for the 
+	 * specified Dist Component Arch filter.
+	 * 
+	 * @param debRepositoryConfiguration
+	 * @param distComponantArchitecture
+	 */
+	public int cleanupPackagesFiles(DebRepositoryConfiguration debRepositoryConfiguration, DistComponentArchitecture dca);
 	
 	@Value
 	public static class DebPackageRemovalBean {

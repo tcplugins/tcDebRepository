@@ -1,5 +1,6 @@
 package debrepo.teamcity.ebean.server;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.mock;
@@ -12,18 +13,16 @@ import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
 import debrepo.teamcity.ebean.DebPackagesFileModel;
 import debrepo.teamcity.ebean.server.DebRepositoryManagerImpl.DistComponentArchImpl;
 import debrepo.teamcity.entity.DebRepositoryConfiguration;
+import debrepo.teamcity.entity.DistComponentArchitecture;
 import debrepo.teamcity.entity.helper.DebRepositoryToReleaseDescriptionBuilder;
 import debrepo.teamcity.entity.helper.PluginDataResolver;
 import debrepo.teamcity.entity.helper.PluginDataResolverImpl;
 import debrepo.teamcity.entity.helper.ReleaseDescriptionBuilder;
 import debrepo.teamcity.service.DebReleaseFileGenerator;
-import debrepo.teamcity.service.DebReleaseFileGenerator.DistComponentArchitecture;
 import debrepo.teamcity.settings.DebRepositoryConfigurationChangePersister;
 import debrepo.teamcity.service.DebRepositoryBaseTest;
 import debrepo.teamcity.service.DebRepositoryConfigurationManager;
@@ -38,14 +37,12 @@ public class DebReleaseFileGeneratorTest extends DebRepositoryBaseTest {
 	PluginDataResolver pluginDataResolver;
 	EbeanServerProvider ebeanServerProvider;
 	
-	//DebRepositoryManager debRepositoryManager;
 	ReleaseDescriptionBuilder realReleaseDescriptionBuilder;
 	
 	DebRepositoryConfiguration c;
 	
 	@Before
 	public void setuplocal() throws NonExistantRepositoryException, IOException {
-		//MockitoAnnotations.initMocks(this);
 		
 		serverPaths = mock(ServerPaths.class);
 		ebeanServerProvider = mock(EbeanServerProvider.class);
@@ -73,7 +70,6 @@ public class DebReleaseFileGeneratorTest extends DebRepositoryBaseTest {
 		
 		System.out.println(debRepositoryManager.getRepositoryStatistics(c, "myUrl").getTotalPackageCount());
 		assertTrue(debRepositoryManager.getRepositoryStatistics(c, "myUrl").getTotalPackageCount() == 4);
-		//super.setup();
 	}
 	
 	@Override
@@ -100,4 +96,32 @@ public class DebReleaseFileGeneratorTest extends DebRepositoryBaseTest {
 		}
 	}
 
+	@Test
+	public void testUpdateReleaseFilesAndRemoveOldPackagesFiles() throws NonExistantRepositoryException {
+		
+		Set<debrepo.teamcity.entity.DistComponentArchitecture> distComponentsToUpdate = new HashSet<>();
+		
+		distComponentsToUpdate.add(new DistComponentArchImpl("wheezy", "main", "amd64"));
+		distComponentsToUpdate.add(new DistComponentArchImpl("wheezy", "main", "i386"));
+	
+		DebReleaseFileGenerator generator = (DebReleaseFileGenerator) this.debRepositoryManager;
+		for (int i = 0; i < 100; i++) {
+			generator.updateReleaseFiles(c, distComponentsToUpdate);
+		}
+		
+		List<DebPackagesFileModel> files = DebPackagesFileModel.find.all();
+		assertEquals(400, files.size());
+		for (DebPackagesFileModel f : files) {
+			System.out.println(f.getFilePath());
+			System.out.println(new String(f.getPackagesFile()));
+		}
+		
+		for (DistComponentArchitecture dca :distComponentsToUpdate) {
+			this.debRepositoryManager.cleanupPackagesFiles(c, dca);
+		}
+		
+		files = DebPackagesFileModel.find.all();
+		assertEquals(20, files.size());
+	}
+	
 }

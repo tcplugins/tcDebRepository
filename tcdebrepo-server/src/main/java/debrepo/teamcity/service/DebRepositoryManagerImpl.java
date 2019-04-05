@@ -304,5 +304,12 @@ public class DebRepositoryManagerImpl extends  DebRepositoryConfigurationManager
 		// TODO Auto-generated method stub
 		
 	}
+
+	@Override
+	public int cleanupPackagesFiles(DebRepositoryConfiguration debRepositoryConfiguration,
+			debrepo.teamcity.entity.DistComponentArchitecture dca) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
 	
 }

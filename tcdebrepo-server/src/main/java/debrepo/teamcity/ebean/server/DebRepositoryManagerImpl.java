@@ -55,6 +55,7 @@ import debrepo.teamcity.entity.DebPackageStore;
 import debrepo.teamcity.entity.DebRepositoryBuildTypeConfig;
 import debrepo.teamcity.entity.DebRepositoryConfiguration;
 import debrepo.teamcity.entity.DebRepositoryStatistics;
+import debrepo.teamcity.entity.DistComponentArchitecture;
 import debrepo.teamcity.entity.helper.DebPackageToPackageDescriptionBuilder;
 import debrepo.teamcity.entity.helper.ReleaseDescriptionBuilder;
 import debrepo.teamcity.service.DebReleaseFileGenerator;
@@ -424,7 +425,6 @@ public class DebRepositoryManagerImpl extends DebRepositoryConfigurationManagerI
 	}
 	
 	@Override
-	@SuppressWarnings("unchecked")
 	public void updateAllReleaseFiles(DebRepositoryConfiguration config) throws NonExistantRepositoryException {
 		Set<? extends DistComponentArchitecture> dcas = getDistinctDistComponentArch(config);
 		DebRepositoryModel repo = findRepository(config.getUuid());
@@ -839,6 +839,50 @@ public class DebRepositoryManagerImpl extends DebRepositoryConfigurationManagerI
 		Loggers.SERVER.info("DebRepositoryManagerImpl :: Requesting Release file generation for " + config.getRepoName() + "(" + config.getUuid().toString() + ")");
 		updateAllReleaseFiles(config);
 		Loggers.SERVER.info("DebRepositoryManagerImpl :: Completed Release file generation for " + config.getRepoName() + "(" + config.getUuid().toString() + ")");
+	}
+
+	@Override
+	public int cleanupPackagesFiles(DebRepositoryConfiguration debRepositoryConfiguration,
+			DistComponentArchitecture dca) {
+		int deleteCount = 0;
+		for (PackagesFileType packagesFileType : PackagesFileType.values()) {
+			/*
+			 * SELECT ID from O_DEB_PACKAGES_FILE where repository_id =1 AND dist = 'jessie' 
+   			 *	AND component = 'main' AND arch = 'amd64' AND PACKAGES_FILE_NAME  = 'Packages' 
+			 *	order by MODIFIED_TIME desc limit 5
+			 */
+			List<Long> mostRecentFiveIds = DebPackagesFileModel.find.query().where()
+					 .eq("repository.name", debRepositoryConfiguration.getRepoName())
+					 .eq("dist", dca.getDist())
+					 .eq("component", dca.getComponent())
+					 .eq("arch", dca.getArch())
+					 .eq("packagesFileName", packagesFileType.getFilename())
+					 .order("modifiedTime desc")
+					 .setMaxRows(5)
+					 .findIds();
+			
+			int deleted = DebPackagesFileModel.find.query().where()
+					 .eq("repository.name", debRepositoryConfiguration.getRepoName())
+					 .eq("dist", dca.getDist())
+					 .eq("component", dca.getComponent())
+					 .eq("arch", dca.getArch())
+					 .eq("packagesFileName", packagesFileType.getFilename())
+					 .notIn("id", mostRecentFiveIds)
+					 .delete();
+			
+			deleteCount += deleted;
+			Loggers.SERVER.info(String.format("DebRepositoryManagerImpl:cleanupPackagesFiles :: Removed %s PackagesFile rows for %s (%s):%s:%s:%s:%s", deleted, 
+												debRepositoryConfiguration.getRepoName(),
+												debRepositoryConfiguration.getUuid().toString(),
+												dca.getDist(),
+												dca.getArch(),
+												dca.getComponent(),
+												packagesFileType.toString()
+											)
+								);
+		}
+		Loggers.SERVER.info("DebRepositoryManagerImpl:cleanupPackagesFiles :: Cleaned up " + deleteCount + "package files");
+		return deleteCount;
 	}
 	
 }

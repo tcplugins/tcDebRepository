@@ -17,30 +17,30 @@
 	
 	<build>
 		<plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.7.0</version>
-        <configuration>
-          <source>${java.version}</source>
-          <target>${java.version}</target>
-          <showWarnings>true</showWarnings>
-          <showDeprecation>true</showDeprecation>
-        </configuration>
-      </plugin>
-
-      <plugin>
-        <groupId>io.repaint.maven</groupId>
-        <artifactId>tiles-maven-plugin</artifactId>
-        <version>2.12</version>
-        <extensions>true</extensions>
-        <configuration>
-          <tiles>
-            <tile>org.avaje.tile:java-compile:1.1</tile>
-            <tile>io.ebean.tile:enhancement:7.4</tile>
-          </tiles>
-        </configuration>
-      </plugin>
+	      <plugin>
+	        <groupId>org.apache.maven.plugins</groupId>
+	        <artifactId>maven-compiler-plugin</artifactId>
+	        <version>3.7.0</version>
+	        <configuration>
+	          <source>${java.version}</source>
+	          <target>${java.version}</target>
+	          <showWarnings>true</showWarnings>
+	          <showDeprecation>true</showDeprecation>
+	        </configuration>
+	      </plugin>
+	
+	      <plugin>
+	        <groupId>io.repaint.maven</groupId>
+	        <artifactId>tiles-maven-plugin</artifactId>
+	        <version>2.12</version>
+	        <extensions>true</extensions>
+	        <configuration>
+	          <tiles>
+	            <tile>org.avaje.tile:java-compile:1.1</tile>
+	            <tile>io.ebean.tile:enhancement:7.4</tile>
+	          </tiles>
+	        </configuration>
+	      </plugin>
 		</plugins>
 	</build>			
 

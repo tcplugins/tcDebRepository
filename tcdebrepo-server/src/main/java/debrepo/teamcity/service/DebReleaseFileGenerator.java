@@ -2,8 +2,8 @@ package debrepo.teamcity.service;
 
 import java.util.Set;
 
-import debrepo.teamcity.ebean.DebRepositoryModel;
 import debrepo.teamcity.entity.DebRepositoryConfiguration;
+import debrepo.teamcity.entity.DistComponentArchitecture;
 
 public interface DebReleaseFileGenerator {
 	
@@ -15,11 +15,4 @@ public interface DebReleaseFileGenerator {
 	
 	public abstract void updateAllReleaseFiles(DebRepositoryConfiguration config) throws NonExistantRepositoryException;
 	
-	public static interface DistComponentArchitecture {
-		public String getDist();
-		public String getComponent();
-		public String getArch();
-	}
-
-
 }
