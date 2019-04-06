@@ -384,11 +384,10 @@ public class DebRepositoryManagerImpl extends DebRepositoryConfigurationManagerI
 	}
 	
 	public void rebuildSimpleReleaseFiles(DebRepositoryConfiguration debRepositoryConfiguration, 
-			DebRepositoryModel repositoryModel, 
 			Set<? extends DistComponentArchitecture> dcasToUpdate) throws NonExistantRepositoryException {
 
 		for (DistComponentArchitecture dca : dcasToUpdate) {
-			updateSimpleReleaseFile(debRepositoryConfiguration, repositoryModel, dca);
+			updateSimpleReleaseFile(debRepositoryConfiguration, dca);
 		}
 	}
 	
@@ -432,7 +431,7 @@ public class DebRepositoryManagerImpl extends DebRepositoryConfigurationManagerI
 	public void updateAllReleaseFiles(DebRepositoryConfiguration config) throws NonExistantRepositoryException {
 		Set<? extends DistComponentArchitecture> dcas = getDistinctDistComponentArch(config);
 		DebRepositoryModel repo = findRepository(config.getUuid());
-		rebuildSimpleReleaseFiles(config, repo, dcas);
+		rebuildSimpleReleaseFiles(config, dcas);
 		updateReleaseFiles(config, repo, dcas);
 	}
 
@@ -604,7 +603,7 @@ public class DebRepositoryManagerImpl extends DebRepositoryConfigurationManagerI
 		Loggers.SERVER.info("--DebRepositoryManagerImpl :: Done updating new releaseFiles for dists (" + distsToUpdate.size() +")");
 	}
 
-	private void updateSimpleReleaseFile(DebRepositoryConfiguration config, DebRepositoryModel repositoryModel,
+	private void updateSimpleReleaseFile(DebRepositoryConfiguration config,
 			DistComponentArchitecture distCompArch) throws NonExistantRepositoryException {
 		
 		String releaseFileContents = myReleaseDescriptionBuilder.buildSimpleReleaseFile(config, distCompArch.getDist(), distCompArch.getComponent(), distCompArch.getArch());
