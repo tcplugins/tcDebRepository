@@ -377,6 +377,10 @@ public class DebRepositoryManagerImpl extends DebRepositoryConfigurationManagerI
 		updateReleaseFiles(debRepositoryConfiguration, repo, packageFileToRegenerate);
 		Loggers.SERVER.info("-DebRepositoryManagerImpl :: Done updating ReleaseFiles (" + packageFileToRegenerate.size() +")");
 		//DebPackageModel.db().endTransaction();
+		for (DistComponentArchitecture dca : packageFileToRegenerate) {
+			cleanupPackagesFiles(debRepositoryConfiguration, dca);
+		}
+		
 	}
 	
 	public void rebuildSimpleReleaseFiles(DebRepositoryConfiguration debRepositoryConfiguration, 
@@ -442,12 +446,12 @@ public class DebRepositoryManagerImpl extends DebRepositoryConfigurationManagerI
 								    .notIn("debFile.filename", extractFileNames(packageRemovalBean.getPackagesToKeep()))
 								    .findList();
 		DebPackageModel.db().beginTransaction();
+		Set<DistComponentArchitecture> distComps = new HashSet<>();
 		try {
 			for (DebPackageModel m : packagesForDeletion) {
 				m.delete();
 			}
 			if (packagesForDeletion.size() > 0) {
-				Set<DistComponentArchitecture> distComps = new HashSet<>();
 				for (DebPackageModel m : packagesForDeletion) {
 					distComps.add(new DistComponentArchImpl(m.getDist(), m.getComponent(), m.getArch()));
 				}
@@ -457,6 +461,10 @@ public class DebRepositoryManagerImpl extends DebRepositoryConfigurationManagerI
 		} finally {
 			DebPackageModel.db().endTransaction();
 		}
+		for (DistComponentArchitecture dca : distComps) {
+			cleanupPackagesFiles(packageRemovalBean.getDebRepositoryConfiguration(), dca);
+		}
+
 	}
 	
 	
@@ -836,9 +844,18 @@ public class DebRepositoryManagerImpl extends DebRepositoryConfigurationManagerI
 	@Override
 	public void updateRepositoryMetaData(DebRepositoryConfiguration config)
 			throws NonExistantRepositoryException, DebRepositoryPersistanceException {
-		Loggers.SERVER.info("DebRepositoryManagerImpl :: Requesting Release file generation for " + config.getRepoName() + "(" + config.getUuid().toString() + ")");
+		Loggers.SERVER.info("DebRepositoryManagerImpl :: Requesting Release file generation for " + config.getRepoName() + " (" + config.getUuid().toString() + ")");
 		updateAllReleaseFiles(config);
-		Loggers.SERVER.info("DebRepositoryManagerImpl :: Completed Release file generation for " + config.getRepoName() + "(" + config.getUuid().toString() + ")");
+		Loggers.SERVER.info("DebRepositoryManagerImpl :: Completed Release file generation for " + config.getRepoName() + " (" + config.getUuid().toString() + ")");
+		Loggers.SERVER.info("DebRepositoryManagerImpl :: Requesting PackagesFile cleanup for " + config.getRepoName() + " (" + config.getUuid().toString() + ")");
+		int cleanupTotal = 0;
+		for (DistComponentArchitecture dca : getDistinctDistComponentArch(config)) {
+			cleanupTotal += cleanupPackagesFiles(config, dca);
+		}
+		
+		Loggers.SERVER.info("DebRepositoryManagerImpl :: Completed PackagesFile cleanup for " + config.getRepoName() + " (" + config.getUuid().toString() + ")");
+		Loggers.SERVER.info("DebRepositoryManagerImpl :: PackagesFile cleanup has removed " + cleanupTotal + " PackagesFiles for " + config.getRepoName() + "(" + config.getUuid().toString() + ")");
+
 	}
 
 	@Override
@@ -881,7 +898,7 @@ public class DebRepositoryManagerImpl extends DebRepositoryConfigurationManagerI
 											)
 								);
 		}
-		Loggers.SERVER.info("DebRepositoryManagerImpl:cleanupPackagesFiles :: Cleaned up " + deleteCount + "package files");
+		Loggers.SERVER.info("DebRepositoryManagerImpl:cleanupPackagesFiles :: Cleaned up " + deleteCount + " package files");
 		return deleteCount;
 	}
 	
