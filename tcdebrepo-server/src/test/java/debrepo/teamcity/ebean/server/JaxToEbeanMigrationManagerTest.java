@@ -15,7 +15,6 @@
  *******************************************************************************/
 package debrepo.teamcity.ebean.server;
 
-import static org.junit.Assert.*;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -23,7 +22,6 @@ import static org.mockito.Mockito.any;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.InputStream;
 
 import javax.xml.bind.JAXBException;
 
@@ -47,7 +45,6 @@ import debrepo.teamcity.entity.helper.PluginDataResolver;
 import debrepo.teamcity.entity.helper.PluginDataResolverImpl;
 import debrepo.teamcity.entity.helper.ReleaseDescriptionBuilder;
 import debrepo.teamcity.entity.helper.XmlPersister;
-import debrepo.teamcity.service.DebReleaseFileGenerator;
 import debrepo.teamcity.service.DebRepositoryConfigurationFactory;
 import debrepo.teamcity.service.DebRepositoryConfigurationFactoryImpl;
 import debrepo.teamcity.service.DebRepositoryConfigurationManager;
@@ -114,7 +111,6 @@ public class JaxToEbeanMigrationManagerTest {
 		
 		JaxToEbeanMigrationManager m = new JaxToEbeanMigrationManager(
 				ebeanDebRepositoryManager, 
-				(DebReleaseFileGenerator) ebeanDebRepositoryManager, 
 				projectManager, 
 				jaxPluginDataResolver, 
 				noOpChangePersister, 

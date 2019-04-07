@@ -28,7 +28,6 @@ import debrepo.teamcity.entity.helper.JaxDbFileRenamer;
 import debrepo.teamcity.entity.helper.JaxHelper;
 import debrepo.teamcity.entity.helper.PluginDataResolver;
 import debrepo.teamcity.entity.helper.XmlPersister;
-import debrepo.teamcity.service.DebReleaseFileGenerator;
 import debrepo.teamcity.service.DebRepositoryConfigurationFactory;
 import debrepo.teamcity.service.DebRepositoryConfigurationManager;
 import debrepo.teamcity.service.DebRepositoryManager;
@@ -39,7 +38,6 @@ import jetbrains.buildServer.serverSide.ProjectManager;
 public class JaxToEbeanMigrationManager {
 	
 	private DebRepositoryManager myEbeanDebRepositoryManager;
-	private DebReleaseFileGenerator myDebReleaseFileGenerator;
 	private XmlPersister<DebPackageStore, DebRepositoryConfiguration> myDebRepositoryDatabaseXmlPersister;
 	private DebRepositoryConfigurationChangePersister jaxConfigChangePersister;
 	private DebRepositoryManager myJaxDebRepositoryManager;
@@ -47,7 +45,6 @@ public class JaxToEbeanMigrationManager {
 	private JaxDbFileRenamer myJaxDbFileRenamer;
 	
 	public JaxToEbeanMigrationManager(DebRepositoryManager ebeanDebRepositoryManager, 
-									  DebReleaseFileGenerator debReleaseFileGenerator,
 									  ProjectManager projectManager,
 									  PluginDataResolver pluginDataResolver,
 									  DebRepositoryConfigurationChangePersister configurationJaxHelper,
@@ -55,7 +52,6 @@ public class JaxToEbeanMigrationManager {
 									  DebRepositoryConfigurationFactory debRepositoryConfigurationFactory,
 									  JaxDbFileRenamer jaxDbFileRenamer) {
 		this.myEbeanDebRepositoryManager = ebeanDebRepositoryManager;
-		this.myDebReleaseFileGenerator = debReleaseFileGenerator;
 		this.myDebRepositoryDatabaseXmlPersister = new DebRepositoryDatabaseXmlPersisterImpl(pluginDataResolver, jaxDatabasePersister);
 		
 		this.jaxConfigChangePersister = configurationJaxHelper;
@@ -71,7 +67,7 @@ public class JaxToEbeanMigrationManager {
 	
 	public void doMigration() throws FileNotFoundException, JAXBException {
 		Loggers.SERVER.info("JaxToEbeanMigrationManager :: Starting XML to EBean migration");
-		JaxToEbeanMigrator migrator = new JaxToEbeanMigrator(myJaxDebRepositoryManager, myEbeanDebRepositoryManager, myDebReleaseFileGenerator, myJaxDbFileRenamer);
+		JaxToEbeanMigrator migrator = new JaxToEbeanMigrator(myJaxDebRepositoryManager, myEbeanDebRepositoryManager, myJaxDbFileRenamer);
 		this.myJaxDebRepositoryConfigurationManager.updateRepositoryConfigurations(this.jaxConfigChangePersister.readDebRespositoryConfigurationChanges());
 		for (DebRepositoryConfiguration config : this.myJaxDebRepositoryConfigurationManager.getAllConfigurations()) {
 			Loggers.SERVER.info("JaxToEbeanMigrationManager :: Will now migrate repo called " + config.getRepoName() + " (" + config.getUuid().toString() + ")");

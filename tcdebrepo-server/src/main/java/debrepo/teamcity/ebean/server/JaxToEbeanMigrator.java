@@ -23,7 +23,6 @@ import debrepo.teamcity.DebPackage;
 import debrepo.teamcity.Loggers;
 import debrepo.teamcity.entity.DebRepositoryConfiguration;
 import debrepo.teamcity.entity.helper.JaxDbFileRenamer;
-import debrepo.teamcity.service.DebReleaseFileGenerator;
 import debrepo.teamcity.service.DebRepositoryManager;
 import debrepo.teamcity.service.NonExistantRepositoryException;
 
@@ -31,17 +30,14 @@ public class JaxToEbeanMigrator {
 	
 	private DebRepositoryManager myJaxDebRepositoryManager;
 	private DebRepositoryManager myEbeanDebRepositoryManager;
-	private DebReleaseFileGenerator myDebReleaseFileGenerator;
 	private JaxDbFileRenamer myJaxDbFileRenamer;
 
 	public JaxToEbeanMigrator(
 						DebRepositoryManager jaxDebRepositoryManager, 
 						DebRepositoryManager ebeanDebRepositoryManager,
-						DebReleaseFileGenerator debReleaseFileGenerator,
 						JaxDbFileRenamer jaxDbFileRenamer) {
 		myJaxDebRepositoryManager = jaxDebRepositoryManager;
 		myEbeanDebRepositoryManager = ebeanDebRepositoryManager;
-		myDebReleaseFileGenerator = debReleaseFileGenerator;
 		myJaxDbFileRenamer = jaxDbFileRenamer;
 		
 	}

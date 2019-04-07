@@ -29,7 +29,6 @@ import java.util.UUID;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -145,7 +144,7 @@ public class EbeanRecordTests {
 		config.setUuid(UUID.fromString("a187bd92-b22d-43ea-98ce-55ec2cedb942"));
 		debRepositoryConfigManager.addDebRepository(config);
 		jaxDebRepositoryManager.initialisePackageStore(config);
-		JaxToEbeanMigrator migrator = new JaxToEbeanMigrator(jaxDebRepositoryManager, ebeanDebRepositoryManager, debReleaseFileGenerator, jaxDbFileRenamer);
+		JaxToEbeanMigrator migrator = new JaxToEbeanMigrator(jaxDebRepositoryManager, ebeanDebRepositoryManager, jaxDbFileRenamer);
 		migrator.migrate(config);
 	}
 
@@ -214,7 +213,7 @@ public class EbeanRecordTests {
 		config2.setUuid(UUID.fromString("eafee234-c753-4a7b-9221-6b208eac4ab6"));
 		debRepositoryConfigManager.addDebRepository(config2);
 		jaxDebRepositoryManager.initialisePackageStore(config2);
-		JaxToEbeanMigrator migrator = new JaxToEbeanMigrator(jaxDebRepositoryManager, ebeanDebRepositoryManager, debReleaseFileGenerator, jaxDbFileRenamer);
+		JaxToEbeanMigrator migrator = new JaxToEbeanMigrator(jaxDebRepositoryManager, ebeanDebRepositoryManager, jaxDbFileRenamer);
 		migrator.migrate(config2);
 		
 		assertEquals(1217, ebeanDebRepositoryManager.findAllByDistComponentArch("MyStoreName2", "jessie", "main", "i386").size());
@@ -244,7 +243,7 @@ public class EbeanRecordTests {
 		config3.setUuid(UUID.fromString("dd7824da-c0c2-4895-b0e3-b8af7a05dafe"));
 		debRepositoryConfigManager.addDebRepository(config3);
 		jaxDebRepositoryManager.initialisePackageStore(config3);
-		JaxToEbeanMigrator migrator = new JaxToEbeanMigrator(jaxDebRepositoryManager, ebeanDebRepositoryManager, debReleaseFileGenerator, jaxDbFileRenamer);
+		JaxToEbeanMigrator migrator = new JaxToEbeanMigrator(jaxDebRepositoryManager, ebeanDebRepositoryManager, jaxDbFileRenamer);
 		migrator.migrate(config3);
 
 		assertEquals(1, ebeanDebRepositoryManager.findAllByDistComponentArch("MyStoreName", "jessie", "main", "i386").size());
@@ -281,7 +280,7 @@ public class EbeanRecordTests {
 		config3.setUuid(UUID.fromString("dd7824da-c0c2-4895-b0e3-b8af7a05dafe"));
 		debRepositoryConfigManager.addDebRepository(config3);
 		jaxDebRepositoryManager.initialisePackageStore(config3);
-		JaxToEbeanMigrator migrator = new JaxToEbeanMigrator(jaxDebRepositoryManager, ebeanDebRepositoryManager, debReleaseFileGenerator, jaxDbFileRenamer);
+		JaxToEbeanMigrator migrator = new JaxToEbeanMigrator(jaxDebRepositoryManager, ebeanDebRepositoryManager, jaxDbFileRenamer);
 		migrator.migrate(config3);
 
 		assertEquals(1, ebeanDebRepositoryManager.findAllByDistComponentArch("MyStoreName", "jessie", "main", "i386").size());

@@ -22,7 +22,6 @@ import java.io.File;
 import java.io.IOException;
 
 import io.ebean.datasource.DataSourceConfig;
-import org.springframework.beans.factory.FactoryBean;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
