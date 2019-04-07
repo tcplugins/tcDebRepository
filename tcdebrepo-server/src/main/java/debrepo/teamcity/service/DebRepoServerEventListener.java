@@ -21,44 +21,64 @@ import jetbrains.buildServer.serverSide.SBuild;
 import jetbrains.buildServer.serverSide.SBuildServer;
 import jetbrains.buildServer.serverSide.SRunningBuild;
 import jetbrains.buildServer.serverSide.artifacts.BuildArtifactsViewMode;
+import jetbrains.buildServer.util.executors.ExecutorsFactory;
 
 public class DebRepoServerEventListener extends BuildServerAdapter {
-	
+
 	private final DebRepositoryBuildArtifactsPublisher myPublisher;
 	private final DebRepositoryBuildArtifactsCleaner myCleaner;
+	private final DebRepositoryConfigurationManager myDebRepositoryConfigurationManager;
+	private final DebRepositoryManager myDebRepositoryManager;
 	private final SBuildServer myBuildServer;
-	
-	public DebRepoServerEventListener(DebRepositoryBuildArtifactsPublisher publisher, 
-									  DebRepositoryBuildArtifactsCleaner cleaner,
-									  SBuildServer sBuildServer) {
-		this.myPublisher = publisher;
-		this.myCleaner = cleaner;
-		this.myBuildServer = sBuildServer;
+
+	public DebRepoServerEventListener(
+			DebRepositoryBuildArtifactsPublisher publisher,
+			DebRepositoryBuildArtifactsCleaner cleaner, 
+			DebRepositoryManager maintenanceManager,
+			DebRepositoryConfigurationManager configurationManager, 
+			SBuildServer sBuildServer) 
+	{
+		myPublisher = publisher;
+		myCleaner = cleaner;
+		myDebRepositoryManager = maintenanceManager;
+		myDebRepositoryConfigurationManager = configurationManager;
+		myBuildServer = sBuildServer;
 	}
 
-	public void register(){
+	public void register() {
 		myBuildServer.addListener(this);
 		Loggers.SERVER.info("DebRepoServerEventListener :: Registering");
 	}
-	
+
+	@Override
+	public void serverStartup() {
+		ExecutorsFactory.newExecutor("debRepoStartupThread")
+				.execute(new DebRepoOnBootExecutor(
+						myDebRepositoryConfigurationManager, 
+						myDebRepositoryManager)
+					);
+	}
+
 	@Override
 	public void serverShutdown() {
 		// TODO Auto-generated method stub
 	}
-	
+
 	@Override
 	public void cleanupFinished() {
 		myCleaner.removeDetachedDebFilesFromRepositories();
 	}
-	
+
 	@Override
 	public void buildArtifactsChanged(SBuild build) {
-		this.myPublisher.removeArtifactsFromRepositories(build, build.getArtifacts(BuildArtifactsViewMode.VIEW_DEFAULT));
-		
+		this.myPublisher.removeArtifactsFromRepositories(build,
+				build.getArtifacts(BuildArtifactsViewMode.VIEW_DEFAULT));
+
 	}
-	
+
 	@Override
 	public void buildFinished(SRunningBuild build) {
-		this.myPublisher.addArtifactsToRepositories(build, build.getArtifacts(BuildArtifactsViewMode.VIEW_DEFAULT));
+		this.myPublisher.addArtifactsToRepositories(build, 
+				build.getArtifacts(BuildArtifactsViewMode.VIEW_DEFAULT));
 	}
 }

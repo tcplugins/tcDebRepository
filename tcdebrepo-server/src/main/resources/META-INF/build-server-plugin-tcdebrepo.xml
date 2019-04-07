@@ -133,11 +133,6 @@
         
      	<!-- End ebean backed DB impl -->
      	
-     	<bean
-     		id="debRepositoryBuildServerListener"
-     		class="debrepo.teamcity.service.DebRepositoryBuildServerListener"
-     		init-method="register" />
-     	
        <bean id="debRepositoryConfigurationChangePersister"
      	class="debrepo.teamcity.settings.DebRepositoryConfigurationChangePersisterImpl">
      	    <constructor-arg ref="jaxConfigHelper"/>
