@@ -48,6 +48,7 @@ import jetbrains.buildServer.serverSide.ServerPaths;
 import jetbrains.buildServer.serverSide.artifacts.BuildArtifact;
 import jetbrains.buildServer.serverSide.artifacts.BuildArtifactHolder;
 import jetbrains.buildServer.serverSide.artifacts.BuildArtifacts;
+import jetbrains.buildServer.serverSide.buildLog.BuildLog;
 import jetbrains.buildServer.util.PluralUtil;
 
 public class DebRepositoryBuildArtifactsPublisherImplTest {
@@ -65,6 +66,9 @@ public class DebRepositoryBuildArtifactsPublisherImplTest {
 	
 	@Mock
 	SBuild build;
+	
+	@Mock 
+	BuildLog buildLog;
 	
 	@Mock
 	SBuildType buildType;
@@ -86,6 +90,7 @@ public class DebRepositoryBuildArtifactsPublisherImplTest {
 		configs.add(config);
 		when(buildType.getBuildTypeId()).thenReturn("bt01");
 		when(build.getBuildType()).thenReturn(buildType);
+		when(build.getBuildLog()).thenReturn(buildLog);
 		when(build.isArtifactsExists()).thenReturn(true);
 		when(build.getBuildTypeId()).thenReturn("bt01");
 		when(debRepositoryConfigManager.findConfigurationsForBuildType(anyString())).thenReturn(configs);

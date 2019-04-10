@@ -20,7 +20,7 @@ import java.util.Map;
 
 public interface DebFileReader {
 
-	Map<String, String> getMetaDataFromPackage(String filename) throws IOException;
+	Map<String, String> getMetaDataFromPackage(String filename) throws IOException, DebPackageReadException;
 
 	boolean fileExists(String filename);
 

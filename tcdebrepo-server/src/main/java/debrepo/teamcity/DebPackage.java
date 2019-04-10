@@ -22,7 +22,7 @@ import java.util.Map;
 
 /**
  *   DebPackage represents a Debian Package
- *   The existing DebPckageEntity (JAXB) and the new eBean model 
+ *   The existing DebPackageEntity (JAXB) and the new eBean model 
  *   both implement this.    
  */
 public interface DebPackage {

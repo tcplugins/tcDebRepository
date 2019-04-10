@@ -18,7 +18,22 @@ public interface DebReleaseFileLocator {
 		
 		public String getFilename() {
 			return this.filename;
-		}		
+		}
+		
+		/** Finds the {@link ReleaseFileType} with the matching filename.
+		 * If none found, returns the {@link Release} file type.
+		 * 
+		 * @param releaseFileName
+		 * @return Relevant {@link ReleaseFileType} or {@link Release} if not found.
+		 */
+		public static ReleaseFileType findByName(String releaseFileName) {
+			for (ReleaseFileType type : values()) {
+				if (type.getFilename().equals(releaseFileName)) {
+					return type;
+				}
+			}
+			return Release;
+		}
 	}
 	
 	public static enum PackagesFileType {

@@ -279,7 +279,7 @@ public abstract class DebDownloadController extends BaseController {
 			String releaseFileName= matcher.group(3);
 			try {
 				checkRepoIsRestricted(repoName);
-				ReleaseFileType releaseFileType = ReleaseFileType.valueOf(releaseFileName);
+				ReleaseFileType releaseFileType = ReleaseFileType.findByName(releaseFileName);
 				return serveReleaseFile(request, response, repoName, distName, releaseFileType);
 			} catch (DebRepositoryPermissionDeniedException ex){
 				response.sendError(HttpServletResponse.SC_FORBIDDEN);

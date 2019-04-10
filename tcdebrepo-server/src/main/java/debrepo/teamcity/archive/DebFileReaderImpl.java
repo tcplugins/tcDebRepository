@@ -56,7 +56,7 @@ public class DebFileReaderImpl implements DebFileReader {
 	}
 	
 	@Override
-	public Map<String,String> getMetaDataFromPackage(String filename) throws IOException {
+	public Map<String,String> getMetaDataFromPackage(String filename) throws IOException, DebPackageReadException {
 		Path ephemeralTempDir = Files.createTempDirectory(Paths.get(this.myTempDirectory), "deb-temp-", new FileAttribute<?>[] {});
 		File debFile = new File(this.myArtifactsBaseDirectory + File.separator + filename);
 		DebFileControlFile compressedControlFile = this.getCompressedControlFileFromDeb(debFile, ephemeralTempDir.toFile());
@@ -72,7 +72,7 @@ public class DebFileReaderImpl implements DebFileReader {
 		return new File(this.myArtifactsBaseDirectory + File.separator + filename).exists();
 	}
 	
-	protected DebFileControlFile getCompressedControlFileFromDeb(File debFile, File ephemeralTempDir) throws IOException {
+	protected DebFileControlFile getCompressedControlFileFromDeb(File debFile, File ephemeralTempDir) throws IOException, DebPackageReadException {
 		
 		Archiver archiver = ArchiverFactory.createArchiver(ArchiveFormat.AR);
 		ArchiveStream stream = archiver.stream(debFile);
@@ -94,7 +94,7 @@ public class DebFileReaderImpl implements DebFileReader {
 		stream.close();
 		
 		if (compressionType == null) {
-			//throw new De
+			throw new DebPackageReadException("Deb file does not contain expected control file. Only control.tar.gz and control.tar.xz are supported.");
 		}
 		
 		return new DebFileControlFile(compressionType, compressedControlFile);

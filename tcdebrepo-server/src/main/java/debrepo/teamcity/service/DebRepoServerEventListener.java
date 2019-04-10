@@ -77,7 +77,7 @@ public class DebRepoServerEventListener extends BuildServerAdapter {
 	}
 
 	@Override
-	public void buildFinished(SRunningBuild build) {
+	public void beforeBuildFinish(SRunningBuild build) {
 		this.myPublisher.addArtifactsToRepositories(build, 
 				build.getArtifacts(BuildArtifactsViewMode.VIEW_DEFAULT));
 	}

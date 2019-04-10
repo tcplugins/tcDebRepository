@@ -69,7 +69,7 @@ public class ArStreamerTest {
 	}
 	
 	@Test
-	public void getControlFileAsStringTest() throws IOException {
+	public void getControlFileAsStringTest() throws IOException, DebPackageReadException {
 		Path ephemeralTempDir = Files.createTempDirectory(Paths.get("target"), "deb-temp-", new FileAttribute<?>[] {});
 		File debFile = new File("src/test/resources/build-essential_11.6ubuntu6_amd64.deb");
 		DebFileReaderImpl reader = new DebFileReaderImpl(new File("src/test/resources"), "target");
@@ -85,7 +85,7 @@ public class ArStreamerTest {
 	}
 	
 	@Test
-	public void getControlFileAsStringFromAllTest() throws IOException {
+	public void getControlFileAsStringFromAllTest() throws IOException, DebPackageReadException {
 		Path ephemeralTempDir = Files.createTempDirectory(Paths.get("target"), "deb-temp-", new FileAttribute<?>[] {});
 		File debFile = new File("src/test/resources/packages_for_testing/debhelper_9.20120909_all.deb");
 		DebFileReaderImpl reader = new DebFileReaderImpl(new File("src/test/resources/packages_for_testing"), "target");
@@ -101,7 +101,7 @@ public class ArStreamerTest {
 	}
 	
 	@Test
-	public void getControlFileAsStringFromAllTest2() throws IOException {
+	public void getControlFileAsStringFromAllTest2() throws IOException, DebPackageReadException {
 		Path ephemeralTempDir = Files.createTempDirectory(Paths.get("target"), "deb-temp-", new FileAttribute<?>[] {});
 		File debFile = new File("src/test/resources/packages_for_testing/autoconf_2.69-8_all.deb");
 		DebFileReaderImpl reader = new DebFileReaderImpl(new File("src/test/resources/packages_for_testing"), "target");
@@ -117,7 +117,7 @@ public class ArStreamerTest {
 	}
 	
 	@Test
-	public void getControlFileAsStringTest2() throws IOException {
+	public void getControlFileAsStringTest2() throws IOException, DebPackageReadException {
 		Path ephemeralTempDir = Files.createTempDirectory(Paths.get("target"), "deb-temp-", new FileAttribute<?>[] {});
 		File debFile = new File("src/test/resources/packages_for_testing/e3_2.71-1_amd64.deb");
 		DebFileReaderImpl reader = new DebFileReaderImpl(new File("src/test/resources/packages_for_testing"), "target");
@@ -133,7 +133,7 @@ public class ArStreamerTest {
 	}
 	
 	@Test
-	public void getControlFileAsStringTest_tcDummyDeb_amd64_1_0_5667() throws IOException {
+	public void getControlFileAsStringTest_tcDummyDeb_amd64_1_0_5667() throws IOException, DebPackageReadException {
 		Path ephemeralTempDir = Files.createTempDirectory(Paths.get("target"), "deb-temp-", new FileAttribute<?>[] {});
 		File debFile = new File("src/test/resources/packages_for_testing/tcDummyDeb_amd64_1.0.5667.deb");
 		DebFileReaderImpl reader = new DebFileReaderImpl(new File("src/test/resources/packages_for_testing"), "target");
@@ -149,7 +149,7 @@ public class ArStreamerTest {
 	}
 	
 	@Test
-	public void getControlFileAsStringTest_tcDummyDeb_amd64_2_0_14() throws IOException {
+	public void getControlFileAsStringTest_tcDummyDeb_amd64_2_0_14() throws IOException, DebPackageReadException {
 		Path ephemeralTempDir = Files.createTempDirectory(Paths.get("target"), "deb-temp-", new FileAttribute<?>[] {});
 		File debFile = new File("src/test/resources/packages_for_testing/tcDummyDeb_amd64_2.0.14.deb");
 		DebFileReaderImpl reader = new DebFileReaderImpl(new File("src/test/resources/packages_for_testing"), "target");
