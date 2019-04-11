@@ -249,7 +249,6 @@ public abstract class DebDownloadController extends BaseController {
 					linkItems.add(LinkItem.builder().text("Packages").type(LINK_TYPE_REPO_FILE).url("./Packages").build());
 					linkItems.add(LinkItem.builder().text("Packages.gz").type(LINK_TYPE_REPO_FILE).url("./Packages.gz").build());
 					linkItems.add(LinkItem.builder().text("Release").type(LINK_TYPE_REPO_FILE).url("./Release").build());
-					linkItems.add(LinkItem.builder().text("by-hash").type(LINK_TYPE_REPO_DIR).url("./by-hash/").build());
 
 					params.put("linkItems", linkItems);
 					params.put("directoryTitle", repoName);
@@ -356,6 +355,7 @@ public abstract class DebDownloadController extends BaseController {
 				linkItems.add(LinkItem.builder().text("InRelease").type(LINK_TYPE_REPO_FILE).url("./InRelease").build());
 				linkItems.add(LinkItem.builder().text("Release").type(LINK_TYPE_REPO_FILE).url("./Release").build());
 				linkItems.add(LinkItem.builder().text("Release.gpg").type(LINK_TYPE_REPO_FILE).url("./Release.gpg").build());
+				linkItems.add(LinkItem.builder().text("by-hash").type(LINK_TYPE_REPO_DIR).url("./by-hash/").build());
 				for (String component : myDebRepositoryManager.findUniqueComponentByDist(repoName, distName)) {
 					linkItems.add(LinkItem.builder().text(component).type(LINK_TYPE_REPO_DIR).url("./" + component + "/").build());
 				}

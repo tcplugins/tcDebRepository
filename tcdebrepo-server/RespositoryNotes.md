@@ -119,3 +119,8 @@ Example:<br>
 	     |        -- Release (optional)
 	     |
 	     -- {distname}, eg, zesty
+
+#### by-hash support
+The file `main/binary-i386/Packages` must be also available at `main/binary-i386/by-hash/MD5Sum/e9c66b2352c403a3387e240bae17f629` (if the server provides uncompressed indexes) and the file `main/binary-i386/Packages.gz` at `main/binary-i386/by-hash/MD5Sum/f21914a78219561b7056b23c3a3b0235`. 
+
+Servers must provide by-hash with the strongest hashsum they support (and include in the Release file) and should provide by-hash for all hashsums. Clients supporting by-hash must use the strongest hashsum they support and is provided in the Release file. 
