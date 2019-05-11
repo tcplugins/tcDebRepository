@@ -28,7 +28,7 @@ import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-import debrepo.teamcity.DebPackagesFile;
+import debrepo.teamcity.GenericRepositoryFile;
 import io.ebean.Finder;
 import io.ebean.Model;
 import io.ebean.annotation.Index;
@@ -38,10 +38,10 @@ import lombok.Setter;
 
 @Index(columnNames = {"repository_id", "dist", "path" ,"modified_time"})
 @Entity
-@Table(name = "o_deb_packages_file")
+@Table(name = "o_deb_metadata_file")
 @Getter
 @Setter
-public class DebPackagesFileModel extends Model implements DebPackagesFile {
+public class DebMetaDataFileModel extends Model implements GenericRepositoryFile {
 
 
 	private static final String MD5 = "md5";
@@ -58,14 +58,15 @@ public class DebPackagesFileModel extends Model implements DebPackagesFile {
 	@ManyToOne
 	private DebRepositoryModel repository;
 	
-	String packagesFileName;
+	@Index
+	String fileName;
 	
 	@Index
 	@WhenModified
 	Date modifiedTime;
 
 	@Lob
-	byte[] fileContents;
+	byte[] fileContent;
 	
 	@Index
 	String dist;
@@ -79,66 +80,26 @@ public class DebPackagesFileModel extends Model implements DebPackagesFile {
 	String sha1;
 	String sha256;
 
-/*	public void setMd5(String md5Hex) {
-		updateHash(MD5, md5Hex);
-	}
-	
-	public void setSha1(String sha1Hex) {
-		updateHash(SHA1, sha1Hex);
-	}
-
-	public void setSha256(String sha256Hex) {
-		updateHash(SHA256, sha256Hex);
-	}
-	
-	private void updateHash(String hashType, String hashValue) {
-		if (debPackagesHashes.containsKey(hashType)) {
-			debPackagesHashes.get(hashType).setHashValue(hashValue);
-			return;
-		}
-	
-		DebPackagesFileHashModel newHash = new DebPackagesFileHashModel();
-		newHash.setPackagesFile(this);
-		newHash.setHashType(hashType);
-		newHash.setHashValue(hashValue);
-		this.debPackagesHashes.put(hashType, newHash);
-	}*/
-
 	@Override
 	public int getSizeInBytes() {
-		if (fileContents == null) {
+		if (fileContent == null) {
 			return 0;
 		}
-		return fileContents.length;
+		return fileContent.length;
 	}
 
-/*	@Override
-	public String getMd5() {
-		return debPackagesHashes.get(MD5).getHashValue();
-	}
-
-	@Override
-	public String getSha1() {
-		return debPackagesHashes.get(SHA1).getHashValue();
-	}
-
-	@Override
-	public String getSha256() {
-		return debPackagesHashes.get(SHA256).getHashValue();
-	}
-*/
 	@Override
 	public String getFilePath() {
 		return path;
 	}
 	
-	public static class MyFinder extends Finder<Long, DebPackagesFileModel> {
+	public static class MyFinder extends Finder<Long, DebMetaDataFileModel> {
 
 		/**
 		 * Construct using the default EbeanServer.
 		 */
 		public MyFinder() {
-			super(DebPackagesFileModel.class);
+			super(DebMetaDataFileModel.class);
 		}
 
 	}

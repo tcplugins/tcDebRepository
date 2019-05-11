@@ -14,8 +14,11 @@ import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
 
+import debrepo.teamcity.RepoDataFileType;
+import debrepo.teamcity.ebean.DebMetaDataFileModel;
 import debrepo.teamcity.ebean.DebPackagesFileModel;
 import debrepo.teamcity.ebean.server.DebRepositoryManagerImpl.DistComponentArchImpl;
+import debrepo.teamcity.entity.DebPackageEntity;
 import debrepo.teamcity.entity.DebRepositoryConfiguration;
 import debrepo.teamcity.entity.DistComponentArchitecture;
 import debrepo.teamcity.entity.helper.DebRepositoryToReleaseDescriptionBuilder;
@@ -89,11 +92,23 @@ public class DebReleaseFileGeneratorTest extends DebRepositoryBaseTest {
 		generator.updateReleaseFiles(c, distComponentsToUpdate);
 		generator.updateReleaseFiles(c, distComponentsToUpdate);
 		
-		List<DebPackagesFileModel> files = DebPackagesFileModel.find.all();
-		for (DebPackagesFileModel f : files) {
-			System.out.println(f.getFilePath());
-			System.out.println(new String(f.getPackagesFile()));
+		List<DebMetaDataFileModel> releaseFiles = DebMetaDataFileModel.find.query()
+				.where()
+					.eq("fileName", RepoDataFileType.Release.getFileName())
+				.findList();
+		assertEquals(2, releaseFiles.size());
+		for (DebMetaDataFileModel f : releaseFiles) {
+			System.out.println("Release filePath: " + f.getFilePath());
+			System.out.println("Release fileContent: " + new String(f.getFileContent()));
 		}
+		
+		List<DebMetaDataFileModel> packageFiles = DebMetaDataFileModel.find.query()
+			.where()
+			.disjunction()
+			  .eq("fileName", RepoDataFileType.Packages.getFileName())
+			  .eq("fileName", RepoDataFileType.PackagesGz.getFileName())
+			.findList();
+		assertEquals(2, packageFiles.size());
 	}
 
 	@Test
@@ -106,21 +121,46 @@ public class DebReleaseFileGeneratorTest extends DebRepositoryBaseTest {
 	
 		DebReleaseFileGenerator generator = (DebReleaseFileGenerator) this.debRepositoryManager;
 		for (int i = 0; i < 100; i++) {
+			DebPackageEntity entityN = DebPackageEntity.copy(entity4);
+			entityN.setVersion("2.1." + i);
+			entityN.setFilename("testpackage-amd64-" + entityN.getVersion() +".deb");
+			entityN.setUri("ProjectName/BuildName/" + entityN.getBuildId() + "/" + entityN.getFilename());
+			debRepositoryManager.addBuildPackage(c, entityN);
+			
+			DebPackageEntity entityN2 = DebPackageEntity.copy(entity4);
+			entityN2.setVersion("2.1." + i);
+			entityN2.setArch("i386");
+			entityN2.setFilename("testpackage-i386-" + entityN2.getVersion() +".deb");
+			entityN2.setUri("ProjectName/BuildName/" + entityN2.getBuildId() + "/" + entityN2.getFilename());
+			debRepositoryManager.addBuildPackage(c, entityN2);
+
 			generator.updateReleaseFiles(c, distComponentsToUpdate);
 		}
 		
-		List<DebPackagesFileModel> files = DebPackagesFileModel.find.all();
-		assertEquals(400, files.size());
-		for (DebPackagesFileModel f : files) {
-			System.out.println(f.getFilePath());
-			System.out.println(new String(f.getPackagesFile()));
+		List<DebMetaDataFileModel> files = DebMetaDataFileModel.find.query()
+				.where()
+				.disjunction()
+					.eq("fileName", RepoDataFileType.Packages.getFileName())
+					.eq("fileName", RepoDataFileType.PackagesGz.getFileName())
+				.findList();		
+		
+		
+		for (DebMetaDataFileModel f : files) {
+			System.out.println("############  Packages filePath: " + f.getFilePath() + "(" + f.getMd5() + ")");
+			System.out.println("Packages fileContent: " + new String(f.getFileContent()));
 		}
+		assertEquals(400, files.size());
 		
 		for (DistComponentArchitecture dca :distComponentsToUpdate) {
 			this.debRepositoryManager.cleanupPackagesFiles(c, dca);
 		}
 		
-		files = DebPackagesFileModel.find.all();
+		files = DebMetaDataFileModel.find.query()
+				.where()
+				.disjunction()
+				.eq("fileName", RepoDataFileType.Packages.getFileName())
+				.eq("fileName", RepoDataFileType.PackagesGz.getFileName())
+				.findList();		
 		assertEquals(20, files.size());
 	}
 	

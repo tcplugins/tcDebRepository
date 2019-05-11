@@ -9,6 +9,22 @@ create table o_debfile (
   constraint pk_o_debfile primary key (id)
 );
 
+create table o_deb_metadata_file (
+  id                            bigint auto_increment not null,
+  repository_id                 bigint,
+  file_name                     varchar(255),
+  file_content                  blob,
+  dist                          varchar(255),
+  component                     varchar(255),
+  arch                          varchar(255),
+  path                          varchar(255),
+  md5                           varchar(255),
+  sha1                          varchar(255),
+  sha256                        varchar(255),
+  modified_time                 timestamp not null,
+  constraint pk_o_deb_metadata_file primary key (id)
+);
+
 create table o_debpackage (
   id                            bigint auto_increment not null,
   repository_id                 bigint,
@@ -31,7 +47,7 @@ create table o_deb_packages_file (
   id                            bigint auto_increment not null,
   repository_id                 bigint,
   packages_file_name            varchar(255),
-  packages_file                 blob,
+  file_contents                 blob,
   dist                          varchar(255),
   component                     varchar(255),
   arch                          varchar(255),
@@ -51,7 +67,6 @@ create table o_deb_release_file (
   release_file                  clob,
   in_release_file               clob,
   release_file_gpg              clob,
-  constraint uq_o_deb_release_file_repository_id_dist unique (repository_id,dist),
   constraint pk_o_deb_release_file primary key (id)
 );
 
@@ -80,10 +95,18 @@ create table o_repository (
 );
 
 create index ix_o_debfile_build_id_filename on o_debfile (build_id,filename);
+create index ix_o_deb_metadata_file_repository_id_dist_path_modified_t_1 on o_deb_metadata_file (repository_id,dist,path,modified_time);
+create index ix_o_deb_metadata_file_file_name on o_deb_metadata_file (file_name);
+create index ix_o_deb_metadata_file_dist on o_deb_metadata_file (dist);
+create index ix_o_deb_metadata_file_path on o_deb_metadata_file (path);
+create index ix_o_deb_metadata_file_modified_time on o_deb_metadata_file (modified_time);
 create index ix_o_deb_packages_file_repository_id_dist_path_modified_t_1 on o_deb_packages_file (repository_id,dist,path,modified_time);
 create index ix_o_deb_packages_file_dist on o_deb_packages_file (dist);
 create index ix_o_deb_packages_file_path on o_deb_packages_file (path);
 create index ix_o_deb_packages_file_modified_time on o_deb_packages_file (modified_time);
+create index ix_o_deb_metadata_file_repository_id on o_deb_metadata_file (repository_id);
+alter table o_deb_metadata_file add constraint fk_o_deb_metadata_file_repository_id foreign key (repository_id) references o_repository (id) on delete restrict on update restrict;
+
 create index ix_o_debpackage_repository_id on o_debpackage (repository_id);
 alter table o_debpackage add constraint fk_o_debpackage_repository_id foreign key (repository_id) references o_repository (id) on delete restrict on update restrict;
 

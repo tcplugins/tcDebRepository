@@ -39,11 +39,10 @@ import org.springframework.web.servlet.ModelAndView;
 
 import debrepo.teamcity.DebPackage;
 import debrepo.teamcity.Loggers;
+import debrepo.teamcity.RepoDataFileType;
 import debrepo.teamcity.entity.DebPackageNotFoundInStoreException;
 import debrepo.teamcity.entity.helper.DebPackageToPackageDescriptionBuilder;
 import debrepo.teamcity.service.DebReleaseFileLocator;
-import debrepo.teamcity.service.DebReleaseFileLocator.PackagesFileType;
-import debrepo.teamcity.service.DebReleaseFileLocator.ReleaseFileType;
 import debrepo.teamcity.service.DebRepositoryItemNotFoundException;
 import debrepo.teamcity.service.DebRepositoryManager;
 import debrepo.teamcity.service.NonExistantRepositoryException;
@@ -180,7 +179,7 @@ public abstract class DebDownloadController extends BaseController {
 			String component= matcher.group(3);
 			String archName = matcher.group(4);
 			try {
-				return serveReleaseFile(request, response, repoName, distName, component, archName, ReleaseFileType.Release);
+				return serveReleaseFile(request, response, repoName, distName, component, archName, RepoDataFileType.Release);
 			} catch (NonExistantRepositoryException ex){
 				response.sendError(HttpServletResponse.SC_NOT_FOUND);
 				Loggers.SERVER.info("DebDownloadController:: Returning 404 : Not Found: No Deb Repository exists with the name: " + request.getPathInfo());
@@ -202,7 +201,7 @@ public abstract class DebDownloadController extends BaseController {
 			String packagesFileName = matcher.group(5);
 			try {
 				checkRepoIsRestricted(repoName);
-				PackagesFileType packagesFileType = PackagesFileType.findByName(packagesFileName);
+				RepoDataFileType packagesFileType = RepoDataFileType.findByName(packagesFileName);
 				return servePackagesFile(request, response, repoName, distName, component, archName, packagesFileType);
 				//return servePackagesFile(request, response, myDebRepositoryManager.findAllByDistComponentArchIncludingAll(repoName, distName, component, archName));
 			} catch (DebRepositoryPermissionDeniedException ex){
@@ -278,7 +277,7 @@ public abstract class DebDownloadController extends BaseController {
 			String releaseFileName= matcher.group(3);
 			try {
 				checkRepoIsRestricted(repoName);
-				ReleaseFileType releaseFileType = ReleaseFileType.findByName(releaseFileName);
+				RepoDataFileType releaseFileType = RepoDataFileType.findByName(releaseFileName);
 				return serveReleaseFile(request, response, repoName, distName, releaseFileType);
 			} catch (DebRepositoryPermissionDeniedException ex){
 				response.sendError(HttpServletResponse.SC_FORBIDDEN);
@@ -663,12 +662,12 @@ public abstract class DebDownloadController extends BaseController {
 	 * @throws DebRepositoryItemNotFoundException - If the query to find the packages file returns nothing.
      */
 	private ModelAndView servePackagesFile(HttpServletRequest request, HttpServletResponse response, String reponame, 
-											 String dist, String component, String architecture, PackagesFileType packagesFileType) 
+											 String dist, String component, String architecture, RepoDataFileType packagesFileType) 
 													 throws IOException, NonExistantRepositoryException, 
 													 		DebRepositoryItemNotFoundException {
 		response.setContentType(packagesFileType.getContentType());
 		response.getOutputStream().write(myDebReleaseFileLocator.findPackagesFile(reponame, packagesFileType, dist, component, architecture));
-		Loggers.SERVER.info("DebDownloadController:: Returning 200 : " + packagesFileType.getFilename() + " file exists with the name: " + request.getPathInfo());
+		Loggers.SERVER.info("DebDownloadController:: Returning 200 : " + packagesFileType.getFileName() + " file exists with the name: " + request.getPathInfo());
 		return null;
 	}
 	
@@ -685,7 +684,7 @@ public abstract class DebDownloadController extends BaseController {
 	 * @throws NonExistantRepositoryException - If the reponame passed in is not a valid repo.
 	 * @throws DebRepositoryItemNotFoundException - If the query to find the release file returns nothing.
 	 */
-	private ModelAndView serveReleaseFile(HttpServletRequest request, HttpServletResponse response, String reponame, String dist, String component, String architecture, ReleaseFileType releaseFileType) throws IOException, NonExistantRepositoryException, DebRepositoryItemNotFoundException {
+	private ModelAndView serveReleaseFile(HttpServletRequest request, HttpServletResponse response, String reponame, String dist, String component, String architecture, RepoDataFileType releaseFileType) throws IOException, NonExistantRepositoryException, DebRepositoryItemNotFoundException {
 		response.getOutputStream().write(myDebReleaseFileLocator.findReleaseFile(reponame, dist, component, architecture, releaseFileType).getBytes(StandardCharsets.UTF_8));
 		Loggers.SERVER.info("DebDownloadController:: Returning 200 : Release file exists with the name: " + request.getPathInfo());
 		return null;
@@ -703,7 +702,7 @@ public abstract class DebDownloadController extends BaseController {
 	 * @throws NonExistantRepositoryException - If the reponame passed in is not a valid repo.
 	 * @throws DebRepositoryItemNotFoundException - If the query to find the release file returns nothing.
 	 */
-	private ModelAndView serveReleaseFile(HttpServletRequest request, HttpServletResponse response, String reponame, String dist, ReleaseFileType releaseFileType) throws IOException, NonExistantRepositoryException, DebRepositoryItemNotFoundException {
+	private ModelAndView serveReleaseFile(HttpServletRequest request, HttpServletResponse response, String reponame, String dist, RepoDataFileType releaseFileType) throws IOException, NonExistantRepositoryException, DebRepositoryItemNotFoundException {
 		response.getOutputStream().write(myDebReleaseFileLocator.findReleaseFile(reponame, dist, releaseFileType).getBytes(StandardCharsets.UTF_8));
 		Loggers.SERVER.info("DebDownloadController:: Returning 200 : Release file exists with the name: " + request.getPathInfo());
 		return null;

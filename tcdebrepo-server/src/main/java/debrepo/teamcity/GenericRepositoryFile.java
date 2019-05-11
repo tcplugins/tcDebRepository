@@ -23,5 +23,4 @@ public interface GenericRepositoryFile {
 	public String getSha256();
 	public String getComponent();
 	public String getArch();
-
 }

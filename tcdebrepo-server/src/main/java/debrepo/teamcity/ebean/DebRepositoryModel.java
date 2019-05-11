@@ -56,13 +56,7 @@ public class DebRepositoryModel extends Model {
 	List<DebPackageModel> debpackages;
 	
 	@OneToMany(mappedBy = "repository", cascade=CascadeType.REMOVE)
-	List<DebPackagesFileModel> debpackagesFile;
-	
-	@OneToMany(mappedBy = "repository", cascade=CascadeType.REMOVE)
-	List<DebReleaseFileModel> releaseFile;
-	
-	@OneToMany(mappedBy = "repository", cascade=CascadeType.REMOVE)
-	List<DebReleaseFileSimpleModel> releaseFileSimple;
+	List<DebMetaDataFileModel> metaDataFile;
 	
 	public static class MyFinder extends Finder<Long, DebRepositoryModel> {
 

@@ -27,7 +27,6 @@ import javax.persistence.Id;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
 
 import io.ebean.Finder;
 import io.ebean.Model;
@@ -36,10 +35,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Entity
-@Table(name = "o_deb_release_file",
-	uniqueConstraints =
-		@UniqueConstraint( columnNames={ "repository_id", "dist" } )
-	)
+@Table(name = "o_deb_release_file")
 @Getter
 @Setter
 public class DebReleaseFileModel extends Model {
