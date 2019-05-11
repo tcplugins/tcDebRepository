@@ -15,14 +15,12 @@
  *******************************************************************************/
 package debrepo.teamcity.web;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
 import org.jetbrains.annotations.NotNull;
 
-import debrepo.teamcity.ebean.DebPackageModel;
 import debrepo.teamcity.service.DebRepositoryConfigurationManager;
 import debrepo.teamcity.service.DebRepositoryMaintenanceManager;
 import jetbrains.buildServer.controllers.admin.AdminPage;

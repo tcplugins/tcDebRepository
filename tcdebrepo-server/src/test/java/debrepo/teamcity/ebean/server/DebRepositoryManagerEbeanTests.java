@@ -16,27 +16,20 @@
 package debrepo.teamcity.ebean.server;
 
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.io.File;
 import java.io.IOException;
 
 import javax.xml.bind.JAXBException;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 
-import debrepo.teamcity.entity.DebPackageStore;
-import debrepo.teamcity.entity.DebRepositoryConfiguration;
 import debrepo.teamcity.entity.helper.DebRepositoryToReleaseDescriptionBuilder;
 import debrepo.teamcity.entity.helper.PluginDataResolver;
 import debrepo.teamcity.entity.helper.PluginDataResolverImpl;
-import debrepo.teamcity.entity.helper.ReleaseDescriptionBuilder;
-import debrepo.teamcity.entity.helper.XmlPersister;
 import debrepo.teamcity.service.DebRepositoryConfigurationManager;
 import debrepo.teamcity.service.DebRepositoryManager;
 import debrepo.teamcity.service.DebRepositoryManagerTest;

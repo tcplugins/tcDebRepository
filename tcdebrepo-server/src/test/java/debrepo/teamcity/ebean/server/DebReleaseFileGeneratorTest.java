@@ -16,7 +16,6 @@ import org.junit.Test;
 
 import debrepo.teamcity.RepoDataFileType;
 import debrepo.teamcity.ebean.DebMetaDataFileModel;
-import debrepo.teamcity.ebean.DebPackagesFileModel;
 import debrepo.teamcity.ebean.server.DebRepositoryManagerImpl.DistComponentArchImpl;
 import debrepo.teamcity.entity.DebPackageEntity;
 import debrepo.teamcity.entity.DebRepositoryConfiguration;

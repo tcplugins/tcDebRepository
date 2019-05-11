@@ -41,7 +41,6 @@ import debrepo.teamcity.DebPackage;
 import debrepo.teamcity.Loggers;
 import debrepo.teamcity.RepoDataFileType;
 import debrepo.teamcity.entity.DebPackageNotFoundInStoreException;
-import debrepo.teamcity.entity.helper.DebPackageToPackageDescriptionBuilder;
 import debrepo.teamcity.service.DebReleaseFileLocator;
 import debrepo.teamcity.service.DebRepositoryItemNotFoundException;
 import debrepo.teamcity.service.DebRepositoryManager;

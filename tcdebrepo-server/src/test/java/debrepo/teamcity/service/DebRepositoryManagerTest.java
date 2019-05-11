@@ -15,11 +15,11 @@
  *******************************************************************************/
 package debrepo.teamcity.service;
 
-import static org.junit.Assert.*;
-import static org.mockito.ArgumentMatchers.any;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,24 +28,18 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.UUID;
 
-import javax.xml.bind.JAXBException;
-
-import org.junit.*;
+import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import debrepo.teamcity.DebPackage;
-import debrepo.teamcity.Loggers;
-//import debrepo.teamcity.ebean.DebPackageModel;
-//import debrepo.teamcity.ebean.DebRepositoryModel;
 import debrepo.teamcity.entity.DebPackageEntity;
 import debrepo.teamcity.entity.DebPackageNotFoundInStoreException;
 import debrepo.teamcity.entity.DebRepositoryConfiguration;
 import debrepo.teamcity.entity.DebRepositoryConfigurations;
 import debrepo.teamcity.entity.DebRepositoryStatistics;
 import debrepo.teamcity.entity.helper.DebRepositoryConfigurationJaxHelperImpl;
-import debrepo.teamcity.entity.helper.DebRepositoryToReleaseDescriptionBuilder;
 import debrepo.teamcity.entity.helper.JaxHelper;
 import debrepo.teamcity.entity.helper.PluginDataResolver;
 import debrepo.teamcity.entity.helper.PluginDataResolverImpl;

@@ -23,7 +23,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import debrepo.teamcity.DebPackage;
-import debrepo.teamcity.entity.DebPackageEntity;
 
 public class MapBackedDebRepositoryPersistanceEngineTest extends DebRepositoryBaseTest {
 

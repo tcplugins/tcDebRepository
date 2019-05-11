@@ -43,11 +43,6 @@ import lombok.Setter;
 @Setter
 public class DebMetaDataFileModel extends Model implements GenericRepositoryFile {
 
-
-	private static final String MD5 = "md5";
-	private static final String SHA1 = "sha1";
-	private static final String SHA256 = "sha256";
-
 	public static final MyFinder find = new MyFinder();
 	
 	@Id

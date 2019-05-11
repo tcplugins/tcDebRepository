@@ -18,9 +18,7 @@
  *******************************************************************************/
 package debrepo.teamcity.ebean.server;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -29,19 +27,10 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.UUID;
-import java.util.zip.GZIPOutputStream;
 
 import org.apache.commons.codec.digest.DigestUtils;
 
-import io.ebean.Ebean;
-import io.ebean.EbeanServer;
-import io.ebean.Query;
-import io.ebean.RawSql;
-import io.ebean.RawSqlBuilder;
-import io.ebean.SqlUpdate;
-
 import debrepo.teamcity.DebPackage;
-import debrepo.teamcity.DebPackagesFile;
 import debrepo.teamcity.FileHashType;
 import debrepo.teamcity.GenericRepositoryFile;
 import debrepo.teamcity.Loggers;
@@ -71,6 +60,12 @@ import debrepo.teamcity.service.DebRepositoryPersistanceException;
 import debrepo.teamcity.service.NonExistantRepositoryException;
 import debrepo.teamcity.settings.DebRepositoryConfigurationChangePersister;
 import debrepo.teamcity.util.TextConverter;
+import io.ebean.Ebean;
+import io.ebean.EbeanServer;
+import io.ebean.Query;
+import io.ebean.RawSql;
+import io.ebean.RawSqlBuilder;
+import io.ebean.SqlUpdate;
 import lombok.AllArgsConstructor;
 import lombok.Value;
 

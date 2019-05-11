@@ -15,7 +15,12 @@
  *******************************************************************************/
 package debrepo.teamcity.entity.helper;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.when;
+
+import java.io.IOException;
+
+import javax.xml.bind.JAXBException;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -23,16 +28,8 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import debrepo.teamcity.entity.DebRepositoryBuildTypeConfig;
-import debrepo.teamcity.entity.DebRepositoryConfiguration;
 import debrepo.teamcity.entity.DebRepositoryConfigurationJaxImpl;
 import debrepo.teamcity.entity.DebRepositoryConfigurations;
-
-import static org.mockito.Mockito.*;
-
-import java.io.IOException;
-
-import javax.xml.bind.JAXBException;
-
 import jetbrains.buildServer.serverSide.ServerPaths;
 
 public class DebRepositoryConfigurationJaxHelperImplTest {

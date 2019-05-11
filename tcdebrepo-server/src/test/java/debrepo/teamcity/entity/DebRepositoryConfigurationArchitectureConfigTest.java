@@ -31,8 +31,6 @@ import debrepo.teamcity.entity.helper.DebRepositoryConfigurationJaxHelperImpl;
 import debrepo.teamcity.entity.helper.JaxHelper;
 import debrepo.teamcity.entity.helper.PluginDataResolver;
 import debrepo.teamcity.entity.helper.PluginDataResolverImpl;
-import debrepo.teamcity.service.DebRepositoryConfigurationFactory;
-import debrepo.teamcity.service.DebRepositoryConfigurationFactoryImpl;
 import jetbrains.buildServer.serverSide.ServerPaths;
 
 public class DebRepositoryConfigurationArchitectureConfigTest {

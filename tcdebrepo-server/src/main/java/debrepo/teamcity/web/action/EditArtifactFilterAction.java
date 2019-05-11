@@ -18,7 +18,8 @@
  *******************************************************************************/
 package debrepo.teamcity.web.action;
 
-import static debrepo.teamcity.web.DebRepoConfigurationEditPageActionController.*;
+import static debrepo.teamcity.web.DebRepoConfigurationEditPageActionController.DEBREPO_FILTER_BUILD_TYPE_ID;
+import static debrepo.teamcity.web.DebRepoConfigurationEditPageActionController.DEBREPO_UUID;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -32,7 +33,6 @@ import debrepo.teamcity.entity.DebRepositoryBuildTypeConfig.Filter;
 import debrepo.teamcity.entity.DebRepositoryConfiguration;
 import debrepo.teamcity.service.DebRepositoryConfigurationManager;
 import debrepo.teamcity.web.DebRepoConfigurationEditPageActionController;
-import debrepo.teamcity.web.action.ArtifactFilterAction.IncompleteFilterException;
 import jetbrains.buildServer.controllers.ActionMessages;
 import jetbrains.buildServer.web.openapi.ControllerAction;
 

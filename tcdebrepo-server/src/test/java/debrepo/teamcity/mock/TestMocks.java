@@ -25,7 +25,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import jetbrains.buildServer.controllers.AuthorizationInterceptor;
-import jetbrains.buildServer.plugins.classLoaders.TeamCityPluginClassLoader;
 import jetbrains.buildServer.serverSide.ProjectManager;
 import jetbrains.buildServer.serverSide.SBuildServer;
 import jetbrains.buildServer.serverSide.ServerPaths;

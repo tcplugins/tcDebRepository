@@ -17,12 +17,9 @@ package debrepo.teamcity.service;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.TreeMap;
 
 import debrepo.teamcity.DebPackage;
 import debrepo.teamcity.Loggers;
@@ -37,7 +34,6 @@ import jetbrains.buildServer.messages.Status;
 import jetbrains.buildServer.parameters.ParametersProvider;
 import jetbrains.buildServer.parameters.impl.ReferenceResolver;
 import jetbrains.buildServer.serverSide.SBuild;
-import jetbrains.buildServer.serverSide.artifacts.BuildArtifact;
 import jetbrains.buildServer.serverSide.artifacts.BuildArtifacts;
 import jetbrains.buildServer.serverSide.artifacts.BuildArtifacts.BuildArtifactsProcessor;
 import jetbrains.buildServer.serverSide.buildLog.BuildLog;
