@@ -40,8 +40,8 @@ public class MainDbMigration {
   
   public void generateMigrationFiles() throws IOException {
 	    // optionally specify the version and name
-	    System.setProperty("ddl.migration.version", "1.1.6");
-	    System.setProperty("ddl.migration.name", "Add Index and Multi-column Index on DebPackagesFileModel");
+	    System.setProperty("ddl.migration.version", "1.1.7");
+	    System.setProperty("ddl.migration.name", "Move all meta-data to single table");
 
 	    // generate a migration using drops from a prior version
 	    //System.setProperty("ddl.migration.pendingDropsFor", "1.1.0");
