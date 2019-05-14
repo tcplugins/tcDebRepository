@@ -20,7 +20,7 @@ public class TextConverter {
 				case PackagesGz:
 					return gzip(string);
 				// TODO: case PackagesBz2:
-				// TODO: case PackagesBz2:
+				// TODO: case PackagesXz:
 			 	default:
 			 		return utf(string);
 			}

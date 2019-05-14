@@ -630,60 +630,38 @@ public class DebRepositoryManagerImpl extends DebRepositoryConfigurationManagerI
 	
 	private void updateReleaseFile(DebRepositoryConfiguration config, DebRepositoryModel repositoryModel, String dist)
 			throws NonExistantRepositoryException {
-		String packagesSql = " SELECT id, FILE_CONTENT from O_DEB_METADATA_FILE where ID IN "
-		 		    + " ( SELECT ID FROM O_DEB_METADATA_FILE T1"
-		 		    + "   WHERE MODIFIED_TIME = "
-		 		    + "   ( SELECT max(MODIFIED_TIME) "
-		 		    + "     FROM O_DEB_METADATA_FILE "
-		 		    + "		WHERE O_DEB_METADATA_FILE.REPOSITORY_ID = :repoId"
-		 		    + "      AND O_DEB_METADATA_FILE.DIST = :dist"
-		 		    + "		 AND O_DEB_METADATA_FILE.FILE_NAME = :filename"	
-		 		    + "		 AND T1.PATH = O_DEB_METADATA_FILE.PATH"
-		 		    + "	  ) "
-		 		    + " ) ORDER BY PATH";
+
+		String packagesSql = "SELECT ID, FILE_NAME, T1.PATH " + 
+				"FROM O_DEB_METADATA_FILE  AS T1 " + 
+				"INNER JOIN (" + 
+				"SELECT max(MODIFIED_TIME) as TIME, PATH " + 
+				" 	FROM O_DEB_METADATA_FILE " + 
+				" 	WHERE O_DEB_METADATA_FILE.REPOSITORY_ID = :repoId " + 
+				" 	AND O_DEB_METADATA_FILE.DIST = :dist " + 
+				" 	AND O_DEB_METADATA_FILE.COMPONENT IS NOT NULL " + 
+				" 	AND O_DEB_METADATA_FILE.ARCH IS NOT NULL " + 
+				" 	GROUP BY O_DEB_METADATA_FILE.PATH" + 
+				") as T2 " + 
+				"ON T2.TIME = T1.MODIFIED_TIME AND T2.PATH = T1.PATH " + 
+				"ORDER BY PATH";
 
 		RawSql packagesRawSql = RawSqlBuilder.parse(packagesSql).create();
 		
-		String releasesSql = " SELECT id, FILE_CONTENT from O_DEB_METADATA_FILE where ID IN "
-				+ " ( SELECT ID FROM O_DEB_METADATA_FILE T1"
-				+ "   WHERE MODIFIED_TIME = "
-				+ "   ( SELECT max(MODIFIED_TIME) "
-				+ "     FROM O_DEB_METADATA_FILE "
-				+ "		WHERE O_DEB_METADATA_FILE.REPOSITORY_ID = :repoId"
-				+ "      AND O_DEB_METADATA_FILE.DIST = :dist"
-				+ "		 AND O_DEB_METADATA_FILE.FILE_NAME = :filename"
-				+ "		 AND T1.PATH = O_DEB_METADATA_FILE.PATH"
-				+ "	  ) "
-				+ " ) ORDER BY PATH";
-		
-		RawSql releasesRawSql = RawSqlBuilder.parse(releasesSql).create();
-
-		Loggers.SERVER.info("---DebRepositoryManagerImpl :: Find packages for releaseFile");
+		Loggers.SERVER.info("---DebRepositoryManagerImpl :: Find all meta-data files for releaseFile");
 		List<DebMetaDataFileModel> packagesFiles = DebMetaDataFileModel.find.query()
 					 .setRawSql(packagesRawSql)
 					 .setParameter("repoId", repositoryModel.getId())
 					 .setParameter("dist", dist)
-					 .setParameter("filename", RepoDataFileType.Packages.getFileName())
 					 .findList();
-		Loggers.SERVER.info("---DebRepositoryManagerImpl :: Done find packages for releaseFile");
-		
-		Loggers.SERVER.info("---DebRepositoryManagerImpl :: Find releaseFilesSimples for releaseFile");
-		List<DebMetaDataFileModel> releaseFilesSimple = DebMetaDataFileModel.find.query()
-					 .setRawSql(releasesRawSql)
-					 .setParameter("repoId", repositoryModel.getId())
-					 .setParameter("dist", dist)
-					 .setParameter("fileName", RepoDataFileType.SimpleRelease.getFileName())
-					 .findList();
-		Loggers.SERVER.info("---DebRepositoryManagerImpl :: Done find releaseFilesSimples for releaseFile (" + releaseFilesSimple.size() + ")");
+		Loggers.SERVER.info("---DebRepositoryManagerImpl :: Done find all meta-data files for releaseFile");
 		
 		List<GenericRepositoryFile> repoFiles = new ArrayList<>();
-		repoFiles.addAll(releaseFilesSimple);
 		repoFiles.addAll(packagesFiles);
 		
 		Date modifiedTime = new Date();
 		String releaseFileContent = myReleaseDescriptionBuilder.buildPackageDescriptionList(config, repoFiles, dist, modifiedTime);
 		
-		Loggers.SERVER.info("---DebRepositoryManagerImpl :: Find existing releaseFile");
+		Loggers.SERVER.info("---DebRepositoryManagerImpl :: Create new releaseFile");
 
 		try {
 			DebMetaDataFileModel releaseFile = new DebMetaDataFileModel();
@@ -696,9 +674,9 @@ public class DebRepositoryManagerImpl extends DebRepositoryConfigurationManagerI
 			releaseFile.setMd5(DigestUtils.md5Hex(releaseFileContent));
 			releaseFile.setSha1(DigestUtils.sha1Hex(releaseFileContent));
 			releaseFile.setSha256(DigestUtils.sha256Hex(releaseFileContent));
-			Loggers.SERVER.info("---DebRepositoryManagerImpl :: Persist new releaseFile");
+			Loggers.SERVER.info("---DebRepositoryManagerImpl :: Persist new releaseFile at " + releaseFile.getPath());
 			releaseFile.save();
-			Loggers.SERVER.info("---DebRepositoryManagerImpl :: Done persist new releaseFile");
+			Loggers.SERVER.info("---DebRepositoryManagerImpl :: Done persist new releaseFile at " + releaseFile.getPath());
 		} catch (IOException e) {
 			Loggers.SERVER.warn("---DebRepositoryManagerImpl :: Failed to persist new releaseFile. " + e.getMessage());
 		}
@@ -724,7 +702,7 @@ public class DebRepositoryManagerImpl extends DebRepositoryConfigurationManagerI
 					TextConverter.toByteArray(RepoDataFileType.PackagesGz, packageFileContents),
 					RepoDataFileType.PackagesGz);
 		} catch (IOException e) {
-			Loggers.SERVER.warn("---DebRepositoryManagerImpl :: Failed to persist new packagesFile " + RepoDataFileType.Packages.getFileName());
+			Loggers.SERVER.warn("---DebRepositoryManagerImpl :: Failed to persist new packagesFile " + RepoDataFileType.PackagesGz.getFileName());
 		}
 		
 
@@ -812,7 +790,7 @@ public class DebRepositoryManagerImpl extends DebRepositoryConfigurationManagerI
 																  .eq("dist", dist)
 																  .eq("component", component)
 																  .eq("arch", architecture)
-																  .eq("fileName", RepoDataFileType.SimpleRelease)
+																  .eq("fileName", RepoDataFileType.SimpleRelease.getFileName())
 																  .order("modifiedTime desc")
 																  .setMaxRows(1)
 																  .findOne();
